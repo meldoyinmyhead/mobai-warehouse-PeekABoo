@@ -45,8 +45,8 @@ class MainApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
         initialRoute: AppRouter.landing,
-       home: EmployeeMainScreen(), 
-       //home: SupervisorDashboardScreen(), 
+    //  home: EmployeeMainScreen(), 
+        home: SupervisorDashboardScreen(), 
         onGenerateRoute: AppRouter.generateRoute,
       ),
     );
