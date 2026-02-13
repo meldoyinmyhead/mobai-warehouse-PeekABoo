@@ -9,6 +9,8 @@ import 'package:wms/features/warehouse/presentation/cubits/employee/employee_set
 import 'package:wms/features/warehouse/presentation/cubits/employee/employee_notification_cubit.dart';
 import 'package:wms/features/warehouse/presentation/cubits/supervisor/map_cubit.dart';
 import 'package:wms/features/warehouse/presentation/cubits/supervisor/ai_review_cubit.dart';
+import 'package:wms/features/warehouse/presentation/cubits/supervisor/flag_cubit.dart';
+import 'package:wms/features/warehouse/presentation/cubits/employee/receipt_cubit.dart';
 import 'package:wms/features/auth/presentation/cubits/auth_cubit.dart';
 
 
@@ -42,7 +44,9 @@ class MainApp extends StatelessWidget {
         BlocProvider(create: (_) => EmployeeNotificationCubit()),
         BlocProvider(create: (_) => MapCubit()),
         
-        BlocProvider(create: (_) => AiReviewCubit()..loadPendingReviews()),
+        BlocProvider(create: (_) => sl<AiReviewCubit>()..loadPendingReviews()),
+        BlocProvider(create: (_) => sl<FlagCubit>()..loadFlags()),
+        BlocProvider(create: (_) => sl<ReceiptCubit>()..loadIncomingOrders()),
         BlocProvider(create: (_) => sl<AuthCubit>()),
       ],
       child: MaterialApp(

@@ -10,7 +10,13 @@ import 'package:wms/features/warehouse/data/repositories/emplacement_repository.
 import 'package:wms/features/warehouse/data/repositories/task_repository.dart';
 import 'package:wms/features/warehouse/presentation/cubits/supervisor/dashboard_cubit.dart';
 import 'package:wms/features/warehouse/presentation/cubits/employee/employee_task_cubit.dart';
-import 'package:wms/features/warehouse/presentation/cubits/supervisor/ai_review_cubit.dart'; // Added missing import
+import 'package:wms/features/warehouse/presentation/cubits/supervisor/ai_review_cubit.dart';
+import 'package:wms/features/warehouse/presentation/cubits/supervisor/flag_cubit.dart';
+import 'package:wms/features/warehouse/presentation/cubits/employee/receipt_cubit.dart';
+import 'package:wms/features/warehouse/data/repositories/ai_review_repository.dart';
+import 'package:wms/features/warehouse/data/repositories/flag_repository.dart';
+import 'package:wms/features/warehouse/data/repositories/receipt_repository.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 final sl = GetIt.instance;
 
@@ -32,6 +38,9 @@ Future<void> setupDependencyInjection() async {
   sl.registerLazySingleton<EmplacementRepository>(() => EmplacementRepository());
   sl.registerLazySingleton<TaskRepository>(() => TaskRepository());
   sl.registerLazySingleton<AuthRepository>(() => AuthRepository());
+  sl.registerLazySingleton<AiReviewRepository>(() => AiReviewRepository());
+  sl.registerLazySingleton<FlagRepository>(() => FlagRepository());
+  sl.registerLazySingleton<ReceiptRepository>(() => ReceiptRepository(Supabase.instance.client, sl()));
 
   // Cubits
   sl.registerFactory<SupervisorDashboardCubit>(
@@ -41,4 +50,7 @@ Future<void> setupDependencyInjection() async {
     () => EmployeeTaskCubit(sl<TaskRepository>()), // Eventually switch to OfflineRepository
   );
   sl.registerLazySingleton<AuthCubit>(() => AuthCubit(sl<AuthRepository>()));
+  sl.registerFactory<AiReviewCubit>(() => AiReviewCubit(sl<AiReviewRepository>()));
+  sl.registerFactory<FlagCubit>(() => FlagCubit(sl<FlagRepository>()));
+  sl.registerFactory<ReceiptCubit>(() => ReceiptCubit(sl<ReceiptRepository>()));
 }
