@@ -1,8 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-// import 'package:sqflite_common_ffi/sqflite_ffi.dart'; // Needed for desktop/unit testing sqflite
-import 'package:wms/data/models/task_model.dart';
-import 'package:wms/data/models/location_point_model.dart';
-import 'dart:convert';
+import 'package:wms/features/warehouse/data/models/task_model.dart';
+import 'package:wms/features/warehouse/data/models/location_point_model.dart';
 
 void main() {
   test('TaskModel Serialization', () {
