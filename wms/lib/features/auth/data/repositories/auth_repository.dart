@@ -16,21 +16,29 @@ class AuthRepository {
       );
 
       if (response.user != null) {
-        // Fetch user profile from public.utilisateurs to get role and name
-        final userProfile = await Supabase.instance.client
-            .from('utilisateurs')
-            .select()
-            .eq('id_utilisateur', response.user!.id)
-            .single();
+        try {
+          // Fetch user profile from public.utilisateurs to get role and name
+          final userProfile = await Supabase.instance.client
+              .from('utilisateurs')
+              .select()
+              .eq('id_utilisateur', response.user!.id)
+              .single();
 
-        return {
-          'user': userProfile, 
-          'access_token': response.session?.accessToken,
-        };
+          return {
+            'user': userProfile, 
+            'access_token': response.session?.accessToken,
+          };
+        } on PostgrestException catch (e) {
+          if (e.code == 'PGRST116') {
+            throw Exception('Profil introuvable dans la base de données. Veuillez contacter l\'administrateur.');
+          }
+          rethrow;
+        }
       } else {
         throw Exception('Login failed: No user returned');
       }
     } catch (e) {
+      if (e is Exception) rethrow;
       throw Exception('Login failed: ${e.toString()}');
     }
   }

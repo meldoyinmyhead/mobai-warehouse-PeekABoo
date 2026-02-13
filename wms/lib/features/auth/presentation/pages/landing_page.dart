@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:wms/core/theme/app_theme.dart';
+import 'package:wms/core/routes/app_router.dart';
 
 class LandingPage extends StatelessWidget {
   const LandingPage({super.key});
@@ -50,7 +51,7 @@ class LandingPage extends StatelessWidget {
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: () => Navigator.pushNamed(context, '/onboarding'), // Navigate to Onboarding
+                  onPressed: () => Navigator.pushNamed(context, AppRouter.onboarding), // Navigate to Onboarding
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.yellow,
                     foregroundColor: AppTheme.darkBlue,

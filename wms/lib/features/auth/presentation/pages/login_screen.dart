@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:wms/core/routes/app_router.dart';
 import 'package:wms/features/auth/presentation/cubits/auth_cubit.dart';
 import 'package:wms/features/auth/data/user_model.dart';
 import 'package:wms/core/theme/app_theme.dart';
@@ -47,13 +48,13 @@ class _LoginScreenState extends State<LoginScreen> {
           // Role-based routing
           switch (state.user.role) {
             case UserRole.ADMIN:
-              Navigator.pushReplacementNamed(context, '/admin/dashboard');
+              Navigator.pushReplacementNamed(context, AppRouter.adminDashboard);
               break;
             case UserRole.SUPERVISOR:
-              Navigator.pushReplacementNamed(context, '/supervisor/dashboard');
+              Navigator.pushReplacementNamed(context, AppRouter.supervisorDashboard);
               break;
             case UserRole.EMPLOYEE:
-              Navigator.pushReplacementNamed(context, '/employee/main');
+              Navigator.pushReplacementNamed(context, AppRouter.employeeMain);
               break;
           }
         } else if (state is Unauthenticated && state.message != null) {

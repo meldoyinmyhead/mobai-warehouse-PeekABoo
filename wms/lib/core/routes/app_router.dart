@@ -10,6 +10,8 @@ import 'package:wms/features/warehouse/presentation/pages/employee/task_detail_s
 import 'package:wms/features/warehouse/presentation/pages/supervisor/ai_review_screen.dart';
 import 'package:wms/features/warehouse/presentation/pages/employee/log_task_screen.dart';
 import 'package:wms/features/warehouse/presentation/pages/supervisor/supervisor_map_screen.dart';
+import 'package:wms/features/warehouse/presentation/pages/supervisor/supervisor_notifications_screen.dart';
+import 'package:wms/features/warehouse/presentation/pages/supervisor/supervisor_profile_screen.dart';
 
 import 'package:wms/features/auth/presentation/pages/landing_page.dart';
 import 'package:wms/features/auth/presentation/pages/onboarding_screen.dart';
@@ -27,9 +29,11 @@ class AppRouter {
   static const String login = '/login';
   static const String supervisorDashboard = '/supervisor/dashboard';
   static const String supervisorMap = '/supervisor/map';
-  static const String aiReview = '/supervisor/review'; // Changed from ai_review to match navbar
+  static const String supervisorAiReview = '/supervisor/ai_review';
   static const String supervisorFlagged = '/supervisor/flagged';
   static const String supervisorSettings = '/supervisor/settings';
+  static const String supervisorNotifications = '/supervisor/notifications';
+  static const String supervisorProfile = '/supervisor/profile';
   static const String employeeDashboard = '/employee/dashboard';
   static const String employeeMain = '/employee/main';
   static const String employeeTaskDetail = '/employee/task_detail';
@@ -53,12 +57,16 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const SupervisorDashboardScreen());
       case supervisorMap:
         return MaterialPageRoute(builder: (_) => const SupervisorMapScreen());
-      case aiReview:
+      case supervisorAiReview:
         return MaterialPageRoute(builder: (_) => const AiReviewScreen());
       case supervisorFlagged:
         return MaterialPageRoute(builder: (_) => const FlagManagementScreen());
       case supervisorSettings:
         return MaterialPageRoute(builder: (_) => const SupervisorSettingsScreen());
+      case supervisorNotifications:
+        return MaterialPageRoute(builder: (_) => const SupervisorNotificationsScreen());
+      case supervisorProfile:
+        return MaterialPageRoute(builder: (_) => const SupervisorProfileScreen());
       case employeeDashboard: // Legacy or direct link to dashboard only
         return MaterialPageRoute(builder: (_) => const EmployeeDashboardScreen());
       case employeeMain: // The new Main Wrapper

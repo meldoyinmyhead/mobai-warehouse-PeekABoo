@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:wms/core/widgets/supervisorBottonBar.dart';
+import 'package:wms/core/routes/app_router.dart';
 import 'package:wms/features/warehouse/presentation/cubits/supervisor/dashboard_cubit.dart';
 import 'package:wms/features/warehouse/data/repositories/task_repository.dart';
 import 'package:wms/core/theme/app_theme.dart';
@@ -31,20 +32,16 @@ class _SupervisorDashboardScreenState extends State<SupervisorDashboardScreen> {
     // Handle navigation based on index
     switch (index) {
       case 0:
-        // Navigate to dashboard
-        Navigator.pushReplacementNamed(context, '/supervisor/dashboard');
+        Navigator.pushReplacementNamed(context, AppRouter.supervisorDashboard);
         break;
       case 1:
-        // Navigate to map view
-        Navigator.pushReplacementNamed(context, '/supervisor/map');
+        Navigator.pushReplacementNamed(context, AppRouter.supervisorMap);
         break;
       case 2:
-        // Navigate to AI review
-        Navigator.pushReplacementNamed(context, '/supervisor/ai_review');
+        Navigator.pushReplacementNamed(context, AppRouter.supervisorAiReview);
         break;
       case 3:
-        // Navigate to flagged issues
-        Navigator.pushReplacementNamed(context, '/supervisor/flagged');
+        Navigator.pushReplacementNamed(context, AppRouter.supervisorFlagged);
         break;
     }
   }
@@ -64,12 +61,7 @@ class _SupervisorDashboardScreenState extends State<SupervisorDashboardScreen> {
           leading: Padding(
           padding: const EdgeInsets.all(12.0),
           child: GestureDetector(
-            onTap: () =>  Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => SupervisorProfileScreen(),
-                  ),
-                ),
+          onTap: () => Navigator.pushNamed(context, AppRouter.supervisorProfile),
             child: const CircleAvatar(
               backgroundColor: Colors.white,
               child: Icon(Icons.person_outline, color: Color(0xFF5D6266)),
@@ -88,12 +80,7 @@ class _SupervisorDashboardScreenState extends State<SupervisorDashboardScreen> {
                 color: Color(0xFF5D6266),
               ),
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => SupervisorSettingsScreen(),
-                  ),
-                );
+                Navigator.pushNamed(context, AppRouter.supervisorSettings);
               },
             ),
             IconButton(
@@ -102,12 +89,7 @@ class _SupervisorDashboardScreenState extends State<SupervisorDashboardScreen> {
                 color: Color(0xFF5D6266),
               ),
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => SupervisorNotificationsScreen(),
-                  ),
-                );
+                Navigator.pushNamed(context, AppRouter.supervisorNotifications);
               },
             ),
           ],

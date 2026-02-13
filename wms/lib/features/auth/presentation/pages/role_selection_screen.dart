@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:wms/core/theme/app_theme.dart';
+import 'package:wms/core/routes/app_router.dart';
 import 'package:wms/features/auth/data/user_model.dart';
 
 class RoleSelectionScreen extends StatelessWidget {
@@ -47,7 +48,7 @@ class RoleSelectionScreen extends StatelessWidget {
               onTap: () {
                 // We can pass the role as an argument if needed, or just let Login handle it via Auth logic.
                 // For this UI flow, it seems to just filter or direct. Here we just go to Login.
-                Navigator.pushNamed(context, '/login', arguments: {'role': 'employee'});
+                Navigator.pushNamed(context, AppRouter.login, arguments: {'role': 'employee'});
               },
             ),
             const SizedBox(height: 24),
@@ -57,7 +58,7 @@ class RoleSelectionScreen extends StatelessWidget {
               subtitle: 'Monitor teams, approve AI, and manage flags',
               icon: Icons.admin_panel_settings_outlined,
               onTap: () {
-                 Navigator.pushNamed(context, '/login', arguments: {'role': 'supervisor'});
+                 Navigator.pushNamed(context, AppRouter.login, arguments: {'role': 'supervisor'});
               },
             ),
 

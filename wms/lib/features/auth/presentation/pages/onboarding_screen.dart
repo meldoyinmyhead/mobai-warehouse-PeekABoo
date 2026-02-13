@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:wms/core/theme/app_theme.dart';
+import 'package:wms/core/routes/app_router.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -62,7 +63,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               child: Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: () => Navigator.pushNamed(context, '/role_selection'),
+                  onPressed: () => Navigator.pushNamed(context, AppRouter.roleSelection),
                   child: Text('Skip', style: GoogleFonts.lato(color: Colors.white, fontWeight: FontWeight.bold)),
                 ),
               ),
@@ -100,7 +101,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       if (_currentPage < _pages.length - 1) {
                          _pageController.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.ease);
                       } else {
-                        Navigator.pushNamed(context, '/role_selection');
+                        Navigator.pushNamed(context, AppRouter.roleSelection);
                       }
                     },
                     style: ElevatedButton.styleFrom(

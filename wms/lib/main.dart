@@ -10,7 +10,6 @@ import 'package:wms/features/warehouse/presentation/cubits/employee/employee_not
 import 'package:wms/features/warehouse/presentation/cubits/supervisor/map_cubit.dart';
 import 'package:wms/features/warehouse/presentation/cubits/supervisor/ai_review_cubit.dart';
 import 'package:wms/features/auth/presentation/cubits/auth_cubit.dart';
-import 'package:wms/features/warehouse/presentation/pages/supervisor/supervisor_dashboard_screen.dart';
 
 
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -51,8 +50,6 @@ class MainApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
         initialRoute: AppRouter.landing,
-    //  home: EmployeeMainScreen(), 
-        home: SupervisorDashboardScreen(), 
         onGenerateRoute: AppRouter.generateRoute,
       ),
     );
