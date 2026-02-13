@@ -3,8 +3,10 @@ import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:wms/features/auth/data/user_model.dart';
 
+import 'package:wms/core/app_config.dart';
+
 class AuthRepository {
-  final String baseUrl = 'http://127.0.0.1:8000'; // Keep for other endpoints if needed
+  final String baseUrl = AppConfig.backendUrl;
   
   Future<Map<String, dynamic>> login(String email, String password) async {
     try {
@@ -14,12 +16,16 @@ class AuthRepository {
       );
 
       if (response.user != null) {
-        // Return a map similar to what the app expects, or adapt the Cubit
+        // Fetch user profile from public.utilisateurs to get role and name
+        final userProfile = await Supabase.instance.client
+            .from('utilisateurs')
+            .select()
+            .eq('id_utilisateur', response.user!.id)
+            .single();
+
         return {
-          'token': response.session?.accessToken,
-          'user_id': response.user?.id,
-          'email': response.user?.email,
-          'role': response.user?.userMetadata?['role'] ?? 'employee', // Assuming metadata
+          'user': userProfile, 
+          'access_token': response.session?.accessToken,
         };
       } else {
         throw Exception('Login failed: No user returned');

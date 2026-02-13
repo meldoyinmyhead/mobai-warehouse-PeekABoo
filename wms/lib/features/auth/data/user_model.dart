@@ -23,7 +23,10 @@ class UserModel {
     return UserModel(
       id: json['id_utilisateur'],
       fullName: json['nom_complet'],
-      role: UserRole.values.byName(json['role']),
+      role: UserRole.values.firstWhere(
+        (e) => e.name.toUpperCase() == (json['role'] as String).toUpperCase(),
+        orElse: () => UserRole.EMPLOYEE,
+      ),
       email: json['email'],
       isActive: json['actif'] ?? true,
     );
