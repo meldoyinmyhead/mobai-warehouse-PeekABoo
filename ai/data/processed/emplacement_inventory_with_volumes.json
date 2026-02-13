@@ -1,0 +1,1284 @@
+{
+  "1358": {
+    "total_volume_m3": 45.88,
+    "product_count": 1,
+    "products": {
+      "31496": 1240
+    }
+  },
+  "411": {
+    "total_volume_m3": 2095.32,
+    "product_count": 3,
+    "products": {
+      "35584": 30100,
+      "34016": 4100,
+      "31740": 18240
+    }
+  },
+  "1389": {
+    "total_volume_m3": 3712.6,
+    "product_count": 5,
+    "products": {
+      "35584": 19500,
+      "34017": 20300,
+      "35580": 36100,
+      "34018": 14600,
+      "32083": 105
+    }
+  },
+  "1390": {
+    "total_volume_m3": 565.8,
+    "product_count": 1,
+    "products": {
+      "34016": 13800
+    }
+  },
+  "1326": {
+    "total_volume_m3": 233.1,
+    "product_count": 2,
+    "products": {
+      "31866": 1500,
+      "31484": 4800
+    }
+  },
+  "667": {
+    "total_volume_m3": 2147.58,
+    "product_count": 6,
+    "products": {
+      "44489": 880,
+      "35585": 17000,
+      "44486": 4720,
+      "35595": 16480,
+      "35578": 10500,
+      "34016": 2800
+    }
+  },
+  "402": {
+    "total_volume_m3": 3078.83,
+    "product_count": 4,
+    "products": {
+      "34015": 62400,
+      "44489": 7520,
+      "32002": 2430,
+      "31552": 3040
+    }
+  },
+  "867": {
+    "total_volume_m3": 506.04,
+    "product_count": 2,
+    "products": {
+      "32089": 327,
+      "31565": 13500
+    }
+  },
+  "413": {
+    "total_volume_m3": 1361.59,
+    "product_count": 3,
+    "products": {
+      "31567": 2750,
+      "31569": 6890,
+      "31986": 24510
+    }
+  },
+  "407": {
+    "total_volume_m3": 373.1,
+    "product_count": 2,
+    "products": {
+      "35586": 7600,
+      "35602": 1500
+    }
+  },
+  "1334": {
+    "total_volume_m3": 2684.152,
+    "product_count": 5,
+    "products": {
+      "32083": 255,
+      "32089": 1185,
+      "35585": 46500,
+      "32080": 1236,
+      "35576": 17300
+    }
+  },
+  "1400": {
+    "total_volume_m3": 728.506,
+    "product_count": 9,
+    "products": {
+      "44485": 3960,
+      "32078": 3318,
+      "31543": 400,
+      "31554": 3300,
+      "35576": 4400,
+      "31548": 500,
+      "32001": 3150,
+      "31556": 600,
+      "38907": 468
+    }
+  },
+  "1378": {
+    "total_volume_m3": 58.914,
+    "product_count": 1,
+    "products": {
+      "32079": 2182
+    }
+  },
+  "1323": {
+    "total_volume_m3": 9767.296921,
+    "product_count": 75,
+    "products": {
+      "32081": 1296,
+      "31343": 1776,
+      "32089": 1863,
+      "31463": 3100,
+      "32086": 3204,
+      "32088": 4983,
+      "31494": 6080,
+      "41562": 6500,
+      "37146": 30428,
+      "35983": 5280,
+      "31340": 1956,
+      "35639": 1920,
+      "31364": 1320,
+      "31363": 1400,
+      "31367": 5220,
+      "43914": 80,
+      "32002": 5310,
+      "31441": 6560,
+      "31341": 6162,
+      "32087": 726,
+      "31528": 1230,
+      "39141": 4600,
+      "33068": 101,
+      "32085": 468,
+      "34014": 2400,
+      "34016": 7100,
+      "33067": 872,
+      "44486": 5880,
+      "31362": 1650,
+      "43915": 200,
+      "43921": 280,
+      "31701": 4700,
+      "31354": 5000,
+      "35586": 2000,
+      "32080": 504,
+      "31335": 800,
+      "31475": 4850,
+      "31532": 2280,
+      "31725": 9000,
+      "31662": 7600,
+      "44489": 3360,
+      "31451": 3120,
+      "35585": 1800,
+      "31667": 3560,
+      "31727": 2400,
+      "32077": 14112,
+      "31339": 1540,
+      "31334": 3576,
+      "32000": 880,
+      "42612": 1600,
+      "31365": 1100,
+      "31559": 4950,
+      "31443": 2240,
+      "32001": 5940,
+      "31782": 3500,
+      "31531": 23280,
+      "31697": 2300,
+      "43913": 80,
+      "31351": 16600,
+      "31355": 1100,
+      "31756": 31320,
+      "31726": 512,
+      "31661": 7400,
+      "31437": 4500,
+      "34403": 1200,
+      "31729": 450,
+      "31338": 496,
+      "31453": 2100,
+      "31674": 3500,
+      "31336": 1408,
+      "44046": 1200,
+      "45475": 894,
+      "31449": 900,
+      "39971": 300,
+      "31757": 3480
+    }
+  },
+  "409": {
+    "total_volume_m3": 490.072,
+    "product_count": 5,
+    "products": {
+      "32082": 189,
+      "35585": 3100,
+      "35584": 7000,
+      "32087": 208,
+      "35593": 1450
+    }
+  },
+  "669": {
+    "total_volume_m3": 3.0,
+    "product_count": 1,
+    "products": {
+      "39906": 60
+    }
+  },
+  "400": {
+    "total_volume_m3": 186.85,
+    "product_count": 2,
+    "products": {
+      "31462": 200,
+      "31475": 4850
+    }
+  },
+  "1398": {
+    "total_volume_m3": 3977.82,
+    "product_count": 5,
+    "products": {
+      "35578": 13100,
+      "34392": 29100,
+      "34393": 4620,
+      "35574": 45000,
+      "34013": 5200
+    }
+  },
+  "1331": {
+    "total_volume_m3": 217.058,
+    "product_count": 3,
+    "products": {
+      "31784": 3134,
+      "34201": 41,
+      "34202": 3968
+    }
+  },
+  "660": {
+    "total_volume_m3": 561.318,
+    "product_count": 3,
+    "products": {
+      "31584": 12100,
+      "37151": 2214,
+      "31594": 2000
+    }
+  },
+  "671": {
+    "total_volume_m3": 119.18,
+    "product_count": 2,
+    "products": {
+      "31706": 2800,
+      "32088": 219
+    }
+  },
+  "1386": {
+    "total_volume_m3": 1426.95,
+    "product_count": 3,
+    "products": {
+      "31993": 31600,
+      "31437": 3500,
+      "31473": 50
+    }
+  },
+  "408": {
+    "total_volume_m3": 3317.782,
+    "product_count": 6,
+    "products": {
+      "32080": 22,
+      "34403": 800,
+      "44486": 4880,
+      "31554": 77400,
+      "35593": 3450,
+      "32087": 2322
+    }
+  },
+  "1324": {
+    "total_volume_m3": 709.028,
+    "product_count": 2,
+    "products": {
+      "34014": 16900,
+      "32080": 504
+    }
+  },
+  "889": {
+    "total_volume_m3": 89.1,
+    "product_count": 2,
+    "products": {
+      "39907": 960,
+      "32076": 1260
+    }
+  },
+  "1332": {
+    "total_volume_m3": 91.2,
+    "product_count": 1,
+    "products": {
+      "31754": 2400
+    }
+  },
+  "664": {
+    "total_volume_m3": 2828.9,
+    "product_count": 6,
+    "products": {
+      "31992": 4900,
+      "31688": 2800,
+      "31995": 7400,
+      "31463": 17500,
+      "31994": 28900,
+      "31461": 10200
+    }
+  },
+  "1346": {
+    "total_volume_m3": 331.04,
+    "product_count": 3,
+    "products": {
+      "32078": 2742,
+      "34014": 5800,
+      "32084": 1920
+    }
+  },
+  "886": {
+    "total_volume_m3": 109.7,
+    "product_count": 3,
+    "products": {
+      "31775": 1800,
+      "32076": 2100,
+      "37145": 550
+    }
+  },
+  "674": {
+    "total_volume_m3": 127.368,
+    "product_count": 2,
+    "products": {
+      "32088": 1152,
+      "32085": 3864
+    }
+  },
+  "1336": {
+    "total_volume_m3": 21.384,
+    "product_count": 1,
+    "products": {
+      "38907": 792
+    }
+  },
+  "1333": {
+    "total_volume_m3": 260.84,
+    "product_count": 3,
+    "products": {
+      "32000": 3440,
+      "31737": 2000,
+      "36155": 876
+    }
+  },
+  "1352": {
+    "total_volume_m3": 23.814,
+    "product_count": 1,
+    "products": {
+      "38781": 882
+    }
+  },
+  "666": {
+    "total_volume_m3": 315.28,
+    "product_count": 5,
+    "products": {
+      "43923": 7900,
+      "42615": 1000,
+      "31734": 20,
+      "37145": 150,
+      "32076": 4560
+    }
+  },
+  "885": {
+    "total_volume_m3": 1336.0,
+    "product_count": 6,
+    "products": {
+      "31549": 14900,
+      "31674": 600,
+      "31543": 200,
+      "31449": 3500,
+      "31995": 14000,
+      "31992": 1200
+    }
+  },
+  "1361": {
+    "total_volume_m3": 22.8,
+    "product_count": 1,
+    "products": {
+      "32088": 1140
+    }
+  },
+  "1314": {
+    "total_volume_m3": 2157.42,
+    "product_count": 4,
+    "products": {
+      "34013": 29200,
+      "34016": 11900,
+      "35596": 5640,
+      "34393": 5880
+    }
+  },
+  "1353": {
+    "total_volume_m3": 1058.32,
+    "product_count": 4,
+    "products": {
+      "31461": 23100,
+      "31993": 1300,
+      "31686": 2800,
+      "31552": 960
+    }
+  },
+  "661": {
+    "total_volume_m3": 557.8,
+    "product_count": 2,
+    "products": {
+      "31587": 15100,
+      "31595": 1200
+    }
+  },
+  "665": {
+    "total_volume_m3": 1272.7,
+    "product_count": 5,
+    "products": {
+      "31731": 10100,
+      "31729": 7050,
+      "43826": 11500,
+      "31778": 2740,
+      "31727": 7200
+    }
+  },
+  "1296": {
+    "total_volume_m3": 1626.76,
+    "product_count": 3,
+    "products": {
+      "31730": 40440,
+      "34201": 1800,
+      "34017": 5000
+    }
+  },
+  "1315": {
+    "total_volume_m3": 399.6,
+    "product_count": 2,
+    "products": {
+      "31876": 1800,
+      "31863": 9000
+    }
+  },
+  "398": {
+    "total_volume_m3": 2769.89,
+    "product_count": 5,
+    "products": {
+      "31725": 76650,
+      "31678": 900,
+      "31674": 900,
+      "31558": 770,
+      "31988": 1500
+    }
+  },
+  "1297": {
+    "total_volume_m3": 80.46,
+    "product_count": 2,
+    "products": {
+      "32087": 2310,
+      "32084": 96
+    }
+  },
+  "878": {
+    "total_volume_m3": 98.25,
+    "product_count": 1,
+    "products": {
+      "36155": 1965
+    }
+  },
+  "1388": {
+    "total_volume_m3": 171.85,
+    "product_count": 2,
+    "products": {
+      "31987": 2170,
+      "31494": 2240
+    }
+  },
+  "1357": {
+    "total_volume_m3": 0.68,
+    "product_count": 1,
+    "products": {
+      "31734": 20
+    }
+  },
+  "673": {
+    "total_volume_m3": 1.92,
+    "product_count": 1,
+    "products": {
+      "32089": 96
+    }
+  },
+  "1393": {
+    "total_volume_m3": 373.048,
+    "product_count": 1,
+    "products": {
+      "34203": 14348
+    }
+  },
+  "1339": {
+    "total_volume_m3": 10.8,
+    "product_count": 1,
+    "products": {
+      "32130": 180
+    }
+  },
+  "668": {
+    "total_volume_m3": 334.08,
+    "product_count": 1,
+    "products": {
+      "41937": 10440
+    }
+  },
+  "1092": {
+    "total_volume_m3": 285.1,
+    "product_count": 5,
+    "products": {
+      "42615": 400,
+      "43923": 300,
+      "39009": 8100,
+      "42616": 1700,
+      "31789": 1000
+    }
+  },
+  "1355": {
+    "total_volume_m3": 305.288,
+    "product_count": 2,
+    "products": {
+      "32087": 3432,
+      "35584": 4600
+    }
+  },
+  "1337": {
+    "total_volume_m3": 27.0,
+    "product_count": 1,
+    "products": {
+      "32132": 300
+    }
+  },
+  "1320": {
+    "total_volume_m3": 2040.45,
+    "product_count": 6,
+    "products": {
+      "31789": 14400,
+      "31725": 27450,
+      "38208": 3000,
+      "39039": 3000,
+      "34397": 2300,
+      "31475": 4850
+    }
+  },
+  "1335": {
+    "total_volume_m3": 658.6,
+    "product_count": 1,
+    "products": {
+      "31551": 17800
+    }
+  },
+  "1312": {
+    "total_volume_m3": 1303.28,
+    "product_count": 3,
+    "products": {
+      "37145": 20350,
+      "31756": 11880,
+      "35983": 5280
+    }
+  },
+  "401": {
+    "total_volume_m3": 22.601613,
+    "product_count": 5,
+    "products": {
+      "43915": 200,
+      "43913": 80,
+      "43914": 80,
+      "43921": 280,
+      "45475": 336
+    }
+  },
+  "1372": {
+    "total_volume_m3": 14.28,
+    "product_count": 1,
+    "products": {
+      "32081": 420
+    }
+  },
+  "1298": {
+    "total_volume_m3": 44.7,
+    "product_count": 1,
+    "products": {
+      "32088": 2235
+    }
+  },
+  "405": {
+    "total_volume_m3": 483.04,
+    "product_count": 4,
+    "products": {
+      "34016": 200,
+      "44485": 10440,
+      "34403": 600,
+      "31463": 600
+    }
+  },
+  "403": {
+    "total_volume_m3": 333.0,
+    "product_count": 1,
+    "products": {
+      "31556": 9000
+    }
+  },
+  "1376": {
+    "total_volume_m3": 0.96,
+    "product_count": 1,
+    "products": {
+      "32089": 48
+    }
+  },
+  "1095": {
+    "total_volume_m3": 17.64,
+    "product_count": 1,
+    "products": {
+      "32084": 882
+    }
+  },
+  "1096": {
+    "total_volume_m3": 0.0945,
+    "product_count": 1,
+    "products": {
+      "41601": 1575
+    }
+  },
+  "869": {
+    "total_volume_m3": 0.06048,
+    "product_count": 1,
+    "products": {
+      "41599": 1008
+    }
+  },
+  "404": {
+    "total_volume_m3": 410.0,
+    "product_count": 1,
+    "products": {
+      "34403": 10000
+    }
+  },
+  "1091": {
+    "total_volume_m3": 384.58,
+    "product_count": 3,
+    "products": {
+      "31668": 2580,
+      "31667": 3600,
+      "31691": 3200
+    }
+  },
+  "1370": {
+    "total_volume_m3": 368.52,
+    "product_count": 2,
+    "products": {
+      "31887": 4920,
+      "31484": 5040
+    }
+  },
+  "884": {
+    "total_volume_m3": 142.8,
+    "product_count": 1,
+    "products": {
+      "31730": 4200
+    }
+  },
+  "658": {
+    "total_volume_m3": 78.45035,
+    "product_count": 3,
+    "products": {
+      "37145": 2450,
+      "31363": 1400,
+      "31367": 5220
+    }
+  },
+  "672": {
+    "total_volume_m3": 103.6,
+    "product_count": 1,
+    "products": {
+      "31554": 2800
+    }
+  },
+  "1343": {
+    "total_volume_m3": 683.764,
+    "product_count": 3,
+    "products": {
+      "31824": 3172,
+      "37128": 9050,
+      "37146": 8650
+    }
+  },
+  "868": {
+    "total_volume_m3": 317.518,
+    "product_count": 3,
+    "products": {
+      "42249": 3850,
+      "37145": 5350,
+      "39971": 300
+    }
+  },
+  "414": {
+    "total_volume_m3": 124.416,
+    "product_count": 1,
+    "products": {
+      "32086": 3888
+    }
+  },
+  "1383": {
+    "total_volume_m3": 164.45,
+    "product_count": 1,
+    "products": {
+      "32124": 3289
+    }
+  },
+  "1340": {
+    "total_volume_m3": 0.0258,
+    "product_count": 1,
+    "products": {
+      "41599": 430
+    }
+  },
+  "1362": {
+    "total_volume_m3": 1.09536,
+    "product_count": 1,
+    "products": {
+      "41600": 18256
+    }
+  },
+  "1330": {
+    "total_volume_m3": 168.03108,
+    "product_count": 2,
+    "products": {
+      "41599": 518,
+      "39913": 2400
+    }
+  },
+  "1097": {
+    "total_volume_m3": 508.74,
+    "product_count": 4,
+    "products": {
+      "42249": 5050,
+      "37145": 8900,
+      "32131": 420,
+      "32128": 120
+    }
+  },
+  "663": {
+    "total_volume_m3": 261.898,
+    "product_count": 4,
+    "products": {
+      "31777": 3240,
+      "31775": 359,
+      "37145": 1300,
+      "32127": 200
+    }
+  },
+  "1313": {
+    "total_volume_m3": 102.5,
+    "product_count": 1,
+    "products": {
+      "34017": 2500
+    }
+  },
+  "870": {
+    "total_volume_m3": 0.1152,
+    "product_count": 1,
+    "products": {
+      "39970": 1920
+    }
+  },
+  "406": {
+    "total_volume_m3": 716.68,
+    "product_count": 2,
+    "products": {
+      "34403": 2520,
+      "44490": 14960
+    }
+  },
+  "395": {
+    "total_volume_m3": 48.0,
+    "product_count": 1,
+    "products": {
+      "37145": 1500
+    }
+  },
+  "1387": {
+    "total_volume_m3": 16.92,
+    "product_count": 2,
+    "products": {
+      "43915": 200,
+      "43921": 280
+    }
+  },
+  "866": {
+    "total_volume_m3": 1763.05,
+    "product_count": 1,
+    "products": {
+      "31565": 47650
+    }
+  },
+  "1329": {
+    "total_volume_m3": 142.8,
+    "product_count": 1,
+    "products": {
+      "31730": 4200
+    }
+  },
+  "1377": {
+    "total_volume_m3": 162.8,
+    "product_count": 1,
+    "products": {
+      "31557": 4400
+    }
+  },
+  "1379": {
+    "total_volume_m3": 102.0,
+    "product_count": 1,
+    "products": {
+      "38208": 3000
+    }
+  },
+  "1369": {
+    "total_volume_m3": 86.4,
+    "product_count": 1,
+    "products": {
+      "39907": 1440
+    }
+  },
+  "1360": {
+    "total_volume_m3": 66.6,
+    "product_count": 1,
+    "products": {
+      "31554": 1800
+    }
+  },
+  "1319": {
+    "total_volume_m3": 259.2,
+    "product_count": 1,
+    "products": {
+      "39907": 4320
+    }
+  },
+  "1375": {
+    "total_volume_m3": 520.92,
+    "product_count": 2,
+    "products": {
+      "31554": 13500,
+      "32087": 630
+    }
+  },
+  "1374": {
+    "total_volume_m3": 499.5,
+    "product_count": 1,
+    "products": {
+      "31554": 13500
+    }
+  },
+  "670": {
+    "total_volume_m3": 230.4,
+    "product_count": 1,
+    "products": {
+      "37145": 7200
+    }
+  },
+  "1348": {
+    "total_volume_m3": 0.0156,
+    "product_count": 1,
+    "products": {
+      "39971": 260
+    }
+  },
+  "1391": {
+    "total_volume_m3": 22.2,
+    "product_count": 1,
+    "products": {
+      "31960": 600
+    }
+  },
+  "1367": {
+    "total_volume_m3": 0.0024,
+    "product_count": 1,
+    "products": {
+      "41598": 40
+    }
+  },
+  "1384": {
+    "total_volume_m3": 386.0,
+    "product_count": 1,
+    "products": {
+      "39915": 7720
+    }
+  },
+  "1395": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "1344": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "416": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "891": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "410": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "1300": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "1365": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "874": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "873": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "1371": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "1090": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "1382": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "1396": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "865": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "1338": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "1366": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "883": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "1373": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "864": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "417": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "1317": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "1351": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "1401": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "1328": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "1322": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "1310": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "397": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "1318": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "877": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "1399": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "1354": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "1094": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "1349": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "1392": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "1368": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "676": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "1359": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "875": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "876": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "893": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "415": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "1321": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "677": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "396": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "1325": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "1345": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "1380": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "1316": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "871": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "1381": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "882": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "209": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "1363": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "675": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "881": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "888": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "892": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "1397": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "890": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "1356": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "880": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "1364": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "1309": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "879": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "1093": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "1394": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "1347": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "1385": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "1327": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "1402": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "872": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "1350": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "412": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "399": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  },
+  "887": {
+    "total_volume_m3": 0,
+    "product_count": 0,
+    "products": {}
+  }
+}
