@@ -15,13 +15,11 @@ class EmployeeTaskDetailScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.grey[50], // Match design background
       appBar: AppBar(
-        title: Text('${task.title} Task'),
+        title: Text('${task.title}'),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
-        actions: [
-          IconButton(icon: const Icon(Icons.help_outline), onPressed: () {}),
-        ],
+       
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),

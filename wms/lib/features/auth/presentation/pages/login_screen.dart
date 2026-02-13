@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:wms/features/auth/presentation/cubits/auth_cubit.dart';
 import 'package:wms/features/auth/data/user_model.dart';
+import 'package:wms/core/theme/app_theme.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -30,7 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter email and password')),
+        const SnackBar(content: Text('Veuillez entrer l\'email et le mot de passe')),
       );
       return;
     }
@@ -64,19 +65,17 @@ class _LoginScreenState extends State<LoginScreen> {
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: AppTheme.lightBlue,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.black),
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
             onPressed: () => Navigator.pop(context),
           ),
           title: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('BBMS', style: GoogleFonts.lato(color: Colors.orange, fontWeight: FontWeight.bold, fontSize: 24)),
-              const SizedBox(width: 4),
-              Text('ELECTRIC', style: GoogleFonts.lato(color: Colors.orange, fontSize: 16)),
+              Image.asset('assets/images/logo.png', height: 30),
             ],
           ),
           centerTitle: true,
@@ -90,26 +89,26 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   const SizedBox(height: 40),
                   Text(
-                    'Welcome Back',
-                    style: GoogleFonts.lato(fontSize: 32, fontWeight: FontWeight.bold, color: const Color(0xFF004D40)),
+                    'Bon Retour',
+                    style: GoogleFonts.lato(fontSize: 32, fontWeight: FontWeight.bold, color: AppTheme.lightBlue),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Sign in to your account to continue',
+                    'Connectez-vous à votre compte pour continuer',
                     style: GoogleFonts.lato(fontSize: 16, color: Colors.grey[600]),
                   ),
                   const SizedBox(height: 48),
                   _buildTextField(
                     controller: _emailController,
-                    label: 'Email Address',
-                    hint: 'your.email@example.com',
+                    label: 'Adresse Email',
+                    hint: 'votre.email@exemple.com',
                     icon: Icons.email_outlined,
                   ),
                   const SizedBox(height: 24),
                   _buildTextField(
                     controller: _passwordController,
-                    label: 'Password',
-                    hint: 'Enter your password',
+                    label: 'Mot de Passe',
+                    hint: 'Entrez votre mot de passe',
                     icon: Icons.lock_outline,
                     isPassword: true,
                   ),
@@ -121,11 +120,11 @@ class _LoginScreenState extends State<LoginScreen> {
                         onChanged: (val) => setState(() => _rememberMe = val!),
                         activeColor: const Color(0xFF00796B),
                       ),
-                      Text('Remember me', style: GoogleFonts.lato(color: Colors.grey[700])),
+                      Text('Se souvenir de moi', style: GoogleFonts.lato(color: Colors.grey[700])),
                       const Spacer(),
                       TextButton(
                         onPressed: () {},
-                        child: Text('Forgot Password?', style: GoogleFonts.lato(color: const Color(0xFF00796B), fontWeight: FontWeight.bold)),
+                        child: Text('Mot de passe oublié?', style: GoogleFonts.lato(color: const Color(0xFF00796B), fontWeight: FontWeight.bold)),
                       ),
                     ],
                   ),
@@ -143,13 +142,13 @@ class _LoginScreenState extends State<LoginScreen> {
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                               elevation: 0,
                             ),
-                            child: Text('Sign In', style: GoogleFonts.lato(fontSize: 18, fontWeight: FontWeight.bold)),
+                            child: Text('Se Connecter', style: GoogleFonts.lato(fontSize: 18, fontWeight: FontWeight.bold)),
                           ),
                   ),
                   const SizedBox(height: 24),
                   Center(
                     child: Text(
-                      'Version 1.0.0 Developed by MobAI\n© 2026 BBMS ELEC. All rights reserved.',
+                      'Version 1.0.0 Développé par MobAI\n© 2026 BBMS ELEC. Tous droits réservés.',
                       textAlign: TextAlign.center,
                       style: GoogleFonts.lato(fontSize: 12, color: Colors.grey[400]),
                     ),
