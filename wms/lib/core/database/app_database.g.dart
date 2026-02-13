@@ -3,39 +3,16 @@
 part of 'app_database.dart';
 
 // ignore_for_file: type=lint
-class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
+class $LocalTasksTable extends LocalTasks
+    with TableInfo<$LocalTasksTable, LocalTask> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $TasksTable(this.attachedDatabase, [this._alias]);
+  $LocalTasksTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
     'id',
-    aliasedName,
-    false,
-    hasAutoIncrement: true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'PRIMARY KEY AUTOINCREMENT',
-    ),
-  );
-  static const VerificationMeta _titleMeta = const VerificationMeta('title');
-  @override
-  late final GeneratedColumn<String> title = GeneratedColumn<String>(
-    'title',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _descriptionMeta = const VerificationMeta(
-    'description',
-  );
-  @override
-  late final GeneratedColumn<String> description = GeneratedColumn<String>(
-    'description',
     aliasedName,
     false,
     type: DriftSqlType.string,
@@ -59,12 +36,10 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _priorityMeta = const VerificationMeta(
-    'priority',
-  );
+  static const VerificationMeta _dataMeta = const VerificationMeta('data');
   @override
-  late final GeneratedColumn<String> priority = GeneratedColumn<String>(
-    'priority',
+  late final GeneratedColumn<String> data = GeneratedColumn<String>(
+    'data',
     aliasedName,
     false,
     type: DriftSqlType.string,
@@ -81,73 +56,55 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _locationDataMeta = const VerificationMeta(
-    'locationData',
+  static const VerificationMeta _syncStatusMeta = const VerificationMeta(
+    'syncStatus',
   );
   @override
-  late final GeneratedColumn<String> locationData = GeneratedColumn<String>(
-    'location_data',
+  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
+    'sync_status',
     aliasedName,
     false,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('synced'),
   );
-  static const VerificationMeta _detailsMeta = const VerificationMeta(
-    'details',
+  static const VerificationMeta _lastUpdatedMeta = const VerificationMeta(
+    'lastUpdated',
   );
   @override
-  late final GeneratedColumn<String> details = GeneratedColumn<String>(
-    'details',
+  late final GeneratedColumn<DateTime> lastUpdated = GeneratedColumn<DateTime>(
+    'last_updated',
     aliasedName,
     false,
-    type: DriftSqlType.string,
+    type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
   @override
   List<GeneratedColumn> get $columns => [
     id,
-    title,
-    description,
     type,
     status,
-    priority,
+    data,
     createdAt,
-    locationData,
-    details,
+    syncStatus,
+    lastUpdated,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'tasks';
+  static const String $name = 'local_tasks';
   @override
   VerificationContext validateIntegrity(
-    Insertable<Task> instance, {
+    Insertable<LocalTask> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    }
-    if (data.containsKey('title')) {
-      context.handle(
-        _titleMeta,
-        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
-      );
     } else if (isInserting) {
-      context.missing(_titleMeta);
-    }
-    if (data.containsKey('description')) {
-      context.handle(
-        _descriptionMeta,
-        description.isAcceptableOrUnknown(
-          data['description']!,
-          _descriptionMeta,
-        ),
-      );
-    } else if (isInserting) {
-      context.missing(_descriptionMeta);
+      context.missing(_idMeta);
     }
     if (data.containsKey('type')) {
       context.handle(
@@ -165,13 +122,13 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
     } else if (isInserting) {
       context.missing(_statusMeta);
     }
-    if (data.containsKey('priority')) {
+    if (data.containsKey('data')) {
       context.handle(
-        _priorityMeta,
-        priority.isAcceptableOrUnknown(data['priority']!, _priorityMeta),
+        _dataMeta,
+        this.data.isAcceptableOrUnknown(data['data']!, _dataMeta),
       );
     } else if (isInserting) {
-      context.missing(_priorityMeta);
+      context.missing(_dataMeta);
     }
     if (data.containsKey('created_at')) {
       context.handle(
@@ -181,878 +138,11 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
     } else if (isInserting) {
       context.missing(_createdAtMeta);
     }
-    if (data.containsKey('location_data')) {
+    if (data.containsKey('sync_status')) {
       context.handle(
-        _locationDataMeta,
-        locationData.isAcceptableOrUnknown(
-          data['location_data']!,
-          _locationDataMeta,
-        ),
+        _syncStatusMeta,
+        syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
       );
-    } else if (isInserting) {
-      context.missing(_locationDataMeta);
-    }
-    if (data.containsKey('details')) {
-      context.handle(
-        _detailsMeta,
-        details.isAcceptableOrUnknown(data['details']!, _detailsMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_detailsMeta);
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  Task map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Task(
-      id: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}id'],
-      )!,
-      title: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}title'],
-      )!,
-      description: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}description'],
-      )!,
-      type: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}type'],
-      )!,
-      status: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}status'],
-      )!,
-      priority: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}priority'],
-      )!,
-      createdAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}created_at'],
-      )!,
-      locationData: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}location_data'],
-      )!,
-      details: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}details'],
-      )!,
-    );
-  }
-
-  @override
-  $TasksTable createAlias(String alias) {
-    return $TasksTable(attachedDatabase, alias);
-  }
-}
-
-class Task extends DataClass implements Insertable<Task> {
-  final int id;
-  final String title;
-  final String description;
-  final String type;
-  final String status;
-  final String priority;
-  final DateTime createdAt;
-  final String locationData;
-  final String details;
-  const Task({
-    required this.id,
-    required this.title,
-    required this.description,
-    required this.type,
-    required this.status,
-    required this.priority,
-    required this.createdAt,
-    required this.locationData,
-    required this.details,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
-    map['title'] = Variable<String>(title);
-    map['description'] = Variable<String>(description);
-    map['type'] = Variable<String>(type);
-    map['status'] = Variable<String>(status);
-    map['priority'] = Variable<String>(priority);
-    map['created_at'] = Variable<DateTime>(createdAt);
-    map['location_data'] = Variable<String>(locationData);
-    map['details'] = Variable<String>(details);
-    return map;
-  }
-
-  TasksCompanion toCompanion(bool nullToAbsent) {
-    return TasksCompanion(
-      id: Value(id),
-      title: Value(title),
-      description: Value(description),
-      type: Value(type),
-      status: Value(status),
-      priority: Value(priority),
-      createdAt: Value(createdAt),
-      locationData: Value(locationData),
-      details: Value(details),
-    );
-  }
-
-  factory Task.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Task(
-      id: serializer.fromJson<int>(json['id']),
-      title: serializer.fromJson<String>(json['title']),
-      description: serializer.fromJson<String>(json['description']),
-      type: serializer.fromJson<String>(json['type']),
-      status: serializer.fromJson<String>(json['status']),
-      priority: serializer.fromJson<String>(json['priority']),
-      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
-      locationData: serializer.fromJson<String>(json['locationData']),
-      details: serializer.fromJson<String>(json['details']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
-      'title': serializer.toJson<String>(title),
-      'description': serializer.toJson<String>(description),
-      'type': serializer.toJson<String>(type),
-      'status': serializer.toJson<String>(status),
-      'priority': serializer.toJson<String>(priority),
-      'createdAt': serializer.toJson<DateTime>(createdAt),
-      'locationData': serializer.toJson<String>(locationData),
-      'details': serializer.toJson<String>(details),
-    };
-  }
-
-  Task copyWith({
-    int? id,
-    String? title,
-    String? description,
-    String? type,
-    String? status,
-    String? priority,
-    DateTime? createdAt,
-    String? locationData,
-    String? details,
-  }) => Task(
-    id: id ?? this.id,
-    title: title ?? this.title,
-    description: description ?? this.description,
-    type: type ?? this.type,
-    status: status ?? this.status,
-    priority: priority ?? this.priority,
-    createdAt: createdAt ?? this.createdAt,
-    locationData: locationData ?? this.locationData,
-    details: details ?? this.details,
-  );
-  Task copyWithCompanion(TasksCompanion data) {
-    return Task(
-      id: data.id.present ? data.id.value : this.id,
-      title: data.title.present ? data.title.value : this.title,
-      description: data.description.present
-          ? data.description.value
-          : this.description,
-      type: data.type.present ? data.type.value : this.type,
-      status: data.status.present ? data.status.value : this.status,
-      priority: data.priority.present ? data.priority.value : this.priority,
-      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
-      locationData: data.locationData.present
-          ? data.locationData.value
-          : this.locationData,
-      details: data.details.present ? data.details.value : this.details,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('Task(')
-          ..write('id: $id, ')
-          ..write('title: $title, ')
-          ..write('description: $description, ')
-          ..write('type: $type, ')
-          ..write('status: $status, ')
-          ..write('priority: $priority, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('locationData: $locationData, ')
-          ..write('details: $details')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(
-    id,
-    title,
-    description,
-    type,
-    status,
-    priority,
-    createdAt,
-    locationData,
-    details,
-  );
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is Task &&
-          other.id == this.id &&
-          other.title == this.title &&
-          other.description == this.description &&
-          other.type == this.type &&
-          other.status == this.status &&
-          other.priority == this.priority &&
-          other.createdAt == this.createdAt &&
-          other.locationData == this.locationData &&
-          other.details == this.details);
-}
-
-class TasksCompanion extends UpdateCompanion<Task> {
-  final Value<int> id;
-  final Value<String> title;
-  final Value<String> description;
-  final Value<String> type;
-  final Value<String> status;
-  final Value<String> priority;
-  final Value<DateTime> createdAt;
-  final Value<String> locationData;
-  final Value<String> details;
-  const TasksCompanion({
-    this.id = const Value.absent(),
-    this.title = const Value.absent(),
-    this.description = const Value.absent(),
-    this.type = const Value.absent(),
-    this.status = const Value.absent(),
-    this.priority = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.locationData = const Value.absent(),
-    this.details = const Value.absent(),
-  });
-  TasksCompanion.insert({
-    this.id = const Value.absent(),
-    required String title,
-    required String description,
-    required String type,
-    required String status,
-    required String priority,
-    required DateTime createdAt,
-    required String locationData,
-    required String details,
-  }) : title = Value(title),
-       description = Value(description),
-       type = Value(type),
-       status = Value(status),
-       priority = Value(priority),
-       createdAt = Value(createdAt),
-       locationData = Value(locationData),
-       details = Value(details);
-  static Insertable<Task> custom({
-    Expression<int>? id,
-    Expression<String>? title,
-    Expression<String>? description,
-    Expression<String>? type,
-    Expression<String>? status,
-    Expression<String>? priority,
-    Expression<DateTime>? createdAt,
-    Expression<String>? locationData,
-    Expression<String>? details,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (title != null) 'title': title,
-      if (description != null) 'description': description,
-      if (type != null) 'type': type,
-      if (status != null) 'status': status,
-      if (priority != null) 'priority': priority,
-      if (createdAt != null) 'created_at': createdAt,
-      if (locationData != null) 'location_data': locationData,
-      if (details != null) 'details': details,
-    });
-  }
-
-  TasksCompanion copyWith({
-    Value<int>? id,
-    Value<String>? title,
-    Value<String>? description,
-    Value<String>? type,
-    Value<String>? status,
-    Value<String>? priority,
-    Value<DateTime>? createdAt,
-    Value<String>? locationData,
-    Value<String>? details,
-  }) {
-    return TasksCompanion(
-      id: id ?? this.id,
-      title: title ?? this.title,
-      description: description ?? this.description,
-      type: type ?? this.type,
-      status: status ?? this.status,
-      priority: priority ?? this.priority,
-      createdAt: createdAt ?? this.createdAt,
-      locationData: locationData ?? this.locationData,
-      details: details ?? this.details,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
-    if (title.present) {
-      map['title'] = Variable<String>(title.value);
-    }
-    if (description.present) {
-      map['description'] = Variable<String>(description.value);
-    }
-    if (type.present) {
-      map['type'] = Variable<String>(type.value);
-    }
-    if (status.present) {
-      map['status'] = Variable<String>(status.value);
-    }
-    if (priority.present) {
-      map['priority'] = Variable<String>(priority.value);
-    }
-    if (createdAt.present) {
-      map['created_at'] = Variable<DateTime>(createdAt.value);
-    }
-    if (locationData.present) {
-      map['location_data'] = Variable<String>(locationData.value);
-    }
-    if (details.present) {
-      map['details'] = Variable<String>(details.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('TasksCompanion(')
-          ..write('id: $id, ')
-          ..write('title: $title, ')
-          ..write('description: $description, ')
-          ..write('type: $type, ')
-          ..write('status: $status, ')
-          ..write('priority: $priority, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('locationData: $locationData, ')
-          ..write('details: $details')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class $ProductsTable extends Products with TableInfo<$ProductsTable, Product> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $ProductsTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<String> id = GeneratedColumn<String>(
-    'id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _nameMeta = const VerificationMeta('name');
-  @override
-  late final GeneratedColumn<String> name = GeneratedColumn<String>(
-    'name',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _quantityMeta = const VerificationMeta(
-    'quantity',
-  );
-  @override
-  late final GeneratedColumn<int> quantity = GeneratedColumn<int>(
-    'quantity',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _categoryMeta = const VerificationMeta(
-    'category',
-  );
-  @override
-  late final GeneratedColumn<String> category = GeneratedColumn<String>(
-    'category',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _skuMeta = const VerificationMeta('sku');
-  @override
-  late final GeneratedColumn<String> sku = GeneratedColumn<String>(
-    'sku',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  @override
-  List<GeneratedColumn> get $columns => [id, name, quantity, category, sku];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'products';
-  @override
-  VerificationContext validateIntegrity(
-    Insertable<Product> instance, {
-    bool isInserting = false,
-  }) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    } else if (isInserting) {
-      context.missing(_idMeta);
-    }
-    if (data.containsKey('name')) {
-      context.handle(
-        _nameMeta,
-        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_nameMeta);
-    }
-    if (data.containsKey('quantity')) {
-      context.handle(
-        _quantityMeta,
-        quantity.isAcceptableOrUnknown(data['quantity']!, _quantityMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_quantityMeta);
-    }
-    if (data.containsKey('category')) {
-      context.handle(
-        _categoryMeta,
-        category.isAcceptableOrUnknown(data['category']!, _categoryMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_categoryMeta);
-    }
-    if (data.containsKey('sku')) {
-      context.handle(
-        _skuMeta,
-        sku.isAcceptableOrUnknown(data['sku']!, _skuMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_skuMeta);
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  Product map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Product(
-      id: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}id'],
-      )!,
-      name: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}name'],
-      )!,
-      quantity: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}quantity'],
-      )!,
-      category: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}category'],
-      )!,
-      sku: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}sku'],
-      )!,
-    );
-  }
-
-  @override
-  $ProductsTable createAlias(String alias) {
-    return $ProductsTable(attachedDatabase, alias);
-  }
-}
-
-class Product extends DataClass implements Insertable<Product> {
-  final String id;
-  final String name;
-  final int quantity;
-  final String category;
-  final String sku;
-  const Product({
-    required this.id,
-    required this.name,
-    required this.quantity,
-    required this.category,
-    required this.sku,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<String>(id);
-    map['name'] = Variable<String>(name);
-    map['quantity'] = Variable<int>(quantity);
-    map['category'] = Variable<String>(category);
-    map['sku'] = Variable<String>(sku);
-    return map;
-  }
-
-  ProductsCompanion toCompanion(bool nullToAbsent) {
-    return ProductsCompanion(
-      id: Value(id),
-      name: Value(name),
-      quantity: Value(quantity),
-      category: Value(category),
-      sku: Value(sku),
-    );
-  }
-
-  factory Product.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Product(
-      id: serializer.fromJson<String>(json['id']),
-      name: serializer.fromJson<String>(json['name']),
-      quantity: serializer.fromJson<int>(json['quantity']),
-      category: serializer.fromJson<String>(json['category']),
-      sku: serializer.fromJson<String>(json['sku']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<String>(id),
-      'name': serializer.toJson<String>(name),
-      'quantity': serializer.toJson<int>(quantity),
-      'category': serializer.toJson<String>(category),
-      'sku': serializer.toJson<String>(sku),
-    };
-  }
-
-  Product copyWith({
-    String? id,
-    String? name,
-    int? quantity,
-    String? category,
-    String? sku,
-  }) => Product(
-    id: id ?? this.id,
-    name: name ?? this.name,
-    quantity: quantity ?? this.quantity,
-    category: category ?? this.category,
-    sku: sku ?? this.sku,
-  );
-  Product copyWithCompanion(ProductsCompanion data) {
-    return Product(
-      id: data.id.present ? data.id.value : this.id,
-      name: data.name.present ? data.name.value : this.name,
-      quantity: data.quantity.present ? data.quantity.value : this.quantity,
-      category: data.category.present ? data.category.value : this.category,
-      sku: data.sku.present ? data.sku.value : this.sku,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('Product(')
-          ..write('id: $id, ')
-          ..write('name: $name, ')
-          ..write('quantity: $quantity, ')
-          ..write('category: $category, ')
-          ..write('sku: $sku')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(id, name, quantity, category, sku);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is Product &&
-          other.id == this.id &&
-          other.name == this.name &&
-          other.quantity == this.quantity &&
-          other.category == this.category &&
-          other.sku == this.sku);
-}
-
-class ProductsCompanion extends UpdateCompanion<Product> {
-  final Value<String> id;
-  final Value<String> name;
-  final Value<int> quantity;
-  final Value<String> category;
-  final Value<String> sku;
-  final Value<int> rowid;
-  const ProductsCompanion({
-    this.id = const Value.absent(),
-    this.name = const Value.absent(),
-    this.quantity = const Value.absent(),
-    this.category = const Value.absent(),
-    this.sku = const Value.absent(),
-    this.rowid = const Value.absent(),
-  });
-  ProductsCompanion.insert({
-    required String id,
-    required String name,
-    required int quantity,
-    required String category,
-    required String sku,
-    this.rowid = const Value.absent(),
-  }) : id = Value(id),
-       name = Value(name),
-       quantity = Value(quantity),
-       category = Value(category),
-       sku = Value(sku);
-  static Insertable<Product> custom({
-    Expression<String>? id,
-    Expression<String>? name,
-    Expression<int>? quantity,
-    Expression<String>? category,
-    Expression<String>? sku,
-    Expression<int>? rowid,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (name != null) 'name': name,
-      if (quantity != null) 'quantity': quantity,
-      if (category != null) 'category': category,
-      if (sku != null) 'sku': sku,
-      if (rowid != null) 'rowid': rowid,
-    });
-  }
-
-  ProductsCompanion copyWith({
-    Value<String>? id,
-    Value<String>? name,
-    Value<int>? quantity,
-    Value<String>? category,
-    Value<String>? sku,
-    Value<int>? rowid,
-  }) {
-    return ProductsCompanion(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      quantity: quantity ?? this.quantity,
-      category: category ?? this.category,
-      sku: sku ?? this.sku,
-      rowid: rowid ?? this.rowid,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<String>(id.value);
-    }
-    if (name.present) {
-      map['name'] = Variable<String>(name.value);
-    }
-    if (quantity.present) {
-      map['quantity'] = Variable<int>(quantity.value);
-    }
-    if (category.present) {
-      map['category'] = Variable<String>(category.value);
-    }
-    if (sku.present) {
-      map['sku'] = Variable<String>(sku.value);
-    }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('ProductsCompanion(')
-          ..write('id: $id, ')
-          ..write('name: $name, ')
-          ..write('quantity: $quantity, ')
-          ..write('category: $category, ')
-          ..write('sku: $sku, ')
-          ..write('rowid: $rowid')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class $InventoryTable extends Inventory
-    with TableInfo<$InventoryTable, InventoryData> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $InventoryTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
-    'id',
-    aliasedName,
-    false,
-    hasAutoIncrement: true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'PRIMARY KEY AUTOINCREMENT',
-    ),
-  );
-  static const VerificationMeta _productIdMeta = const VerificationMeta(
-    'productId',
-  );
-  @override
-  late final GeneratedColumn<String> productId = GeneratedColumn<String>(
-    'product_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _zoneMeta = const VerificationMeta('zone');
-  @override
-  late final GeneratedColumn<String> zone = GeneratedColumn<String>(
-    'zone',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _floorMeta = const VerificationMeta('floor');
-  @override
-  late final GeneratedColumn<String> floor = GeneratedColumn<String>(
-    'floor',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _slotMeta = const VerificationMeta('slot');
-  @override
-  late final GeneratedColumn<String> slot = GeneratedColumn<String>(
-    'slot',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _stockQuantityMeta = const VerificationMeta(
-    'stockQuantity',
-  );
-  @override
-  late final GeneratedColumn<int> stockQuantity = GeneratedColumn<int>(
-    'stock_quantity',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _lastUpdatedMeta = const VerificationMeta(
-    'lastUpdated',
-  );
-  @override
-  late final GeneratedColumn<DateTime> lastUpdated = GeneratedColumn<DateTime>(
-    'last_updated',
-    aliasedName,
-    false,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: true,
-  );
-  @override
-  List<GeneratedColumn> get $columns => [
-    id,
-    productId,
-    zone,
-    floor,
-    slot,
-    stockQuantity,
-    lastUpdated,
-  ];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'inventory';
-  @override
-  VerificationContext validateIntegrity(
-    Insertable<InventoryData> instance, {
-    bool isInserting = false,
-  }) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    }
-    if (data.containsKey('product_id')) {
-      context.handle(
-        _productIdMeta,
-        productId.isAcceptableOrUnknown(data['product_id']!, _productIdMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_productIdMeta);
-    }
-    if (data.containsKey('zone')) {
-      context.handle(
-        _zoneMeta,
-        zone.isAcceptableOrUnknown(data['zone']!, _zoneMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_zoneMeta);
-    }
-    if (data.containsKey('floor')) {
-      context.handle(
-        _floorMeta,
-        floor.isAcceptableOrUnknown(data['floor']!, _floorMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_floorMeta);
-    }
-    if (data.containsKey('slot')) {
-      context.handle(
-        _slotMeta,
-        slot.isAcceptableOrUnknown(data['slot']!, _slotMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_slotMeta);
-    }
-    if (data.containsKey('stock_quantity')) {
-      context.handle(
-        _stockQuantityMeta,
-        stockQuantity.isAcceptableOrUnknown(
-          data['stock_quantity']!,
-          _stockQuantityMeta,
-        ),
-      );
-    } else if (isInserting) {
-      context.missing(_stockQuantityMeta);
     }
     if (data.containsKey('last_updated')) {
       context.handle(
@@ -1071,32 +161,32 @@ class $InventoryTable extends Inventory
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  InventoryData map(Map<String, dynamic> data, {String? tablePrefix}) {
+  LocalTask map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return InventoryData(
+    return LocalTask(
       id: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
+        DriftSqlType.string,
         data['${effectivePrefix}id'],
       )!,
-      productId: attachedDatabase.typeMapping.read(
+      type: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}product_id'],
+        data['${effectivePrefix}type'],
       )!,
-      zone: attachedDatabase.typeMapping.read(
+      status: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}zone'],
+        data['${effectivePrefix}status'],
       )!,
-      floor: attachedDatabase.typeMapping.read(
+      data: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}floor'],
+        data['${effectivePrefix}data'],
       )!,
-      slot: attachedDatabase.typeMapping.read(
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      syncStatus: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}slot'],
-      )!,
-      stockQuantity: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}stock_quantity'],
+        data['${effectivePrefix}sync_status'],
       )!,
       lastUpdated: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
@@ -1106,65 +196,65 @@ class $InventoryTable extends Inventory
   }
 
   @override
-  $InventoryTable createAlias(String alias) {
-    return $InventoryTable(attachedDatabase, alias);
+  $LocalTasksTable createAlias(String alias) {
+    return $LocalTasksTable(attachedDatabase, alias);
   }
 }
 
-class InventoryData extends DataClass implements Insertable<InventoryData> {
-  final int id;
-  final String productId;
-  final String zone;
-  final String floor;
-  final String slot;
-  final int stockQuantity;
+class LocalTask extends DataClass implements Insertable<LocalTask> {
+  final String id;
+  final String type;
+  final String status;
+  final String data;
+  final DateTime createdAt;
+  final String syncStatus;
   final DateTime lastUpdated;
-  const InventoryData({
+  const LocalTask({
     required this.id,
-    required this.productId,
-    required this.zone,
-    required this.floor,
-    required this.slot,
-    required this.stockQuantity,
+    required this.type,
+    required this.status,
+    required this.data,
+    required this.createdAt,
+    required this.syncStatus,
     required this.lastUpdated,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
-    map['product_id'] = Variable<String>(productId);
-    map['zone'] = Variable<String>(zone);
-    map['floor'] = Variable<String>(floor);
-    map['slot'] = Variable<String>(slot);
-    map['stock_quantity'] = Variable<int>(stockQuantity);
+    map['id'] = Variable<String>(id);
+    map['type'] = Variable<String>(type);
+    map['status'] = Variable<String>(status);
+    map['data'] = Variable<String>(data);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['sync_status'] = Variable<String>(syncStatus);
     map['last_updated'] = Variable<DateTime>(lastUpdated);
     return map;
   }
 
-  InventoryCompanion toCompanion(bool nullToAbsent) {
-    return InventoryCompanion(
+  LocalTasksCompanion toCompanion(bool nullToAbsent) {
+    return LocalTasksCompanion(
       id: Value(id),
-      productId: Value(productId),
-      zone: Value(zone),
-      floor: Value(floor),
-      slot: Value(slot),
-      stockQuantity: Value(stockQuantity),
+      type: Value(type),
+      status: Value(status),
+      data: Value(data),
+      createdAt: Value(createdAt),
+      syncStatus: Value(syncStatus),
       lastUpdated: Value(lastUpdated),
     );
   }
 
-  factory InventoryData.fromJson(
+  factory LocalTask.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return InventoryData(
-      id: serializer.fromJson<int>(json['id']),
-      productId: serializer.fromJson<String>(json['productId']),
-      zone: serializer.fromJson<String>(json['zone']),
-      floor: serializer.fromJson<String>(json['floor']),
-      slot: serializer.fromJson<String>(json['slot']),
-      stockQuantity: serializer.fromJson<int>(json['stockQuantity']),
+    return LocalTask(
+      id: serializer.fromJson<String>(json['id']),
+      type: serializer.fromJson<String>(json['type']),
+      status: serializer.fromJson<String>(json['status']),
+      data: serializer.fromJson<String>(json['data']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      syncStatus: serializer.fromJson<String>(json['syncStatus']),
       lastUpdated: serializer.fromJson<DateTime>(json['lastUpdated']),
     );
   }
@@ -1172,43 +262,43 @@ class InventoryData extends DataClass implements Insertable<InventoryData> {
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
-      'productId': serializer.toJson<String>(productId),
-      'zone': serializer.toJson<String>(zone),
-      'floor': serializer.toJson<String>(floor),
-      'slot': serializer.toJson<String>(slot),
-      'stockQuantity': serializer.toJson<int>(stockQuantity),
+      'id': serializer.toJson<String>(id),
+      'type': serializer.toJson<String>(type),
+      'status': serializer.toJson<String>(status),
+      'data': serializer.toJson<String>(data),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'syncStatus': serializer.toJson<String>(syncStatus),
       'lastUpdated': serializer.toJson<DateTime>(lastUpdated),
     };
   }
 
-  InventoryData copyWith({
-    int? id,
-    String? productId,
-    String? zone,
-    String? floor,
-    String? slot,
-    int? stockQuantity,
+  LocalTask copyWith({
+    String? id,
+    String? type,
+    String? status,
+    String? data,
+    DateTime? createdAt,
+    String? syncStatus,
     DateTime? lastUpdated,
-  }) => InventoryData(
+  }) => LocalTask(
     id: id ?? this.id,
-    productId: productId ?? this.productId,
-    zone: zone ?? this.zone,
-    floor: floor ?? this.floor,
-    slot: slot ?? this.slot,
-    stockQuantity: stockQuantity ?? this.stockQuantity,
+    type: type ?? this.type,
+    status: status ?? this.status,
+    data: data ?? this.data,
+    createdAt: createdAt ?? this.createdAt,
+    syncStatus: syncStatus ?? this.syncStatus,
     lastUpdated: lastUpdated ?? this.lastUpdated,
   );
-  InventoryData copyWithCompanion(InventoryCompanion data) {
-    return InventoryData(
+  LocalTask copyWithCompanion(LocalTasksCompanion data) {
+    return LocalTask(
       id: data.id.present ? data.id.value : this.id,
-      productId: data.productId.present ? data.productId.value : this.productId,
-      zone: data.zone.present ? data.zone.value : this.zone,
-      floor: data.floor.present ? data.floor.value : this.floor,
-      slot: data.slot.present ? data.slot.value : this.slot,
-      stockQuantity: data.stockQuantity.present
-          ? data.stockQuantity.value
-          : this.stockQuantity,
+      type: data.type.present ? data.type.value : this.type,
+      status: data.status.present ? data.status.value : this.status,
+      data: data.data.present ? data.data.value : this.data,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
       lastUpdated: data.lastUpdated.present
           ? data.lastUpdated.value
           : this.lastUpdated,
@@ -1217,13 +307,13 @@ class InventoryData extends DataClass implements Insertable<InventoryData> {
 
   @override
   String toString() {
-    return (StringBuffer('InventoryData(')
+    return (StringBuffer('LocalTask(')
           ..write('id: $id, ')
-          ..write('productId: $productId, ')
-          ..write('zone: $zone, ')
-          ..write('floor: $floor, ')
-          ..write('slot: $slot, ')
-          ..write('stockQuantity: $stockQuantity, ')
+          ..write('type: $type, ')
+          ..write('status: $status, ')
+          ..write('data: $data, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('syncStatus: $syncStatus, ')
           ..write('lastUpdated: $lastUpdated')
           ..write(')'))
         .toString();
@@ -1231,88 +321,95 @@ class InventoryData extends DataClass implements Insertable<InventoryData> {
 
   @override
   int get hashCode =>
-      Object.hash(id, productId, zone, floor, slot, stockQuantity, lastUpdated);
+      Object.hash(id, type, status, data, createdAt, syncStatus, lastUpdated);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is InventoryData &&
+      (other is LocalTask &&
           other.id == this.id &&
-          other.productId == this.productId &&
-          other.zone == this.zone &&
-          other.floor == this.floor &&
-          other.slot == this.slot &&
-          other.stockQuantity == this.stockQuantity &&
+          other.type == this.type &&
+          other.status == this.status &&
+          other.data == this.data &&
+          other.createdAt == this.createdAt &&
+          other.syncStatus == this.syncStatus &&
           other.lastUpdated == this.lastUpdated);
 }
 
-class InventoryCompanion extends UpdateCompanion<InventoryData> {
-  final Value<int> id;
-  final Value<String> productId;
-  final Value<String> zone;
-  final Value<String> floor;
-  final Value<String> slot;
-  final Value<int> stockQuantity;
+class LocalTasksCompanion extends UpdateCompanion<LocalTask> {
+  final Value<String> id;
+  final Value<String> type;
+  final Value<String> status;
+  final Value<String> data;
+  final Value<DateTime> createdAt;
+  final Value<String> syncStatus;
   final Value<DateTime> lastUpdated;
-  const InventoryCompanion({
+  final Value<int> rowid;
+  const LocalTasksCompanion({
     this.id = const Value.absent(),
-    this.productId = const Value.absent(),
-    this.zone = const Value.absent(),
-    this.floor = const Value.absent(),
-    this.slot = const Value.absent(),
-    this.stockQuantity = const Value.absent(),
+    this.type = const Value.absent(),
+    this.status = const Value.absent(),
+    this.data = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.syncStatus = const Value.absent(),
     this.lastUpdated = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
-  InventoryCompanion.insert({
-    this.id = const Value.absent(),
-    required String productId,
-    required String zone,
-    required String floor,
-    required String slot,
-    required int stockQuantity,
+  LocalTasksCompanion.insert({
+    required String id,
+    required String type,
+    required String status,
+    required String data,
+    required DateTime createdAt,
+    this.syncStatus = const Value.absent(),
     required DateTime lastUpdated,
-  }) : productId = Value(productId),
-       zone = Value(zone),
-       floor = Value(floor),
-       slot = Value(slot),
-       stockQuantity = Value(stockQuantity),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       type = Value(type),
+       status = Value(status),
+       data = Value(data),
+       createdAt = Value(createdAt),
        lastUpdated = Value(lastUpdated);
-  static Insertable<InventoryData> custom({
-    Expression<int>? id,
-    Expression<String>? productId,
-    Expression<String>? zone,
-    Expression<String>? floor,
-    Expression<String>? slot,
-    Expression<int>? stockQuantity,
+  static Insertable<LocalTask> custom({
+    Expression<String>? id,
+    Expression<String>? type,
+    Expression<String>? status,
+    Expression<String>? data,
+    Expression<DateTime>? createdAt,
+    Expression<String>? syncStatus,
     Expression<DateTime>? lastUpdated,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
-      if (productId != null) 'product_id': productId,
-      if (zone != null) 'zone': zone,
-      if (floor != null) 'floor': floor,
-      if (slot != null) 'slot': slot,
-      if (stockQuantity != null) 'stock_quantity': stockQuantity,
+      if (type != null) 'type': type,
+      if (status != null) 'status': status,
+      if (data != null) 'data': data,
+      if (createdAt != null) 'created_at': createdAt,
+      if (syncStatus != null) 'sync_status': syncStatus,
       if (lastUpdated != null) 'last_updated': lastUpdated,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
-  InventoryCompanion copyWith({
-    Value<int>? id,
-    Value<String>? productId,
-    Value<String>? zone,
-    Value<String>? floor,
-    Value<String>? slot,
-    Value<int>? stockQuantity,
+  LocalTasksCompanion copyWith({
+    Value<String>? id,
+    Value<String>? type,
+    Value<String>? status,
+    Value<String>? data,
+    Value<DateTime>? createdAt,
+    Value<String>? syncStatus,
     Value<DateTime>? lastUpdated,
+    Value<int>? rowid,
   }) {
-    return InventoryCompanion(
+    return LocalTasksCompanion(
       id: id ?? this.id,
-      productId: productId ?? this.productId,
-      zone: zone ?? this.zone,
-      floor: floor ?? this.floor,
-      slot: slot ?? this.slot,
-      stockQuantity: stockQuantity ?? this.stockQuantity,
+      type: type ?? this.type,
+      status: status ?? this.status,
+      data: data ?? this.data,
+      createdAt: createdAt ?? this.createdAt,
+      syncStatus: syncStatus ?? this.syncStatus,
       lastUpdated: lastUpdated ?? this.lastUpdated,
+      rowid: rowid ?? this.rowid,
     );
   }
 
@@ -1320,39 +417,315 @@ class InventoryCompanion extends UpdateCompanion<InventoryData> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     if (id.present) {
-      map['id'] = Variable<int>(id.value);
+      map['id'] = Variable<String>(id.value);
     }
-    if (productId.present) {
-      map['product_id'] = Variable<String>(productId.value);
+    if (type.present) {
+      map['type'] = Variable<String>(type.value);
     }
-    if (zone.present) {
-      map['zone'] = Variable<String>(zone.value);
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
     }
-    if (floor.present) {
-      map['floor'] = Variable<String>(floor.value);
+    if (data.present) {
+      map['data'] = Variable<String>(data.value);
     }
-    if (slot.present) {
-      map['slot'] = Variable<String>(slot.value);
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
     }
-    if (stockQuantity.present) {
-      map['stock_quantity'] = Variable<int>(stockQuantity.value);
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<String>(syncStatus.value);
     }
     if (lastUpdated.present) {
       map['last_updated'] = Variable<DateTime>(lastUpdated.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
     }
     return map;
   }
 
   @override
   String toString() {
-    return (StringBuffer('InventoryCompanion(')
+    return (StringBuffer('LocalTasksCompanion(')
           ..write('id: $id, ')
+          ..write('type: $type, ')
+          ..write('status: $status, ')
+          ..write('data: $data, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('lastUpdated: $lastUpdated, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $LocalInventoryTable extends LocalInventory
+    with TableInfo<$LocalInventoryTable, LocalInventoryData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalInventoryTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _productIdMeta = const VerificationMeta(
+    'productId',
+  );
+  @override
+  late final GeneratedColumn<String> productId = GeneratedColumn<String>(
+    'product_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _locationIdMeta = const VerificationMeta(
+    'locationId',
+  );
+  @override
+  late final GeneratedColumn<String> locationId = GeneratedColumn<String>(
+    'location_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _quantityMeta = const VerificationMeta(
+    'quantity',
+  );
+  @override
+  late final GeneratedColumn<int> quantity = GeneratedColumn<int>(
+    'quantity',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [productId, locationId, quantity];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_inventory';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LocalInventoryData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('product_id')) {
+      context.handle(
+        _productIdMeta,
+        productId.isAcceptableOrUnknown(data['product_id']!, _productIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_productIdMeta);
+    }
+    if (data.containsKey('location_id')) {
+      context.handle(
+        _locationIdMeta,
+        locationId.isAcceptableOrUnknown(data['location_id']!, _locationIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_locationIdMeta);
+    }
+    if (data.containsKey('quantity')) {
+      context.handle(
+        _quantityMeta,
+        quantity.isAcceptableOrUnknown(data['quantity']!, _quantityMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_quantityMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {productId, locationId};
+  @override
+  LocalInventoryData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalInventoryData(
+      productId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}product_id'],
+      )!,
+      locationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}location_id'],
+      )!,
+      quantity: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}quantity'],
+      )!,
+    );
+  }
+
+  @override
+  $LocalInventoryTable createAlias(String alias) {
+    return $LocalInventoryTable(attachedDatabase, alias);
+  }
+}
+
+class LocalInventoryData extends DataClass
+    implements Insertable<LocalInventoryData> {
+  final String productId;
+  final String locationId;
+  final int quantity;
+  const LocalInventoryData({
+    required this.productId,
+    required this.locationId,
+    required this.quantity,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['product_id'] = Variable<String>(productId);
+    map['location_id'] = Variable<String>(locationId);
+    map['quantity'] = Variable<int>(quantity);
+    return map;
+  }
+
+  LocalInventoryCompanion toCompanion(bool nullToAbsent) {
+    return LocalInventoryCompanion(
+      productId: Value(productId),
+      locationId: Value(locationId),
+      quantity: Value(quantity),
+    );
+  }
+
+  factory LocalInventoryData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalInventoryData(
+      productId: serializer.fromJson<String>(json['productId']),
+      locationId: serializer.fromJson<String>(json['locationId']),
+      quantity: serializer.fromJson<int>(json['quantity']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'productId': serializer.toJson<String>(productId),
+      'locationId': serializer.toJson<String>(locationId),
+      'quantity': serializer.toJson<int>(quantity),
+    };
+  }
+
+  LocalInventoryData copyWith({
+    String? productId,
+    String? locationId,
+    int? quantity,
+  }) => LocalInventoryData(
+    productId: productId ?? this.productId,
+    locationId: locationId ?? this.locationId,
+    quantity: quantity ?? this.quantity,
+  );
+  LocalInventoryData copyWithCompanion(LocalInventoryCompanion data) {
+    return LocalInventoryData(
+      productId: data.productId.present ? data.productId.value : this.productId,
+      locationId: data.locationId.present
+          ? data.locationId.value
+          : this.locationId,
+      quantity: data.quantity.present ? data.quantity.value : this.quantity,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalInventoryData(')
           ..write('productId: $productId, ')
-          ..write('zone: $zone, ')
-          ..write('floor: $floor, ')
-          ..write('slot: $slot, ')
-          ..write('stockQuantity: $stockQuantity, ')
-          ..write('lastUpdated: $lastUpdated')
+          ..write('locationId: $locationId, ')
+          ..write('quantity: $quantity')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(productId, locationId, quantity);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalInventoryData &&
+          other.productId == this.productId &&
+          other.locationId == this.locationId &&
+          other.quantity == this.quantity);
+}
+
+class LocalInventoryCompanion extends UpdateCompanion<LocalInventoryData> {
+  final Value<String> productId;
+  final Value<String> locationId;
+  final Value<int> quantity;
+  final Value<int> rowid;
+  const LocalInventoryCompanion({
+    this.productId = const Value.absent(),
+    this.locationId = const Value.absent(),
+    this.quantity = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocalInventoryCompanion.insert({
+    required String productId,
+    required String locationId,
+    required int quantity,
+    this.rowid = const Value.absent(),
+  }) : productId = Value(productId),
+       locationId = Value(locationId),
+       quantity = Value(quantity);
+  static Insertable<LocalInventoryData> custom({
+    Expression<String>? productId,
+    Expression<String>? locationId,
+    Expression<int>? quantity,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (productId != null) 'product_id': productId,
+      if (locationId != null) 'location_id': locationId,
+      if (quantity != null) 'quantity': quantity,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocalInventoryCompanion copyWith({
+    Value<String>? productId,
+    Value<String>? locationId,
+    Value<int>? quantity,
+    Value<int>? rowid,
+  }) {
+    return LocalInventoryCompanion(
+      productId: productId ?? this.productId,
+      locationId: locationId ?? this.locationId,
+      quantity: quantity ?? this.quantity,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (productId.present) {
+      map['product_id'] = Variable<String>(productId.value);
+    }
+    if (locationId.present) {
+      map['location_id'] = Variable<String>(locationId.value);
+    }
+    if (quantity.present) {
+      map['quantity'] = Variable<int>(quantity.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalInventoryCompanion(')
+          ..write('productId: $productId, ')
+          ..write('locationId: $locationId, ')
+          ..write('quantity: $quantity, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
@@ -1410,20 +783,27 @@ class $SyncQueueTable extends SyncQueue
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _processedMeta = const VerificationMeta(
-    'processed',
-  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
   @override
-  late final GeneratedColumn<bool> processed = GeneratedColumn<bool>(
-    'processed',
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
     aliasedName,
     false,
-    type: DriftSqlType.bool,
+    type: DriftSqlType.string,
     requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("processed" IN (0, 1))',
-    ),
-    defaultValue: const Constant(false),
+    defaultValue: const Constant('pending'),
+  );
+  static const VerificationMeta _retryCountMeta = const VerificationMeta(
+    'retryCount',
+  );
+  @override
+  late final GeneratedColumn<int> retryCount = GeneratedColumn<int>(
+    'retry_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
   );
   @override
   List<GeneratedColumn> get $columns => [
@@ -1431,7 +811,8 @@ class $SyncQueueTable extends SyncQueue
     actionType,
     payload,
     timestamp,
-    processed,
+    status,
+    retryCount,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1472,10 +853,16 @@ class $SyncQueueTable extends SyncQueue
     } else if (isInserting) {
       context.missing(_timestampMeta);
     }
-    if (data.containsKey('processed')) {
+    if (data.containsKey('status')) {
       context.handle(
-        _processedMeta,
-        processed.isAcceptableOrUnknown(data['processed']!, _processedMeta),
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    if (data.containsKey('retry_count')) {
+      context.handle(
+        _retryCountMeta,
+        retryCount.isAcceptableOrUnknown(data['retry_count']!, _retryCountMeta),
       );
     }
     return context;
@@ -1503,9 +890,13 @@ class $SyncQueueTable extends SyncQueue
         DriftSqlType.dateTime,
         data['${effectivePrefix}timestamp'],
       )!,
-      processed: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}processed'],
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      retryCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}retry_count'],
       )!,
     );
   }
@@ -1521,13 +912,15 @@ class SyncQueueData extends DataClass implements Insertable<SyncQueueData> {
   final String actionType;
   final String payload;
   final DateTime timestamp;
-  final bool processed;
+  final String status;
+  final int retryCount;
   const SyncQueueData({
     required this.id,
     required this.actionType,
     required this.payload,
     required this.timestamp,
-    required this.processed,
+    required this.status,
+    required this.retryCount,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1536,7 +929,8 @@ class SyncQueueData extends DataClass implements Insertable<SyncQueueData> {
     map['action_type'] = Variable<String>(actionType);
     map['payload'] = Variable<String>(payload);
     map['timestamp'] = Variable<DateTime>(timestamp);
-    map['processed'] = Variable<bool>(processed);
+    map['status'] = Variable<String>(status);
+    map['retry_count'] = Variable<int>(retryCount);
     return map;
   }
 
@@ -1546,7 +940,8 @@ class SyncQueueData extends DataClass implements Insertable<SyncQueueData> {
       actionType: Value(actionType),
       payload: Value(payload),
       timestamp: Value(timestamp),
-      processed: Value(processed),
+      status: Value(status),
+      retryCount: Value(retryCount),
     );
   }
 
@@ -1560,7 +955,8 @@ class SyncQueueData extends DataClass implements Insertable<SyncQueueData> {
       actionType: serializer.fromJson<String>(json['actionType']),
       payload: serializer.fromJson<String>(json['payload']),
       timestamp: serializer.fromJson<DateTime>(json['timestamp']),
-      processed: serializer.fromJson<bool>(json['processed']),
+      status: serializer.fromJson<String>(json['status']),
+      retryCount: serializer.fromJson<int>(json['retryCount']),
     );
   }
   @override
@@ -1571,7 +967,8 @@ class SyncQueueData extends DataClass implements Insertable<SyncQueueData> {
       'actionType': serializer.toJson<String>(actionType),
       'payload': serializer.toJson<String>(payload),
       'timestamp': serializer.toJson<DateTime>(timestamp),
-      'processed': serializer.toJson<bool>(processed),
+      'status': serializer.toJson<String>(status),
+      'retryCount': serializer.toJson<int>(retryCount),
     };
   }
 
@@ -1580,13 +977,15 @@ class SyncQueueData extends DataClass implements Insertable<SyncQueueData> {
     String? actionType,
     String? payload,
     DateTime? timestamp,
-    bool? processed,
+    String? status,
+    int? retryCount,
   }) => SyncQueueData(
     id: id ?? this.id,
     actionType: actionType ?? this.actionType,
     payload: payload ?? this.payload,
     timestamp: timestamp ?? this.timestamp,
-    processed: processed ?? this.processed,
+    status: status ?? this.status,
+    retryCount: retryCount ?? this.retryCount,
   );
   SyncQueueData copyWithCompanion(SyncQueueCompanion data) {
     return SyncQueueData(
@@ -1596,7 +995,10 @@ class SyncQueueData extends DataClass implements Insertable<SyncQueueData> {
           : this.actionType,
       payload: data.payload.present ? data.payload.value : this.payload,
       timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
-      processed: data.processed.present ? data.processed.value : this.processed,
+      status: data.status.present ? data.status.value : this.status,
+      retryCount: data.retryCount.present
+          ? data.retryCount.value
+          : this.retryCount,
     );
   }
 
@@ -1607,14 +1009,15 @@ class SyncQueueData extends DataClass implements Insertable<SyncQueueData> {
           ..write('actionType: $actionType, ')
           ..write('payload: $payload, ')
           ..write('timestamp: $timestamp, ')
-          ..write('processed: $processed')
+          ..write('status: $status, ')
+          ..write('retryCount: $retryCount')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode =>
-      Object.hash(id, actionType, payload, timestamp, processed);
+      Object.hash(id, actionType, payload, timestamp, status, retryCount);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1623,7 +1026,8 @@ class SyncQueueData extends DataClass implements Insertable<SyncQueueData> {
           other.actionType == this.actionType &&
           other.payload == this.payload &&
           other.timestamp == this.timestamp &&
-          other.processed == this.processed);
+          other.status == this.status &&
+          other.retryCount == this.retryCount);
 }
 
 class SyncQueueCompanion extends UpdateCompanion<SyncQueueData> {
@@ -1631,20 +1035,23 @@ class SyncQueueCompanion extends UpdateCompanion<SyncQueueData> {
   final Value<String> actionType;
   final Value<String> payload;
   final Value<DateTime> timestamp;
-  final Value<bool> processed;
+  final Value<String> status;
+  final Value<int> retryCount;
   const SyncQueueCompanion({
     this.id = const Value.absent(),
     this.actionType = const Value.absent(),
     this.payload = const Value.absent(),
     this.timestamp = const Value.absent(),
-    this.processed = const Value.absent(),
+    this.status = const Value.absent(),
+    this.retryCount = const Value.absent(),
   });
   SyncQueueCompanion.insert({
     this.id = const Value.absent(),
     required String actionType,
     required String payload,
     required DateTime timestamp,
-    this.processed = const Value.absent(),
+    this.status = const Value.absent(),
+    this.retryCount = const Value.absent(),
   }) : actionType = Value(actionType),
        payload = Value(payload),
        timestamp = Value(timestamp);
@@ -1653,14 +1060,16 @@ class SyncQueueCompanion extends UpdateCompanion<SyncQueueData> {
     Expression<String>? actionType,
     Expression<String>? payload,
     Expression<DateTime>? timestamp,
-    Expression<bool>? processed,
+    Expression<String>? status,
+    Expression<int>? retryCount,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (actionType != null) 'action_type': actionType,
       if (payload != null) 'payload': payload,
       if (timestamp != null) 'timestamp': timestamp,
-      if (processed != null) 'processed': processed,
+      if (status != null) 'status': status,
+      if (retryCount != null) 'retry_count': retryCount,
     });
   }
 
@@ -1669,14 +1078,16 @@ class SyncQueueCompanion extends UpdateCompanion<SyncQueueData> {
     Value<String>? actionType,
     Value<String>? payload,
     Value<DateTime>? timestamp,
-    Value<bool>? processed,
+    Value<String>? status,
+    Value<int>? retryCount,
   }) {
     return SyncQueueCompanion(
       id: id ?? this.id,
       actionType: actionType ?? this.actionType,
       payload: payload ?? this.payload,
       timestamp: timestamp ?? this.timestamp,
-      processed: processed ?? this.processed,
+      status: status ?? this.status,
+      retryCount: retryCount ?? this.retryCount,
     );
   }
 
@@ -1695,8 +1106,11 @@ class SyncQueueCompanion extends UpdateCompanion<SyncQueueData> {
     if (timestamp.present) {
       map['timestamp'] = Variable<DateTime>(timestamp.value);
     }
-    if (processed.present) {
-      map['processed'] = Variable<bool>(processed.value);
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (retryCount.present) {
+      map['retry_count'] = Variable<int>(retryCount.value);
     }
     return map;
   }
@@ -1708,7 +1122,8 @@ class SyncQueueCompanion extends UpdateCompanion<SyncQueueData> {
           ..write('actionType: $actionType, ')
           ..write('payload: $payload, ')
           ..write('timestamp: $timestamp, ')
-          ..write('processed: $processed')
+          ..write('status: $status, ')
+          ..write('retryCount: $retryCount')
           ..write(')'))
         .toString();
   }
@@ -1717,67 +1132,54 @@ class SyncQueueCompanion extends UpdateCompanion<SyncQueueData> {
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
-  late final $TasksTable tasks = $TasksTable(this);
-  late final $ProductsTable products = $ProductsTable(this);
-  late final $InventoryTable inventory = $InventoryTable(this);
+  late final $LocalTasksTable localTasks = $LocalTasksTable(this);
+  late final $LocalInventoryTable localInventory = $LocalInventoryTable(this);
   late final $SyncQueueTable syncQueue = $SyncQueueTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
-    tasks,
-    products,
-    inventory,
+    localTasks,
+    localInventory,
     syncQueue,
   ];
 }
 
-typedef $$TasksTableCreateCompanionBuilder =
-    TasksCompanion Function({
-      Value<int> id,
-      required String title,
-      required String description,
+typedef $$LocalTasksTableCreateCompanionBuilder =
+    LocalTasksCompanion Function({
+      required String id,
       required String type,
       required String status,
-      required String priority,
+      required String data,
       required DateTime createdAt,
-      required String locationData,
-      required String details,
+      Value<String> syncStatus,
+      required DateTime lastUpdated,
+      Value<int> rowid,
     });
-typedef $$TasksTableUpdateCompanionBuilder =
-    TasksCompanion Function({
-      Value<int> id,
-      Value<String> title,
-      Value<String> description,
+typedef $$LocalTasksTableUpdateCompanionBuilder =
+    LocalTasksCompanion Function({
+      Value<String> id,
       Value<String> type,
       Value<String> status,
-      Value<String> priority,
+      Value<String> data,
       Value<DateTime> createdAt,
-      Value<String> locationData,
-      Value<String> details,
+      Value<String> syncStatus,
+      Value<DateTime> lastUpdated,
+      Value<int> rowid,
     });
 
-class $$TasksTableFilterComposer extends Composer<_$AppDatabase, $TasksTable> {
-  $$TasksTableFilterComposer({
+class $$LocalTasksTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalTasksTable> {
+  $$LocalTasksTableFilterComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnFilters<int> get id => $composableBuilder(
+  ColumnFilters<String> get id => $composableBuilder(
     column: $table.id,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get title => $composableBuilder(
-    column: $table.title,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get description => $composableBuilder(
-    column: $table.description,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1791,8 +1193,8 @@ class $$TasksTableFilterComposer extends Composer<_$AppDatabase, $TasksTable> {
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get priority => $composableBuilder(
-    column: $table.priority,
+  ColumnFilters<String> get data => $composableBuilder(
+    column: $table.data,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1801,38 +1203,28 @@ class $$TasksTableFilterComposer extends Composer<_$AppDatabase, $TasksTable> {
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get locationData => $composableBuilder(
-    column: $table.locationData,
+  ColumnFilters<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get details => $composableBuilder(
-    column: $table.details,
+  ColumnFilters<DateTime> get lastUpdated => $composableBuilder(
+    column: $table.lastUpdated,
     builder: (column) => ColumnFilters(column),
   );
 }
 
-class $$TasksTableOrderingComposer
-    extends Composer<_$AppDatabase, $TasksTable> {
-  $$TasksTableOrderingComposer({
+class $$LocalTasksTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalTasksTable> {
+  $$LocalTasksTableOrderingComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnOrderings<int> get id => $composableBuilder(
+  ColumnOrderings<String> get id => $composableBuilder(
     column: $table.id,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get title => $composableBuilder(
-    column: $table.title,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get description => $composableBuilder(
-    column: $table.description,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -1846,8 +1238,8 @@ class $$TasksTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get priority => $composableBuilder(
-    column: $table.priority,
+  ColumnOrderings<String> get data => $composableBuilder(
+    column: $table.data,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -1856,446 +1248,8 @@ class $$TasksTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get locationData => $composableBuilder(
-    column: $table.locationData,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get details => $composableBuilder(
-    column: $table.details,
-    builder: (column) => ColumnOrderings(column),
-  );
-}
-
-class $$TasksTableAnnotationComposer
-    extends Composer<_$AppDatabase, $TasksTable> {
-  $$TasksTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumn<String> get title =>
-      $composableBuilder(column: $table.title, builder: (column) => column);
-
-  GeneratedColumn<String> get description => $composableBuilder(
-    column: $table.description,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get type =>
-      $composableBuilder(column: $table.type, builder: (column) => column);
-
-  GeneratedColumn<String> get status =>
-      $composableBuilder(column: $table.status, builder: (column) => column);
-
-  GeneratedColumn<String> get priority =>
-      $composableBuilder(column: $table.priority, builder: (column) => column);
-
-  GeneratedColumn<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
-
-  GeneratedColumn<String> get locationData => $composableBuilder(
-    column: $table.locationData,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get details =>
-      $composableBuilder(column: $table.details, builder: (column) => column);
-}
-
-class $$TasksTableTableManager
-    extends
-        RootTableManager<
-          _$AppDatabase,
-          $TasksTable,
-          Task,
-          $$TasksTableFilterComposer,
-          $$TasksTableOrderingComposer,
-          $$TasksTableAnnotationComposer,
-          $$TasksTableCreateCompanionBuilder,
-          $$TasksTableUpdateCompanionBuilder,
-          (Task, BaseReferences<_$AppDatabase, $TasksTable, Task>),
-          Task,
-          PrefetchHooks Function()
-        > {
-  $$TasksTableTableManager(_$AppDatabase db, $TasksTable table)
-    : super(
-        TableManagerState(
-          db: db,
-          table: table,
-          createFilteringComposer: () =>
-              $$TasksTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$TasksTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$TasksTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                Value<String> title = const Value.absent(),
-                Value<String> description = const Value.absent(),
-                Value<String> type = const Value.absent(),
-                Value<String> status = const Value.absent(),
-                Value<String> priority = const Value.absent(),
-                Value<DateTime> createdAt = const Value.absent(),
-                Value<String> locationData = const Value.absent(),
-                Value<String> details = const Value.absent(),
-              }) => TasksCompanion(
-                id: id,
-                title: title,
-                description: description,
-                type: type,
-                status: status,
-                priority: priority,
-                createdAt: createdAt,
-                locationData: locationData,
-                details: details,
-              ),
-          createCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                required String title,
-                required String description,
-                required String type,
-                required String status,
-                required String priority,
-                required DateTime createdAt,
-                required String locationData,
-                required String details,
-              }) => TasksCompanion.insert(
-                id: id,
-                title: title,
-                description: description,
-                type: type,
-                status: status,
-                priority: priority,
-                createdAt: createdAt,
-                locationData: locationData,
-                details: details,
-              ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
-              .toList(),
-          prefetchHooksCallback: null,
-        ),
-      );
-}
-
-typedef $$TasksTableProcessedTableManager =
-    ProcessedTableManager<
-      _$AppDatabase,
-      $TasksTable,
-      Task,
-      $$TasksTableFilterComposer,
-      $$TasksTableOrderingComposer,
-      $$TasksTableAnnotationComposer,
-      $$TasksTableCreateCompanionBuilder,
-      $$TasksTableUpdateCompanionBuilder,
-      (Task, BaseReferences<_$AppDatabase, $TasksTable, Task>),
-      Task,
-      PrefetchHooks Function()
-    >;
-typedef $$ProductsTableCreateCompanionBuilder =
-    ProductsCompanion Function({
-      required String id,
-      required String name,
-      required int quantity,
-      required String category,
-      required String sku,
-      Value<int> rowid,
-    });
-typedef $$ProductsTableUpdateCompanionBuilder =
-    ProductsCompanion Function({
-      Value<String> id,
-      Value<String> name,
-      Value<int> quantity,
-      Value<String> category,
-      Value<String> sku,
-      Value<int> rowid,
-    });
-
-class $$ProductsTableFilterComposer
-    extends Composer<_$AppDatabase, $ProductsTable> {
-  $$ProductsTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<String> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get name => $composableBuilder(
-    column: $table.name,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get quantity => $composableBuilder(
-    column: $table.quantity,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get category => $composableBuilder(
-    column: $table.category,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get sku => $composableBuilder(
-    column: $table.sku,
-    builder: (column) => ColumnFilters(column),
-  );
-}
-
-class $$ProductsTableOrderingComposer
-    extends Composer<_$AppDatabase, $ProductsTable> {
-  $$ProductsTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<String> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get name => $composableBuilder(
-    column: $table.name,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get quantity => $composableBuilder(
-    column: $table.quantity,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get category => $composableBuilder(
-    column: $table.category,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get sku => $composableBuilder(
-    column: $table.sku,
-    builder: (column) => ColumnOrderings(column),
-  );
-}
-
-class $$ProductsTableAnnotationComposer
-    extends Composer<_$AppDatabase, $ProductsTable> {
-  $$ProductsTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<String> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumn<String> get name =>
-      $composableBuilder(column: $table.name, builder: (column) => column);
-
-  GeneratedColumn<int> get quantity =>
-      $composableBuilder(column: $table.quantity, builder: (column) => column);
-
-  GeneratedColumn<String> get category =>
-      $composableBuilder(column: $table.category, builder: (column) => column);
-
-  GeneratedColumn<String> get sku =>
-      $composableBuilder(column: $table.sku, builder: (column) => column);
-}
-
-class $$ProductsTableTableManager
-    extends
-        RootTableManager<
-          _$AppDatabase,
-          $ProductsTable,
-          Product,
-          $$ProductsTableFilterComposer,
-          $$ProductsTableOrderingComposer,
-          $$ProductsTableAnnotationComposer,
-          $$ProductsTableCreateCompanionBuilder,
-          $$ProductsTableUpdateCompanionBuilder,
-          (Product, BaseReferences<_$AppDatabase, $ProductsTable, Product>),
-          Product,
-          PrefetchHooks Function()
-        > {
-  $$ProductsTableTableManager(_$AppDatabase db, $ProductsTable table)
-    : super(
-        TableManagerState(
-          db: db,
-          table: table,
-          createFilteringComposer: () =>
-              $$ProductsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$ProductsTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$ProductsTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback:
-              ({
-                Value<String> id = const Value.absent(),
-                Value<String> name = const Value.absent(),
-                Value<int> quantity = const Value.absent(),
-                Value<String> category = const Value.absent(),
-                Value<String> sku = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
-              }) => ProductsCompanion(
-                id: id,
-                name: name,
-                quantity: quantity,
-                category: category,
-                sku: sku,
-                rowid: rowid,
-              ),
-          createCompanionCallback:
-              ({
-                required String id,
-                required String name,
-                required int quantity,
-                required String category,
-                required String sku,
-                Value<int> rowid = const Value.absent(),
-              }) => ProductsCompanion.insert(
-                id: id,
-                name: name,
-                quantity: quantity,
-                category: category,
-                sku: sku,
-                rowid: rowid,
-              ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
-              .toList(),
-          prefetchHooksCallback: null,
-        ),
-      );
-}
-
-typedef $$ProductsTableProcessedTableManager =
-    ProcessedTableManager<
-      _$AppDatabase,
-      $ProductsTable,
-      Product,
-      $$ProductsTableFilterComposer,
-      $$ProductsTableOrderingComposer,
-      $$ProductsTableAnnotationComposer,
-      $$ProductsTableCreateCompanionBuilder,
-      $$ProductsTableUpdateCompanionBuilder,
-      (Product, BaseReferences<_$AppDatabase, $ProductsTable, Product>),
-      Product,
-      PrefetchHooks Function()
-    >;
-typedef $$InventoryTableCreateCompanionBuilder =
-    InventoryCompanion Function({
-      Value<int> id,
-      required String productId,
-      required String zone,
-      required String floor,
-      required String slot,
-      required int stockQuantity,
-      required DateTime lastUpdated,
-    });
-typedef $$InventoryTableUpdateCompanionBuilder =
-    InventoryCompanion Function({
-      Value<int> id,
-      Value<String> productId,
-      Value<String> zone,
-      Value<String> floor,
-      Value<String> slot,
-      Value<int> stockQuantity,
-      Value<DateTime> lastUpdated,
-    });
-
-class $$InventoryTableFilterComposer
-    extends Composer<_$AppDatabase, $InventoryTable> {
-  $$InventoryTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<int> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get productId => $composableBuilder(
-    column: $table.productId,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get zone => $composableBuilder(
-    column: $table.zone,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get floor => $composableBuilder(
-    column: $table.floor,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get slot => $composableBuilder(
-    column: $table.slot,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get stockQuantity => $composableBuilder(
-    column: $table.stockQuantity,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<DateTime> get lastUpdated => $composableBuilder(
-    column: $table.lastUpdated,
-    builder: (column) => ColumnFilters(column),
-  );
-}
-
-class $$InventoryTableOrderingComposer
-    extends Composer<_$AppDatabase, $InventoryTable> {
-  $$InventoryTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<int> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get productId => $composableBuilder(
-    column: $table.productId,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get zone => $composableBuilder(
-    column: $table.zone,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get floor => $composableBuilder(
-    column: $table.floor,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get slot => $composableBuilder(
-    column: $table.slot,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get stockQuantity => $composableBuilder(
-    column: $table.stockQuantity,
+  ColumnOrderings<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -2305,32 +1259,32 @@ class $$InventoryTableOrderingComposer
   );
 }
 
-class $$InventoryTableAnnotationComposer
-    extends Composer<_$AppDatabase, $InventoryTable> {
-  $$InventoryTableAnnotationComposer({
+class $$LocalTasksTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalTasksTable> {
+  $$LocalTasksTableAnnotationComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<int> get id =>
+  GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get productId =>
-      $composableBuilder(column: $table.productId, builder: (column) => column);
+  GeneratedColumn<String> get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
 
-  GeneratedColumn<String> get zone =>
-      $composableBuilder(column: $table.zone, builder: (column) => column);
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
 
-  GeneratedColumn<String> get floor =>
-      $composableBuilder(column: $table.floor, builder: (column) => column);
+  GeneratedColumn<String> get data =>
+      $composableBuilder(column: $table.data, builder: (column) => column);
 
-  GeneratedColumn<String> get slot =>
-      $composableBuilder(column: $table.slot, builder: (column) => column);
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
-  GeneratedColumn<int> get stockQuantity => $composableBuilder(
-    column: $table.stockQuantity,
+  GeneratedColumn<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
     builder: (column) => column,
   );
 
@@ -2340,70 +1294,74 @@ class $$InventoryTableAnnotationComposer
   );
 }
 
-class $$InventoryTableTableManager
+class $$LocalTasksTableTableManager
     extends
         RootTableManager<
           _$AppDatabase,
-          $InventoryTable,
-          InventoryData,
-          $$InventoryTableFilterComposer,
-          $$InventoryTableOrderingComposer,
-          $$InventoryTableAnnotationComposer,
-          $$InventoryTableCreateCompanionBuilder,
-          $$InventoryTableUpdateCompanionBuilder,
+          $LocalTasksTable,
+          LocalTask,
+          $$LocalTasksTableFilterComposer,
+          $$LocalTasksTableOrderingComposer,
+          $$LocalTasksTableAnnotationComposer,
+          $$LocalTasksTableCreateCompanionBuilder,
+          $$LocalTasksTableUpdateCompanionBuilder,
           (
-            InventoryData,
-            BaseReferences<_$AppDatabase, $InventoryTable, InventoryData>,
+            LocalTask,
+            BaseReferences<_$AppDatabase, $LocalTasksTable, LocalTask>,
           ),
-          InventoryData,
+          LocalTask,
           PrefetchHooks Function()
         > {
-  $$InventoryTableTableManager(_$AppDatabase db, $InventoryTable table)
+  $$LocalTasksTableTableManager(_$AppDatabase db, $LocalTasksTable table)
     : super(
         TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
-              $$InventoryTableFilterComposer($db: db, $table: table),
+              $$LocalTasksTableFilterComposer($db: db, $table: table),
           createOrderingComposer: () =>
-              $$InventoryTableOrderingComposer($db: db, $table: table),
+              $$LocalTasksTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
-              $$InventoryTableAnnotationComposer($db: db, $table: table),
+              $$LocalTasksTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
-                Value<int> id = const Value.absent(),
-                Value<String> productId = const Value.absent(),
-                Value<String> zone = const Value.absent(),
-                Value<String> floor = const Value.absent(),
-                Value<String> slot = const Value.absent(),
-                Value<int> stockQuantity = const Value.absent(),
+                Value<String> id = const Value.absent(),
+                Value<String> type = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String> data = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
                 Value<DateTime> lastUpdated = const Value.absent(),
-              }) => InventoryCompanion(
+                Value<int> rowid = const Value.absent(),
+              }) => LocalTasksCompanion(
                 id: id,
-                productId: productId,
-                zone: zone,
-                floor: floor,
-                slot: slot,
-                stockQuantity: stockQuantity,
+                type: type,
+                status: status,
+                data: data,
+                createdAt: createdAt,
+                syncStatus: syncStatus,
                 lastUpdated: lastUpdated,
+                rowid: rowid,
               ),
           createCompanionCallback:
               ({
-                Value<int> id = const Value.absent(),
-                required String productId,
-                required String zone,
-                required String floor,
-                required String slot,
-                required int stockQuantity,
+                required String id,
+                required String type,
+                required String status,
+                required String data,
+                required DateTime createdAt,
+                Value<String> syncStatus = const Value.absent(),
                 required DateTime lastUpdated,
-              }) => InventoryCompanion.insert(
+                Value<int> rowid = const Value.absent(),
+              }) => LocalTasksCompanion.insert(
                 id: id,
-                productId: productId,
-                zone: zone,
-                floor: floor,
-                slot: slot,
-                stockQuantity: stockQuantity,
+                type: type,
+                status: status,
+                data: data,
+                createdAt: createdAt,
+                syncStatus: syncStatus,
                 lastUpdated: lastUpdated,
+                rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
@@ -2413,21 +1371,188 @@ class $$InventoryTableTableManager
       );
 }
 
-typedef $$InventoryTableProcessedTableManager =
+typedef $$LocalTasksTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
-      $InventoryTable,
-      InventoryData,
-      $$InventoryTableFilterComposer,
-      $$InventoryTableOrderingComposer,
-      $$InventoryTableAnnotationComposer,
-      $$InventoryTableCreateCompanionBuilder,
-      $$InventoryTableUpdateCompanionBuilder,
+      $LocalTasksTable,
+      LocalTask,
+      $$LocalTasksTableFilterComposer,
+      $$LocalTasksTableOrderingComposer,
+      $$LocalTasksTableAnnotationComposer,
+      $$LocalTasksTableCreateCompanionBuilder,
+      $$LocalTasksTableUpdateCompanionBuilder,
+      (LocalTask, BaseReferences<_$AppDatabase, $LocalTasksTable, LocalTask>),
+      LocalTask,
+      PrefetchHooks Function()
+    >;
+typedef $$LocalInventoryTableCreateCompanionBuilder =
+    LocalInventoryCompanion Function({
+      required String productId,
+      required String locationId,
+      required int quantity,
+      Value<int> rowid,
+    });
+typedef $$LocalInventoryTableUpdateCompanionBuilder =
+    LocalInventoryCompanion Function({
+      Value<String> productId,
+      Value<String> locationId,
+      Value<int> quantity,
+      Value<int> rowid,
+    });
+
+class $$LocalInventoryTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalInventoryTable> {
+  $$LocalInventoryTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get productId => $composableBuilder(
+    column: $table.productId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get locationId => $composableBuilder(
+    column: $table.locationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get quantity => $composableBuilder(
+    column: $table.quantity,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LocalInventoryTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalInventoryTable> {
+  $$LocalInventoryTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get productId => $composableBuilder(
+    column: $table.productId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get locationId => $composableBuilder(
+    column: $table.locationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get quantity => $composableBuilder(
+    column: $table.quantity,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LocalInventoryTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalInventoryTable> {
+  $$LocalInventoryTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get productId =>
+      $composableBuilder(column: $table.productId, builder: (column) => column);
+
+  GeneratedColumn<String> get locationId => $composableBuilder(
+    column: $table.locationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get quantity =>
+      $composableBuilder(column: $table.quantity, builder: (column) => column);
+}
+
+class $$LocalInventoryTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LocalInventoryTable,
+          LocalInventoryData,
+          $$LocalInventoryTableFilterComposer,
+          $$LocalInventoryTableOrderingComposer,
+          $$LocalInventoryTableAnnotationComposer,
+          $$LocalInventoryTableCreateCompanionBuilder,
+          $$LocalInventoryTableUpdateCompanionBuilder,
+          (
+            LocalInventoryData,
+            BaseReferences<
+              _$AppDatabase,
+              $LocalInventoryTable,
+              LocalInventoryData
+            >,
+          ),
+          LocalInventoryData,
+          PrefetchHooks Function()
+        > {
+  $$LocalInventoryTableTableManager(
+    _$AppDatabase db,
+    $LocalInventoryTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalInventoryTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocalInventoryTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LocalInventoryTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> productId = const Value.absent(),
+                Value<String> locationId = const Value.absent(),
+                Value<int> quantity = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalInventoryCompanion(
+                productId: productId,
+                locationId: locationId,
+                quantity: quantity,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String productId,
+                required String locationId,
+                required int quantity,
+                Value<int> rowid = const Value.absent(),
+              }) => LocalInventoryCompanion.insert(
+                productId: productId,
+                locationId: locationId,
+                quantity: quantity,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LocalInventoryTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LocalInventoryTable,
+      LocalInventoryData,
+      $$LocalInventoryTableFilterComposer,
+      $$LocalInventoryTableOrderingComposer,
+      $$LocalInventoryTableAnnotationComposer,
+      $$LocalInventoryTableCreateCompanionBuilder,
+      $$LocalInventoryTableUpdateCompanionBuilder,
       (
-        InventoryData,
-        BaseReferences<_$AppDatabase, $InventoryTable, InventoryData>,
+        LocalInventoryData,
+        BaseReferences<_$AppDatabase, $LocalInventoryTable, LocalInventoryData>,
       ),
-      InventoryData,
+      LocalInventoryData,
       PrefetchHooks Function()
     >;
 typedef $$SyncQueueTableCreateCompanionBuilder =
@@ -2436,7 +1561,8 @@ typedef $$SyncQueueTableCreateCompanionBuilder =
       required String actionType,
       required String payload,
       required DateTime timestamp,
-      Value<bool> processed,
+      Value<String> status,
+      Value<int> retryCount,
     });
 typedef $$SyncQueueTableUpdateCompanionBuilder =
     SyncQueueCompanion Function({
@@ -2444,7 +1570,8 @@ typedef $$SyncQueueTableUpdateCompanionBuilder =
       Value<String> actionType,
       Value<String> payload,
       Value<DateTime> timestamp,
-      Value<bool> processed,
+      Value<String> status,
+      Value<int> retryCount,
     });
 
 class $$SyncQueueTableFilterComposer
@@ -2476,8 +1603,13 @@ class $$SyncQueueTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<bool> get processed => $composableBuilder(
-    column: $table.processed,
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get retryCount => $composableBuilder(
+    column: $table.retryCount,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -2511,8 +1643,13 @@ class $$SyncQueueTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<bool> get processed => $composableBuilder(
-    column: $table.processed,
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get retryCount => $composableBuilder(
+    column: $table.retryCount,
     builder: (column) => ColumnOrderings(column),
   );
 }
@@ -2540,8 +1677,13 @@ class $$SyncQueueTableAnnotationComposer
   GeneratedColumn<DateTime> get timestamp =>
       $composableBuilder(column: $table.timestamp, builder: (column) => column);
 
-  GeneratedColumn<bool> get processed =>
-      $composableBuilder(column: $table.processed, builder: (column) => column);
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<int> get retryCount => $composableBuilder(
+    column: $table.retryCount,
+    builder: (column) => column,
+  );
 }
 
 class $$SyncQueueTableTableManager
@@ -2579,13 +1721,15 @@ class $$SyncQueueTableTableManager
                 Value<String> actionType = const Value.absent(),
                 Value<String> payload = const Value.absent(),
                 Value<DateTime> timestamp = const Value.absent(),
-                Value<bool> processed = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<int> retryCount = const Value.absent(),
               }) => SyncQueueCompanion(
                 id: id,
                 actionType: actionType,
                 payload: payload,
                 timestamp: timestamp,
-                processed: processed,
+                status: status,
+                retryCount: retryCount,
               ),
           createCompanionCallback:
               ({
@@ -2593,13 +1737,15 @@ class $$SyncQueueTableTableManager
                 required String actionType,
                 required String payload,
                 required DateTime timestamp,
-                Value<bool> processed = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<int> retryCount = const Value.absent(),
               }) => SyncQueueCompanion.insert(
                 id: id,
                 actionType: actionType,
                 payload: payload,
                 timestamp: timestamp,
-                processed: processed,
+                status: status,
+                retryCount: retryCount,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
@@ -2630,12 +1776,10 @@ typedef $$SyncQueueTableProcessedTableManager =
 class $AppDatabaseManager {
   final _$AppDatabase _db;
   $AppDatabaseManager(this._db);
-  $$TasksTableTableManager get tasks =>
-      $$TasksTableTableManager(_db, _db.tasks);
-  $$ProductsTableTableManager get products =>
-      $$ProductsTableTableManager(_db, _db.products);
-  $$InventoryTableTableManager get inventory =>
-      $$InventoryTableTableManager(_db, _db.inventory);
+  $$LocalTasksTableTableManager get localTasks =>
+      $$LocalTasksTableTableManager(_db, _db.localTasks);
+  $$LocalInventoryTableTableManager get localInventory =>
+      $$LocalInventoryTableTableManager(_db, _db.localInventory);
   $$SyncQueueTableTableManager get syncQueue =>
       $$SyncQueueTableTableManager(_db, _db.syncQueue);
 }
