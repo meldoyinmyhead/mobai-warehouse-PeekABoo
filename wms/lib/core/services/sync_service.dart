@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:wms/core/database/local_database.dart';
+import 'package:wms/core/database/app_database.dart';
 import 'package:drift/drift.dart' as drift;
 
 class SyncService {
@@ -22,6 +22,17 @@ class SyncService {
     final connectivity = Connectivity();
     
     _instance = SyncService._(supabase, db, connectivity);
+    
+    // Listen to Auth Changes
+    supabase.auth.onAuthStateChange.listen((data) {
+      final event = data.event;
+      if (event == AuthChangeEvent.signedIn) {
+        print('[Sync] User signed in. Starting Realtime & Sync.');
+        _instance!.subscribeToTasks();
+        _instance!.runSync();
+      }
+    });
+    
     return _instance!;
   }
 
@@ -122,5 +133,35 @@ class SyncService {
         )
       );
     }
+  }
+  /// 4. REALTIME: Listen for changes
+  void subscribeToTasks() {
+    print('[Realtime] Subscribing to tasks...');
+    _supabase
+        .from('tasks')
+        .stream(primaryKey: ['id'])
+        .listen((List<Map<String, dynamic>> data) {
+          print('[Realtime] Received ${data.length} tasks update');
+          _handleRealtimeUpdate(data);
+        }, onError: (e) {
+          print('[Realtime] Error: $e');
+        });
+  }
+
+  Future<void> _handleRealtimeUpdate(List<Map<String, dynamic>> tasks) async {
+    for (final t in tasks) {
+      await _db.into(_db.localTasks).insertOnConflictUpdate(
+        LocalTasksCompanion(
+          id: drift.Value(t['id'].toString()), // Ensure string ID
+          type: drift.Value('picking'),
+          status: drift.Value(t['statut']),
+          data: drift.Value(jsonEncode(t)),
+          createdAt: drift.Value(DateTime.parse(t['created_at'])),
+          lastUpdated: drift.Value(DateTime.now()),
+          syncStatus: const drift.Value('synced'),
+        )
+      );
+    }
+    // Optionally notify UI via a StreamController or Cubit
   }
 }

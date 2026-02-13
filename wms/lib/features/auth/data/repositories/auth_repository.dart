@@ -1,22 +1,31 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:wms/features/auth/data/user_model.dart';
 
 class AuthRepository {
-  final String baseUrl = 'http://127.0.0.1:8000'; // Adjust for physical device if needed
-
+  final String baseUrl = 'http://127.0.0.1:8000'; // Keep for other endpoints if needed
+  
   Future<Map<String, dynamic>> login(String email, String password) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/auth/login'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'email': email, 'password': password}),
-    );
+    try {
+      final response = await Supabase.instance.client.auth.signInWithPassword(
+        email: email,
+        password: password,
+      );
 
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
-    } else {
-      final error = jsonDecode(response.body);
-      throw Exception(error['detail'] ?? 'Failed to login');
+      if (response.user != null) {
+        // Return a map similar to what the app expects, or adapt the Cubit
+        return {
+          'token': response.session?.accessToken,
+          'user_id': response.user?.id,
+          'email': response.user?.email,
+          'role': response.user?.userMetadata?['role'] ?? 'employee', // Assuming metadata
+        };
+      } else {
+        throw Exception('Login failed: No user returned');
+      }
+    } catch (e) {
+      throw Exception('Login failed: ${e.toString()}');
     }
   }
 

@@ -65,17 +65,19 @@ class _LoginScreenState extends State<LoginScreen> {
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          backgroundColor: AppTheme.lightBlue,
+          backgroundColor: AppTheme.lightBlue, 
           elevation: 0,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.white),
             onPressed: () => Navigator.pop(context),
           ),
-          title: Row(
+          title: Row( // Using existing logo logic
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Image.asset('assets/images/logo.png', height: 30),
+               Text('BBMS ', style: GoogleFonts.lato(color: AppTheme.yellow, fontWeight: FontWeight.bold, fontSize: 20)),
+               Text('ELECTRIC', style: GoogleFonts.lato(color: AppTheme.yellow, fontStyle: FontStyle.italic, fontWeight: FontWeight.w300, fontSize: 20)),
+             // Image.asset('assets/images/logo.png', height: 30), 
             ],
           ),
           centerTitle: true,
@@ -89,26 +91,26 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   const SizedBox(height: 40),
                   Text(
-                    'Bon Retour',
+                    'Welcome!',
                     style: GoogleFonts.lato(fontSize: 32, fontWeight: FontWeight.bold, color: AppTheme.lightBlue),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Connectez-vous à votre compte pour continuer',
+                    'Sign in to your account to continue',
                     style: GoogleFonts.lato(fontSize: 16, color: Colors.grey[600]),
                   ),
                   const SizedBox(height: 48),
                   _buildTextField(
                     controller: _emailController,
-                    label: 'Adresse Email',
-                    hint: 'votre.email@exemple.com',
+                    label: 'Email Address',
+                    hint: 'your.email@example.com',
                     icon: Icons.email_outlined,
                   ),
                   const SizedBox(height: 24),
                   _buildTextField(
                     controller: _passwordController,
-                    label: 'Mot de Passe',
-                    hint: 'Entrez votre mot de passe',
+                    label: 'Password',
+                    hint: 'Enter your password',
                     icon: Icons.lock_outline,
                     isPassword: true,
                   ),
@@ -118,14 +120,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       Checkbox(
                         value: _rememberMe,
                         onChanged: (val) => setState(() => _rememberMe = val!),
-                        activeColor: const Color(0xFF00796B),
+                        activeColor: AppTheme.yellow,
+                        checkColor: AppTheme.darkBlue,
                       ),
-                      Text('Se souvenir de moi', style: GoogleFonts.lato(color: Colors.grey[700])),
+                      Text('Remember me', style: GoogleFonts.lato(color: Colors.grey[700])),
                       const Spacer(),
-                      TextButton(
-                        onPressed: () {},
-                        child: Text('Mot de passe oublié?', style: GoogleFonts.lato(color: const Color(0xFF00796B), fontWeight: FontWeight.bold)),
-                      ),
                     ],
                   ),
                   const SizedBox(height: 40),
@@ -137,18 +136,25 @@ class _LoginScreenState extends State<LoginScreen> {
                         : ElevatedButton(
                             onPressed: () => _onLoginPressed(context),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFFFD600),
-                              foregroundColor: const Color(0xFF004D40),
+                              backgroundColor: AppTheme.yellow,
+                              foregroundColor: AppTheme.darkBlue,
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                               elevation: 0,
                             ),
-                            child: Text('Se Connecter', style: GoogleFonts.lato(fontSize: 18, fontWeight: FontWeight.bold)),
+                            child: Text('Sign In', style: GoogleFonts.lato(fontSize: 18, fontWeight: FontWeight.bold)),
                           ),
                   ),
+                   const SizedBox(height: 16),
+                   Center(
+                    child: TextButton(
+                        onPressed: () {},
+                        child: Text('Forgot Password?', style: GoogleFonts.lato(color: AppTheme.lightBlue, fontWeight: FontWeight.bold)),
+                      ),
+                   ),
                   const SizedBox(height: 24),
                   Center(
                     child: Text(
-                      'Version 1.0.0 Développé par MobAI\n© 2026 BBMS ELEC. Tous droits réservés.',
+                      'Version 1.0.0 Developed by MobAI\n© 2026 BBMS ELEC. All rights reserved.',
                       textAlign: TextAlign.center,
                       style: GoogleFonts.lato(fontSize: 12, color: Colors.grey[400]),
                     ),

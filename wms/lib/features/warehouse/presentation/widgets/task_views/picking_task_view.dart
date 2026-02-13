@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wms/core/repositories/offline_repository.dart';
 import 'package:wms/features/warehouse/data/models/task_model.dart';
 import 'package:wms/features/warehouse/presentation/widgets/isometric_warehouse_painter.dart';
 import 'package:wms/features/warehouse/data/warehouse_layout_data.dart';
@@ -385,7 +387,23 @@ class _PickingTaskViewState extends State<PickingTaskView> {
           width: double.infinity,
           height: 48,
           child: ElevatedButton(
-            onPressed: () {},
+            onPressed: () async {
+              // 1. Get Repository
+              final offlineRepo = RepositoryProvider.of<OfflineRepository>(context);
+              
+              // 2. Perform Action (Saving to local DB)
+              await offlineRepo.completePickingStop(widget.task.id, 1);
+              
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Tâche sauvegardée localement! (Queue Sync)', style: GoogleFonts.lato()),
+                    backgroundColor: AppTheme.green,
+                  ),
+                );
+                Navigator.pop(context);
+              }
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.lightBlue,
               foregroundColor: Colors.white,

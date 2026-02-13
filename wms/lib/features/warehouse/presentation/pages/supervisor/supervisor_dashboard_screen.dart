@@ -64,12 +64,15 @@ class _SupervisorDashboardScreenState extends State<SupervisorDashboardScreen> {
           ),
           title: Row(
             mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [Image.asset('assets/images/logo.png', height: 30)],
           ),
           actions: [
             IconButton(
               icon: const Icon(Icons.settings_outlined, color: Color(0xFF5D6266)),
-              onPressed: () {},
+              onPressed: () {
+                Navigator.pushNamed(context, '/supervisor/settings');
+              },
             ),
             IconButton(
               icon: const Icon(Icons.notifications_outlined, color: Color(0xFF5D6266)),

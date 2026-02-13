@@ -1,5 +1,5 @@
 import 'package:drift/drift.dart';
-import 'package:wms/core/database/local_database.dart';
+import 'package:wms/core/database/app_database.dart';
 import 'dart:convert';
 
 class OfflineRepository {

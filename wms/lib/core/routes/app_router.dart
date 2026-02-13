@@ -12,14 +12,24 @@ import 'package:wms/features/warehouse/presentation/pages/employee/log_task_scre
 import 'package:wms/features/warehouse/presentation/pages/supervisor/supervisor_map_screen.dart';
 
 import 'package:wms/features/auth/presentation/pages/landing_page.dart';
+import 'package:wms/features/auth/presentation/pages/onboarding_screen.dart';
+import 'package:wms/features/auth/presentation/pages/role_selection_screen.dart';
 import 'package:wms/features/auth/presentation/pages/login_screen.dart';
+
+import 'package:wms/features/warehouse/presentation/pages/supervisor/flag_management_screen.dart';
+
+import 'package:wms/features/warehouse/presentation/pages/supervisor/supervisor_settings_screen.dart';
 
 class AppRouter {
   static const String landing = '/';
+  static const String onboarding = '/onboarding';
+  static const String roleSelection = '/role_selection';
   static const String login = '/login';
   static const String supervisorDashboard = '/supervisor/dashboard';
   static const String supervisorMap = '/supervisor/map';
-  static const String aiReview = '/supervisor/ai_review';
+  static const String aiReview = '/supervisor/review'; // Changed from ai_review to match navbar
+  static const String supervisorFlagged = '/supervisor/flagged';
+  static const String supervisorSettings = '/supervisor/settings';
   static const String employeeDashboard = '/employee/dashboard';
   static const String employeeMain = '/employee/main';
   static const String employeeTaskDetail = '/employee/task_detail';
@@ -33,6 +43,10 @@ class AppRouter {
     switch (settings.name) {
       case landing:
         return MaterialPageRoute(builder: (_) => const LandingPage());
+      case onboarding:
+        return MaterialPageRoute(builder: (_) => const OnboardingScreen());
+      case roleSelection:
+        return MaterialPageRoute(builder: (_) => const RoleSelectionScreen());
       case login:
         return MaterialPageRoute(builder: (_) => const LoginScreen());
       case supervisorDashboard:
@@ -41,6 +55,10 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const SupervisorMapScreen());
       case aiReview:
         return MaterialPageRoute(builder: (_) => const AiReviewScreen());
+      case supervisorFlagged:
+        return MaterialPageRoute(builder: (_) => const FlagManagementScreen());
+      case supervisorSettings:
+        return MaterialPageRoute(builder: (_) => const SupervisorSettingsScreen());
       case employeeDashboard: // Legacy or direct link to dashboard only
         return MaterialPageRoute(builder: (_) => const EmployeeDashboardScreen());
       case employeeMain: // The new Main Wrapper
