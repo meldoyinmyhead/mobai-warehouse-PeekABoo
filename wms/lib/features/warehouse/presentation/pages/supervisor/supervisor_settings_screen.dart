@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:wms/core/theme/app_theme.dart';
+import 'package:wms/features/auth/presentation/cubits/auth_cubit.dart';
 
 class SupervisorSettingsScreen extends StatefulWidget {
   const SupervisorSettingsScreen({super.key});
@@ -221,9 +223,8 @@ class _SupervisorSettingsScreenState extends State<SupervisorSettingsScreen> {
                     child: ElevatedButton(
                       onPressed: () {
                         // Handle logout
-                        Navigator.of(
-                          context,
-                        ).pushNamedAndRemoveUntil('/login', (route) => false);
+                        context.read<AuthCubit>().logout();
+                         Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.red,
