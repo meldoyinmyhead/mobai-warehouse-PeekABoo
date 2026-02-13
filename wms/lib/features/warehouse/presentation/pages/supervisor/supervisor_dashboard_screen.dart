@@ -5,24 +5,29 @@ import 'package:wms/core/widgets/supervisorBottonBar.dart';
 import 'package:wms/features/warehouse/presentation/cubits/supervisor/dashboard_cubit.dart';
 import 'package:wms/features/warehouse/data/repositories/task_repository.dart';
 import 'package:wms/core/theme/app_theme.dart';
+import 'package:wms/features/warehouse/presentation/pages/supervisor/supervisor_notifications_screen.dart';
+import 'package:wms/features/warehouse/presentation/pages/supervisor/supervisor_settings_screen.dart';
+import 'package:wms/features/warehouse/presentation/pages/supervisor/supervisor_profile_screen.dart';
 
 class SupervisorDashboardScreen extends StatefulWidget {
   const SupervisorDashboardScreen({super.key});
 
   @override
-  State<SupervisorDashboardScreen> createState() => _SupervisorDashboardScreenState();
+  State<SupervisorDashboardScreen> createState() =>
+      _SupervisorDashboardScreenState();
 }
 
 class _SupervisorDashboardScreenState extends State<SupervisorDashboardScreen> {
   int _currentIndex = 0;
 
   void _onNavBarTap(int index) {
-    if (index == _currentIndex) return; // Don't navigate if already on this page
-    
+    if (index == _currentIndex)
+      return; // Don't navigate if already on this page
+
     setState(() {
       _currentIndex = index;
     });
-    
+
     // Handle navigation based on index
     switch (index) {
       case 0:
@@ -47,21 +52,30 @@ class _SupervisorDashboardScreenState extends State<SupervisorDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    
+
     return BlocProvider(
-      create: (context) => SupervisorDashboardCubit(TaskRepository())..loadDashboard(),
+      create: (context) =>
+          SupervisorDashboardCubit(TaskRepository())..loadDashboard(),
       child: Scaffold(
         backgroundColor: AppTheme.veryLightGrey,
         appBar: AppBar(
           backgroundColor: Colors.white,
           elevation: 0,
           leading: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: CircleAvatar(
-              backgroundColor: Colors.grey[200],
-              child: const Icon(Icons.person_outline, color: Color(0xFF5D6266)),
+          padding: const EdgeInsets.all(12.0),
+          child: GestureDetector(
+            onTap: () =>  Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SupervisorProfileScreen(),
+                  ),
+                ),
+            child: const CircleAvatar(
+              backgroundColor: Colors.white,
+              child: Icon(Icons.person_outline, color: Color(0xFF5D6266)),
             ),
           ),
+        ),
           title: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
@@ -69,14 +83,32 @@ class _SupervisorDashboardScreenState extends State<SupervisorDashboardScreen> {
           ),
           actions: [
             IconButton(
-              icon: const Icon(Icons.settings_outlined, color: Color(0xFF5D6266)),
+              icon: const Icon(
+                Icons.settings_outlined,
+                color: Color(0xFF5D6266),
+              ),
               onPressed: () {
-                Navigator.pushNamed(context, '/supervisor/settings');
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SupervisorSettingsScreen(),
+                  ),
+                );
               },
             ),
             IconButton(
-              icon: const Icon(Icons.notifications_outlined, color: Color(0xFF5D6266)),
-              onPressed: () {},
+              icon: const Icon(
+                Icons.notifications_outlined,
+                color: Color(0xFF5D6266),
+              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SupervisorNotificationsScreen(),
+                  ),
+                );
+              },
             ),
           ],
         ),
@@ -142,7 +174,10 @@ class _SupervisorDashboardScreenState extends State<SupervisorDashboardScreen> {
                                 ),
                                 const SizedBox(height: 12),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: Colors.white.withOpacity(0.2),
                                     borderRadius: BorderRadius.circular(20),
@@ -150,7 +185,11 @@ class _SupervisorDashboardScreenState extends State<SupervisorDashboardScreen> {
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      const Icon(Icons.wifi, color: Colors.white, size: 14),
+                                      const Icon(
+                                        Icons.wifi,
+                                        color: Colors.white,
+                                        size: 14,
+                                      ),
                                       const SizedBox(width: 6),
                                       Text(
                                         'En ligne',
@@ -178,7 +217,11 @@ class _SupervisorDashboardScreenState extends State<SupervisorDashboardScreen> {
                                   color: Colors.white.withOpacity(0.2),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: const Icon(Icons.assessment, size: 50, color: Colors.white),
+                                child: const Icon(
+                                  Icons.assessment,
+                                  size: 50,
+                                  color: Colors.white,
+                                ),
                               );
                             },
                           ),
@@ -231,7 +274,9 @@ class _SupervisorDashboardScreenState extends State<SupervisorDashboardScreen> {
                         decoration: BoxDecoration(
                           color: AppTheme.red.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: AppTheme.red.withOpacity(0.3)),
+                          border: Border.all(
+                            color: AppTheme.red.withOpacity(0.3),
+                          ),
                         ),
                         child: Row(
                           children: [
@@ -241,7 +286,11 @@ class _SupervisorDashboardScreenState extends State<SupervisorDashboardScreen> {
                                 color: AppTheme.red.withOpacity(0.2),
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(Icons.error_outline, color: AppTheme.red, size: 20),
+                              child: const Icon(
+                                Icons.error_outline,
+                                color: AppTheme.red,
+                                size: 20,
+                              ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
@@ -269,7 +318,10 @@ class _SupervisorDashboardScreenState extends State<SupervisorDashboardScreen> {
                           ),
                           const SizedBox(width: 12),
                           Expanded(
-                            child: _buildStatCard('2', 'Préparation nécessaire'),
+                            child: _buildStatCard(
+                              '2',
+                              'Préparation nécessaire',
+                            ),
                           ),
                         ],
                       ),
@@ -418,10 +470,7 @@ class _SupervisorDashboardScreenState extends State<SupervisorDashboardScreen> {
               Icon(icon, color: Colors.grey[600], size: 20),
               Container(
                 padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: color,
-                  shape: BoxShape.circle,
-                ),
+                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
                 child: Text(
                   count,
                   style: GoogleFonts.lato(
@@ -438,10 +487,7 @@ class _SupervisorDashboardScreenState extends State<SupervisorDashboardScreen> {
             alignment: Alignment.centerLeft,
             child: Text(
               label,
-              style: GoogleFonts.lato(
-                fontSize: 11,
-                color: Colors.grey[600],
-              ),
+              style: GoogleFonts.lato(fontSize: 11, color: Colors.grey[600]),
             ),
           ),
         ],
@@ -476,10 +522,7 @@ class _SupervisorDashboardScreenState extends State<SupervisorDashboardScreen> {
           ),
           Text(
             label,
-            style: GoogleFonts.lato(
-              fontSize: 11,
-              color: Colors.grey[600],
-            ),
+            style: GoogleFonts.lato(fontSize: 11, color: Colors.grey[600]),
           ),
         ],
       ),
@@ -518,7 +561,11 @@ class _SupervisorDashboardScreenState extends State<SupervisorDashboardScreen> {
                   color: AppTheme.lightBlue,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.arrow_forward, color: Colors.white, size: 12),
+                child: const Icon(
+                  Icons.arrow_forward,
+                  color: Colors.white,
+                  size: 12,
+                ),
               ),
             ],
           ),
@@ -538,10 +585,7 @@ class _SupervisorDashboardScreenState extends State<SupervisorDashboardScreen> {
             alignment: Alignment.centerLeft,
             child: Text(
               label,
-              style: GoogleFonts.lato(
-                fontSize: 11,
-                color: Colors.grey[600],
-              ),
+              style: GoogleFonts.lato(fontSize: 11, color: Colors.grey[600]),
             ),
           ),
           const SizedBox(height: 8),
@@ -551,7 +595,9 @@ class _SupervisorDashboardScreenState extends State<SupervisorDashboardScreen> {
               value: progress,
               minHeight: 4,
               backgroundColor: Colors.grey[200],
-              valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.lightBlue),
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                AppTheme.lightBlue,
+              ),
             ),
           ),
         ],
@@ -575,7 +621,11 @@ class _SupervisorDashboardScreenState extends State<SupervisorDashboardScreen> {
       ),
       child: Row(
         children: [
-          Icon(Icons.shopping_cart_outlined, color: AppTheme.lightBlue, size: 24),
+          Icon(
+            Icons.shopping_cart_outlined,
+            color: AppTheme.lightBlue,
+            size: 24,
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
