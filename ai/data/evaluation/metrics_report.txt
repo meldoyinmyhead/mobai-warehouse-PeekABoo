@@ -1,6 +1,0 @@
-             Segment    MAE   RMSE   WAPE   Bias  Count
-             OVERALL 302.00 730.35  84.5%  -9.1%   3446
-A_HIGH_FREQ_HIGH_VOL 392.58 872.45  83.0% -14.4%   2130
- B_HIGH_FREQ_LOW_VOL  55.68 127.60  90.4%  -9.8%    119
-       C_MEDIUM_FREQ 183.42 467.00  89.7%  11.8%    918
-          D_LOW_FREQ 105.70 229.53 105.4%  45.0%    279

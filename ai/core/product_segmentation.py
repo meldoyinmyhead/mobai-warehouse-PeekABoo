@@ -6,7 +6,6 @@ ABC-XYZ analysis for product classification
 import pandas as pd
 import numpy as np
 from typing import Dict, Tuple
-from typing import Optional, Dict
 
 from ..config.settings import settings
 from ..config.logging_config import get_logger
