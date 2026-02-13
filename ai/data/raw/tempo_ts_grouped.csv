@@ -1,4 +1,4 @@
-id_produit,cree_le,categorie,colisage fardeau,colisage palette,volume pcs (m3),Is_Gerbable,quantite
+id_produit,date,categorie,colisage fardeau,colisage palette,volume pcs (m3),Is_Gerbable,quantite_demande
 31851,2025-03-12 00:00:00,MODULE,80,1800,0.037,True,80
 31501,2025-03-12 00:00:00,DISPINA METALIC,120,2100,0.037,True,120
 31501,2025-03-12 00:00:00,DISPINA METALIC,120,2100,0.037,True,480
