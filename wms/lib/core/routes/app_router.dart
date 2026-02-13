@@ -1,0 +1,62 @@
+import 'package:flutter/material.dart';
+import 'package:wms/features/warehouse/data/models/task_model.dart';
+import 'package:wms/features/warehouse/presentation/pages/supervisor/supervisor_dashboard_screen.dart';
+import 'package:wms/features/warehouse/presentation/pages/employee/employee_dashboard_screen.dart';
+import 'package:wms/features/warehouse/presentation/pages/employee_main_screen.dart';
+import 'package:wms/features/warehouse/presentation/pages/employee_profile_screen.dart';
+import 'package:wms/features/warehouse/presentation/pages/employee_settings_screen.dart';
+import 'package:wms/features/warehouse/presentation/pages/employee_notifications_screen.dart';
+import 'package:wms/features/warehouse/presentation/pages/employee/task_detail_screen.dart';
+import 'package:wms/features/warehouse/presentation/pages/supervisor/ai_review_screen.dart';
+import 'package:wms/features/warehouse/presentation/pages/employee/log_task_screen.dart';
+
+import 'package:wms/features/auth/presentation/pages/landing_page.dart';
+import 'package:wms/features/auth/presentation/pages/login_screen.dart';
+
+class AppRouter {
+  static const String landing = '/';
+  static const String login = '/login';
+  static const String supervisorDashboard = '/supervisor/dashboard';
+  static const String aiReview = '/supervisor/ai_review';
+  static const String employeeDashboard = '/employee/dashboard';
+  static const String employeeMain = '/employee/main';
+  static const String employeeTaskDetail = '/employee/task_detail';
+  static const String employeeProfile = '/employee/profile';
+  static const String employeeSettings = '/employee/settings';
+  static const String employeeNotifications = '/employee/notifications';
+  static const String logTask = '/employee/log_task';
+  static const String adminDashboard = '/admin/dashboard'; // Placeholder
+
+  static Route<dynamic> generateRoute(RouteSettings settings) {
+    switch (settings.name) {
+      case landing:
+        return MaterialPageRoute(builder: (_) => const LandingPage());
+      case login:
+        return MaterialPageRoute(builder: (_) => const LoginScreen());
+      case supervisorDashboard:
+        return MaterialPageRoute(builder: (_) => const SupervisorDashboardScreen());
+      case aiReview:
+        return MaterialPageRoute(builder: (_) => const AiReviewScreen());
+      case employeeDashboard: // Legacy or direct link to dashboard only
+        return MaterialPageRoute(builder: (_) => const EmployeeDashboardScreen());
+      case employeeMain: // The new Main Wrapper
+        return MaterialPageRoute(builder: (_) => const EmployeeMainScreen());
+      case employeeProfile:
+        return MaterialPageRoute(builder: (_) => const EmployeeProfileScreen());
+      case employeeSettings:
+        return MaterialPageRoute(builder: (_) => const EmployeeSettingsScreen());
+      case employeeNotifications:
+        return MaterialPageRoute(builder: (_) => const EmployeeNotificationsScreen());
+      case employeeTaskDetail:
+        final task = settings.arguments as TaskModel;
+        return MaterialPageRoute(builder: (_) => EmployeeTaskDetailScreen(task: task));
+      case logTask:
+        return MaterialPageRoute(builder: (_) => const LogTaskScreen());
+      default:
+        return MaterialPageRoute(
+            builder: (_) => Scaffold(
+                  body: Center(child: Text('No route defined for ${settings.name}')),
+                ));
+    }
+  }
+}
