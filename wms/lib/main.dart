@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wms/core/di/dependency_injection.dart';
 import 'package:wms/core/routes/app_router.dart';
 import 'package:wms/core/theme/app_theme.dart';
-import 'package:wms/features/warehouse/data/repositories/task_repository.dart';
 import 'package:wms/features/warehouse/presentation/cubits/employee/employee_task_cubit.dart';
 import 'package:wms/features/warehouse/presentation/cubits/employee/employee_profile_cubit.dart';
 import 'package:wms/features/warehouse/presentation/cubits/employee/employee_settings_cubit.dart';
@@ -12,15 +11,23 @@ import 'package:wms/features/warehouse/presentation/cubits/supervisor/map_cubit.
 import 'package:wms/features/warehouse/presentation/cubits/supervisor/ai_review_cubit.dart';
 import 'package:wms/features/auth/presentation/cubits/auth_cubit.dart';
 import 'package:wms/features/auth/data/repositories/auth_repository.dart';
-import 'package:wms/features/warehouse/presentation/pages/admin/admin_dashboard_screen.dart';
 import 'package:wms/features/warehouse/presentation/pages/employee_main_screen.dart';
 import 'package:wms/features/warehouse/presentation/pages/supervisor/supervisor_dashboard_screen.dart';
 
 
-void main() {
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:wms/core/app_config.dart';
+
+void main() async {
   debugPrint("--- APP INITIALIZING ---");
   WidgetsFlutterBinding.ensureInitialized();
-  setupDependencyInjection();
+  
+  await Supabase.initialize(
+    url: AppConfig.supabaseUrl,
+    anonKey: AppConfig.supabaseAnonKey,
+  );
+  
+  await setupDependencyInjection();
   debugPrint("--- DEPENDENCY INJECTION READY ---");
   runApp(const MainApp());
 }
@@ -46,8 +53,7 @@ class MainApp extends StatelessWidget {
         theme: AppTheme.lightTheme,
         initialRoute: AppRouter.landing,
     //  home: EmployeeMainScreen(), 
-      //  home: SupervisorDashboardScreen(), 
-        home:AdminDashboardScreen(),
+        home: SupervisorDashboardScreen(), 
         onGenerateRoute: AppRouter.generateRoute,
       ),
     );

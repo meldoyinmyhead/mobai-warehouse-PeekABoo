@@ -1,14 +1,62 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wms/core/repositories/offline_repository.dart';
 import 'package:wms/features/warehouse/data/models/task_model.dart';
 import 'package:wms/features/warehouse/presentation/widgets/isometric_warehouse_painter.dart';
+import 'package:wms/features/warehouse/data/warehouse_layout_data.dart';
 import 'package:wms/core/theme/app_theme.dart';
 import 'package:wms/features/warehouse/presentation/widgets/task_views/flag.dart';
 
-class PickingTaskView extends StatelessWidget {
+class PickingTaskView extends StatefulWidget {
   final TaskModel task;
 
   const PickingTaskView({super.key, required this.task});
+
+  @override
+  State<PickingTaskView> createState() => _PickingTaskViewState();
+}
+
+class _PickingTaskViewState extends State<PickingTaskView> {
+  final TransformationController _transformationController = TransformationController();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fitToScreen();
+    });
+  }
+
+  void _fitToScreen() {
+    if (!mounted) return;
+    
+    // Picking usually happens on floor 0A or specific floors. 
+    // For now assuming 0A as per previous code.
+    final layout = WarehouseLayoutData.getAllFloors()['0A'] ?? [];
+    if (layout.isEmpty) return;
+    
+    int rows = layout.length;
+    int cols = layout[0].length;
+    
+    double contentWidth = (rows + cols) * 32.0; 
+    double screenWidth = MediaQuery.of(context).size.width;
+    
+    double scale = (screenWidth / contentWidth) * 0.9;
+    scale = scale.clamp(0.1, 1.5);
+
+    final Matrix4 matrix = Matrix4.identity()
+      ..translate(screenWidth / 2, 50.0) 
+      ..scale(scale);
+      
+    _transformationController.value = matrix;
+  }
+
+  @override
+  void dispose() {
+    _transformationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,13 +96,13 @@ class PickingTaskView extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        _buildDetailRow('Numéro de commande:', task.id),
+        _buildDetailRow('Numéro de commande:', widget.task.id),
         const Divider(height: 20),
-        _buildDetailRow('Type de commande:', task.details['order_type'] ?? 'Commande client'),
+        _buildDetailRow('Type de commande:', widget.task.details['order_type'] ?? 'Commande client'),
         const Divider(height: 20),
         _buildPriorityRow(),
         const Divider(height: 20),
-        _buildDetailRow('Emplacement de départ:', task.locationData['start_location'] ?? 'Zone d\'emballage'),
+        _buildDetailRow('Emplacement de départ:', widget.task.locationData['start_location'] ?? 'Zone d\'emballage'),
       ],
     );
   }
@@ -94,7 +142,7 @@ class PickingTaskView extends StatelessWidget {
 
   Widget _buildProductsToPickList() {
     return Column(
-      children: task.products.asMap().entries.map((entry) {
+      children: widget.task.products.asMap().entries.map((entry) {
         final index = entry.key + 1;
         final product = entry.value;
         return Container(
@@ -191,6 +239,23 @@ class PickingTaskView extends StatelessWidget {
   }
 
   Widget _buildExecutionCard() {
+    // Mock Route for Picking
+    // Visiting 3 Aisles
+    final List<Offset> mockRoute = [
+      const Offset(0, 0),
+      const Offset(0, 5),
+      const Offset(2, 5),
+      const Offset(2, 8),
+      const Offset(4, 8),
+      const Offset(4, 12),
+    ];
+
+    // Mock Entities: Employee + Chariot
+    final List<Map<String, dynamic>> entities = [
+       {'x': 0.0, 'y': 0.0, 'color': AppTheme.lightBlue, 'label': 'MOI', 'type': 'employee'},
+       {'x': 0.0, 'y': 1.0, 'color': AppTheme.yellow, 'label': '', 'type': 'chariot'},
+    ];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -204,7 +269,7 @@ class PickingTaskView extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         Container(
-          height: 200,
+          height: 300, // Increased height
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(12),
@@ -213,14 +278,24 @@ class PickingTaskView extends StatelessWidget {
           clipBehavior: Clip.antiAlias,
           child: Stack(
             children: [
-              CustomPaint(
-                size: const Size(double.infinity, 200),
-                painter: IsometricWarehousePainter(
-                  floor: '0A',
-                  entities: [],
-                  aiPath: [],
+               InteractiveViewer(
+                  transformationController: _transformationController,
+                  maxScale: 5.0,
+                  minScale: 0.1,
+                  boundaryMargin: const EdgeInsets.all(double.infinity),
+                  constrained: false,
+                  child: SizedBox(
+                    width: 1500,
+                    height: 1500,
+                    child: CustomPaint(
+                      painter: IsometricWarehousePainter(
+                        layout: WarehouseLayoutData.getAllFloors()['0A']!,
+                        entities: entities,
+                        aiPath: mockRoute,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
               Positioned(
                 top: 10,
                 left: 0,
@@ -239,7 +314,7 @@ class PickingTaskView extends StatelessWidget {
                       ],
                     ),
                     child: Text(
-                      'Route de préparation',
+                      'Route de préparation optimisée',
                       style: GoogleFonts.lato(
                         fontSize: 10,
                         color: Colors.grey[700],
@@ -261,7 +336,7 @@ class PickingTaskView extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        ...task.products.map((product) => Padding(
+        ...widget.task.products.map((product) => Padding(
               padding: const EdgeInsets.only(bottom: 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -312,7 +387,23 @@ class PickingTaskView extends StatelessWidget {
           width: double.infinity,
           height: 48,
           child: ElevatedButton(
-            onPressed: () {},
+            onPressed: () async {
+              // 1. Get Repository
+              final offlineRepo = RepositoryProvider.of<OfflineRepository>(context);
+              
+              // 2. Perform Action (Saving to local DB)
+              await offlineRepo.completePickingStop(widget.task.id, 1);
+              
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Tâche sauvegardée localement! (Queue Sync)', style: GoogleFonts.lato()),
+                    backgroundColor: AppTheme.green,
+                  ),
+                );
+                Navigator.pop(context);
+              }
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.lightBlue,
               foregroundColor: Colors.white,
@@ -337,7 +428,7 @@ class PickingTaskView extends StatelessWidget {
               Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => FlagIssueScreen(taskId: task.id),
+                builder: (context) => FlagIssueScreen(taskId: widget.task.id),
               ),
             );
             },

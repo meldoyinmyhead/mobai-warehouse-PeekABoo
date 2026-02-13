@@ -20,29 +20,30 @@ def seed():
     db.commit()
     db.refresh(depot_b7)
 
-    # 2. Seed Users
-    admin = models.Utilisateur(
-        nom_complet="Admin User",
-        email="admin@mobai.com",
-        role=models.Role.ADMIN,
-        password_hash="admin123", # Placeholder
-        actif=True
-    )
-    supervisor = models.Utilisateur(
-        nom_complet="Supervisor User",
-        email="supervisor@mobai.com",
-        role=models.Role.SUPERVISOR,
-        password_hash="supervisor123",
-        actif=True
-    )
-    employee = models.Utilisateur(
-        nom_complet="Employee One",
-        email="employee@mobai.com",
-        role=models.Role.EMPLOYEE,
-        password_hash="employee123",
-        actif=True
-    )
-    db.add_all([admin, supervisor, employee])
+    # 2. Seed Users (SKIPPED - Must be done via Supabase Auth)
+    # admin = models.Utilisateur(
+    #     nom_complet="Admin User",
+    #     email="admin@mobai.com",
+    #     role=models.Role.ADMIN,
+    #     password_hash="admin123", # Placeholder
+    #     actif=True
+    # )
+    # supervisor = models.Utilisateur(
+    #     nom_complet="Supervisor User",
+    #     email="supervisor@mobai.com",
+    #     role=models.Role.SUPERVISOR,
+    #     password_hash="supervisor123",
+    #     actif=True
+    # )
+    # employee = models.Utilisateur(
+    #     nom_complet="Employee One",
+    #     email="employee@mobai.com",
+    #     role=models.Role.EMPLOYEE,
+    #     password_hash="employee123",
+    #     actif=True
+    # )
+    # db.add_all([admin, supervisor, employee])
+    print("Skipped User seeding (Requires Supabase Auth ID)")
 
     # 3. Seed Products
     p1 = models.Produit(
