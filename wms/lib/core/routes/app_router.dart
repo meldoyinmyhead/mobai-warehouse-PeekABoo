@@ -9,6 +9,7 @@ import 'package:wms/features/warehouse/presentation/pages/employee_notifications
 import 'package:wms/features/warehouse/presentation/pages/employee/task_detail_screen.dart';
 import 'package:wms/features/warehouse/presentation/pages/supervisor/ai_review_screen.dart';
 import 'package:wms/features/warehouse/presentation/pages/employee/log_task_screen.dart';
+import 'package:wms/features/warehouse/presentation/pages/supervisor/supervisor_map_screen.dart';
 
 import 'package:wms/features/auth/presentation/pages/landing_page.dart';
 import 'package:wms/features/auth/presentation/pages/login_screen.dart';
@@ -17,6 +18,7 @@ class AppRouter {
   static const String landing = '/';
   static const String login = '/login';
   static const String supervisorDashboard = '/supervisor/dashboard';
+  static const String supervisorMap = '/supervisor/map';
   static const String aiReview = '/supervisor/ai_review';
   static const String employeeDashboard = '/employee/dashboard';
   static const String employeeMain = '/employee/main';
@@ -35,6 +37,8 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const LoginScreen());
       case supervisorDashboard:
         return MaterialPageRoute(builder: (_) => const SupervisorDashboardScreen());
+      case supervisorMap:
+        return MaterialPageRoute(builder: (_) => const SupervisorMapScreen());
       case aiReview:
         return MaterialPageRoute(builder: (_) => const AiReviewScreen());
       case employeeDashboard: // Legacy or direct link to dashboard only
