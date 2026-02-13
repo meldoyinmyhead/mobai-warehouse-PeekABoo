@@ -2,13 +2,60 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:wms/features/warehouse/data/models/task_model.dart';
 import 'package:wms/features/warehouse/presentation/widgets/isometric_warehouse_painter.dart';
+import 'package:wms/features/warehouse/data/warehouse_layout_data.dart';
 import 'package:wms/core/theme/app_theme.dart';
 import 'package:wms/features/warehouse/presentation/widgets/task_views/flag.dart';
 
-class StorageTaskView extends StatelessWidget {
+class StorageTaskView extends StatefulWidget {
   final TaskModel task;
 
   const StorageTaskView({super.key, required this.task});
+
+  @override
+  State<StorageTaskView> createState() => _StorageTaskViewState();
+}
+
+class _StorageTaskViewState extends State<StorageTaskView> {
+  final TransformationController _transformationController = TransformationController();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fitToScreen();
+    });
+  }
+
+  void _fitToScreen() {
+    if (!mounted) return;
+    
+    final floor = widget.task.locationData['floor'] ?? 'N2';
+    final layout = WarehouseLayoutData.getAllFloors()[floor] ?? [];
+    if (layout.isEmpty) return;
+    
+    int rows = layout.length;
+    int cols = layout[0].length;
+    
+    // Isometric width roughly
+    double contentWidth = (rows + cols) * 32.0; 
+    double screenWidth = MediaQuery.of(context).size.width;
+    
+    // Scale to fit width, but not too small
+    double scale = (screenWidth / contentWidth) * 0.9;
+    scale = scale.clamp(0.1, 1.5);
+
+    final Matrix4 matrix = Matrix4.identity()
+      ..translate(screenWidth / 2, 50.0) // Center horizontally
+      ..scale(scale);
+      
+    _transformationController.value = matrix;
+  }
+
+  @override
+  void dispose() {
+    _transformationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,21 +88,21 @@ class StorageTaskView extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        _buildDetailRow('Produit:', task.details['product'] ?? 'Appareils électroniques - Téléphones mobiles'),
+        _buildDetailRow('Produit:', widget.task.details['product'] ?? 'Appareils électroniques - Téléphones mobiles'),
         const Divider(height: 20),
-        _buildDetailRow('Quantité:', '${task.details['quantity'] ?? '50'} unités'),
+        _buildDetailRow('Quantité:', '${widget.task.details['quantity'] ?? '50'} unités'),
         const Divider(height: 20),
-        _buildDetailRow('Poids:', task.details['weight'] ?? '25kg'),
+        _buildDetailRow('Poids:', widget.task.details['weight'] ?? '25kg'),
         const Divider(height: 20),
-        _buildDetailRow('Dimensions:', task.details['dimensions'] ?? '40x30x25cm'),
+        _buildDetailRow('Dimensions:', widget.task.details['dimensions'] ?? '40x30x25cm'),
       ],
     );
   }
 
   Widget _buildLocationAssignmentCard() {
-    final zone = task.locationData['zone'] ?? 'B7';
-    final floor = task.locationData['floor'] ?? 'N2';
-    final slot = task.locationData['slot'] ?? 'C5';
+    final zone = widget.task.locationData['zone'] ?? 'B7';
+    final floor = widget.task.locationData['floor'] ?? 'N2';
+    final slot = widget.task.locationData['slot'] ?? 'C5';
     final locationCode = '$zone-$floor-$slot';
 
     return Column(
@@ -127,6 +174,21 @@ class StorageTaskView extends StatelessWidget {
   }
 
   Widget _buildNavigationMapCard() {
+    final floor = widget.task.locationData['floor'] ?? 'N2';
+    
+    // Mock Path for Storage (Receiving -> Slot)
+    final List<Offset> mockPath = [
+       const Offset(0, 0), // Entry
+       const Offset(0, 5),
+       const Offset(5, 5),
+       const Offset(5, 8),
+    ];
+
+    // Mock Employee at start of path
+    final List<Map<String, dynamic>> entities = [
+      {'x': 0.0, 'y': 0.0, 'color': AppTheme.lightBlue, 'label': 'MOI', 'type': 'employee'},
+    ];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -142,25 +204,23 @@ class StorageTaskView extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: ['0A', 'N1', 'N2', 'N3', 'N4'].map((f) {
-            final isSelected = f == (task.locationData['floor'] ?? 'N2');
+            final isSelected = f == floor;
             return Expanded(
               child: Padding(
                 padding: const EdgeInsets.only(right: 4),
-                child: GestureDetector(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    decoration: BoxDecoration(
-                      color: isSelected ? AppTheme.lightBlue : Colors.grey[100],
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Center(
-                      child: Text(
-                        f,
-                        style: GoogleFonts.lato(
-                          color: isSelected ? Colors.white : Colors.black87,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 13,
-                        ),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  decoration: BoxDecoration(
+                    color: isSelected ? AppTheme.lightBlue : Colors.grey[100],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Center(
+                    child: Text(
+                      f,
+                      style: GoogleFonts.lato(
+                        color: isSelected ? Colors.white : Colors.black87,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
                       ),
                     ),
                   ),
@@ -171,7 +231,7 @@ class StorageTaskView extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Container(
-          height: 200,
+          height: 300, // Increased height for map
           width: double.infinity,
           decoration: BoxDecoration(
             color: Colors.white,
@@ -182,23 +242,23 @@ class StorageTaskView extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             child: Stack(
               children: [
-                // Warehouse plan image
-                Image.asset(
-                  'assets/images/plan.png',
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                  height: double.infinity,
-                  errorBuilder: (context, error, stackTrace) {
-                    // Fallback to CustomPaint if image not found
-                    return CustomPaint(
-                      size: const Size(double.infinity, 200),
+                InteractiveViewer(
+                  transformationController: _transformationController,
+                  maxScale: 5.0,
+                  minScale: 0.1,
+                  boundaryMargin: const EdgeInsets.all(double.infinity),
+                  constrained: false,
+                  child: SizedBox(
+                    width: 1500,
+                    height: 1500,
+                    child: CustomPaint(
                       painter: IsometricWarehousePainter(
-                        floor: task.locationData['floor'] ?? 'N2',
-                        entities: [],
-                        aiPath: [],
+                        layout: WarehouseLayoutData.getAllFloors()[floor] ?? [],
+                        entities: entities,
+                        aiPath: mockPath,
                       ),
-                    );
-                  },
+                    ),
+                  ),
                 ),
                 // Overlay text
                 Positioned(
@@ -219,7 +279,7 @@ class StorageTaskView extends StatelessWidget {
                         ],
                       ),
                       child: Text(
-                        'Cliquez sur le plan pour agrandir et obtenir l\'itinéraire',
+                        'Carte interactive: Zoomez pour voir les détails',
                         style: GoogleFonts.lato(
                           fontSize: 10,
                           color: Colors.grey[700],
@@ -260,7 +320,7 @@ class StorageTaskView extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Emplacement actuel: ${task.details['current_location'] ?? 'Zone de réception'}',
+                  'Emplacement actuel: ${widget.task.details['current_location'] ?? 'Zone de réception'}',
                   style: GoogleFonts.lato(
                     fontWeight: FontWeight.w600,
                     fontSize: 13,
@@ -269,7 +329,7 @@ class StorageTaskView extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Suivez le chemin en surbrillance pour atteindre ${task.locationData['zone'] ?? 'B7'}-${task.locationData['floor'] ?? 'N2'}-${task.locationData['slot'] ?? 'C5'}',
+                  'Suivez le chemin en surbrillance pour atteindre ${widget.task.locationData['zone'] ?? 'B7'}-${widget.task.locationData['floor'] ?? 'N2'}-${widget.task.locationData['slot'] ?? 'C5'}',
                   style: GoogleFonts.lato(
                     fontSize: 11,
                     color: Colors.grey[700],
@@ -315,7 +375,7 @@ class StorageTaskView extends StatelessWidget {
               Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => FlagIssueScreen(taskId: task.id),
+                builder: (context) => FlagIssueScreen(taskId: widget.task.id),
               ),
             );
             },
