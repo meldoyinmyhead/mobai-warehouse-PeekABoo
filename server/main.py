@@ -148,6 +148,24 @@ def delete_user(user_id: str, db: Session = Depends(get_db), current_user: model
     db.commit()
     return {"status": "success", "message": "User deleted"}
 
+@app.get("/employees", response_model=List[schemas.Utilisateur])
+def get_employees(db: Session = Depends(get_db), current_user: models.Utilisateur = Depends(require_role(["SUPERVISOR", "ADMIN"]))):
+    return db.query(models.Utilisateur).filter(models.Utilisateur.role == models.Role.EMPLOYEE).all()
+
+@app.get("/chariots", response_model=List[schemas.Chariot])
+def get_chariots(db: Session = Depends(get_db), current_user: models.Utilisateur = Depends(require_role(["SUPERVISOR", "ADMIN"]))):
+    chariots = db.query(models.Chariot).all()
+    # Dynamic status update: if chariot is linked to an active order, it's IN_USE
+    active_chariot_ids = [order.id_chariot for order in db.query(models.PickingOrder).filter(models.PickingOrder.statut.in_([models.OrderStatus.PENDING, models.OrderStatus.IN_PROGRESS, models.OrderStatus.APPROVED])).all() if order.id_chariot]
+    
+    for chariot in chariots:
+        if chariot.id in active_chariot_ids:
+            chariot.statut = models.ChariotStatus.IN_USE
+        else:
+            chariot.statut = models.ChariotStatus.AVAILABLE # "Standby"
+            
+    return chariots
+
 # 2. Warehouse Infrastructure
 @app.get("/entrepots/", response_model=List[schemas.Entrepot])
 def list_entrepots(db: Session = Depends(get_db)):
@@ -654,14 +672,22 @@ def get_employee_tasks(user_id: str, db: Session = Depends(get_db)):
     return result
 
 @app.post("/employee/tasks/{task_id}/complete")
-@app.post("/employee/tasks/{task_id}/complete")
 def complete_employee_task(task_id: str, db: Session = Depends(get_db), current_user: models.Utilisateur = Depends(require_role(["EMPLOYEE", "SUPERVISOR", "ADMIN"]))):
     import uuid
     from datetime import datetime
+    import logging
     
+    logger = logging.getLogger("uvicorn.error")
+    
+    try:
+        task_uuid = uuid.UUID(task_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid task ID format")
+
     # 1. Update Picking Order Status
-    order = db.query(models.PickingOrder).filter(models.PickingOrder.id == uuid.UUID(task_id)).first()
+    order = db.query(models.PickingOrder).filter(models.PickingOrder.id == task_uuid).first()
     if not order:
+        logger.error(f"Task {task_id} not found")
         raise HTTPException(status_code=404, detail="Task not found")
     
     if order.statut == models.OrderStatus.COMPLETED:
@@ -669,15 +695,17 @@ def complete_employee_task(task_id: str, db: Session = Depends(get_db), current_
 
     # 2. Execute Stock Movements for each stop
     stops = db.query(models.PickingOrderStop).filter(models.PickingOrderStop.id_picking_order == order.id).all()
+    logger.info(f"Completing task {task_id} with {len(stops)} stops")
     
     for stop in stops:
         # Check source stock
         source_stock = db.query(models.StockParEmplacement).filter(
             models.StockParEmplacement.id_emplacement == stop.id_emplacement_source,
             models.StockParEmplacement.id_produit == stop.id_produit
-        ).with_for_update().first() # Lock row
+        ).first() 
         
         if not source_stock or source_stock.quantite < stop.quantite:
+             logger.error(f"Insufficient stock for product {stop.id_produit} at {stop.id_emplacement_source}")
              raise HTTPException(status_code=400, detail=f"Insufficient stock for product {stop.id_produit} at source")
 
         # Decrement source
@@ -685,14 +713,12 @@ def complete_employee_task(task_id: str, db: Session = Depends(get_db), current_
         source_stock.updated_at = datetime.now()
         source_stock.version += 1
         
-        # Increment destination (if internal transfer) or just remove (if outbound picking)
-        # Assuming Picking = Outbound for now, OR valid destination. 
-        # If destination is same as source (logic error?), skip.
+        # Increment destination
         if stop.id_emplacement_destination and stop.id_emplacement_destination != stop.id_emplacement_source:
              dest_stock = db.query(models.StockParEmplacement).filter(
                 models.StockParEmplacement.id_emplacement == stop.id_emplacement_destination,
                 models.StockParEmplacement.id_produit == stop.id_produit
-             ).with_for_update().first()
+             ).first()
              
              if dest_stock:
                  dest_stock.quantite += stop.quantite
@@ -705,7 +731,8 @@ def complete_employee_task(task_id: str, db: Session = Depends(get_db), current_
                      id_produit=stop.id_produit,
                      id_emplacement=stop.id_emplacement_destination,
                      quantite=stop.quantite,
-                     version=1
+                     version=1,
+                     updated_at=datetime.now()
                  )
                  db.add(new_stock)
         
@@ -715,12 +742,12 @@ def complete_employee_task(task_id: str, db: Session = Depends(get_db), current_
 
     order.statut = models.OrderStatus.COMPLETED
     
-    # 3. Log Action
+    # 3. Log Action (Using a dummy ID for test if auth disabled)
     audit = models.AuditLog(
-        id_utilisateur=current_user.id_utilisateur, # Use authenticated user
+        id_utilisateur=order.assigned_to, # Use the assigned user's ID
         action="TASK_COMPLETED",
         entity_type="PICKING_ORDER",
-        entity_id=str(order.id),
+        entity_id=order.id,
         payload={"reference": order.reference},
         created_at=datetime.now()
     )
@@ -728,8 +755,10 @@ def complete_employee_task(task_id: str, db: Session = Depends(get_db), current_
     
     try:
         db.commit()
+        logger.info(f"Task {task_id} completed successfully")
     except Exception as e:
         db.rollback()
+        logger.exception("Transaction failed during task completion")
         raise HTTPException(status_code=500, detail=f"Transaction failed: {str(e)}")
         
     return {"status": "success", "message": "Task completed and stock updated"}

@@ -1,0 +1,52 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+
+\title{Detailed Architecture and State Management Report}
+\author{MobAI Engineering Team}
+\date{February 2026}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+This document provides a comprehensive overview of the technical architecture and state management strategy implemented in the MobAI Warehouse Management System.
+
+\section{Architecture and State Management}
+
+\subsection{Architectural Overview}
+MobAI Warehouse implements a multi-layered \textbf{Clean Architecture} pattern to ensure scalability, testability, and a clear separation of concerns. This design is specifically chosen to handle the complex requirements of offline synchronization and real-time AI integration.
+
+\begin{itemize}
+    \item \textbf{Presentation Layer:} Implemented using the \textbf{BLoC (Business Logic Component)} pattern with specialized \textbf{Cubits}. This layer remains data-agnostic, handling only UI state and user interactions.
+    \item \textbf{Domain Layer:} Contains the core business logic, entities, and repository interfaces. It acts as the "source of truth" for the application's rules, independent of external data sources.
+    \item \textbf{Data Layer:} Implements the \textbf{Repository Pattern}. It manages the orchestration between the \textbf{FastAPI Backend}, \textbf{Supabase (PostgreSQL)}, and the local \textbf{Drift (SQLite)} database for offline-first capabilities.
+\end{itemize}
+
+\subsection{State Management approach}
+We utilized \textbf{Cubit (from the BLoC package)} for its lightweight nature and efficiency in handling finite states (Loading, Loaded, Error).
+\begin{itemize}
+    \item \textbf{Reactivity:} The UI reacts to state streams emitted by Cubits, ensuring a unidirectional data flow.
+    \item \textbf{Dependency Injection:} Managed via \textbf{GetIt}, allowing for clean decoupling and easy swapping of repository implementations (e.g., Mock vs. Live).
+\end{itemize}
+
+\subsection{Data Flow: Mobile, Backend, and AI Services}
+The data flow is designed as an \textbf{Offline-First Synchronization Loop}:
+\begin{enumerate}
+    \item \textbf{Local Persistence:} Every user action (Task Completion, Audit Logs) is first recorded in the local \textbf{Drift/SQLite} database.
+    \item \textbf{AI Orchestration:} The \textbf{Backend (FastAPI)} serves as the bridge. It triggers \textbf{AI Route Optimization} and \textbf{Demand Forecasting} services, then pushes optimized "Preparation Orders" to the database.
+    \item \textbf{Synchronization Service:} A background process monitors connectivity. When online, it pushes pending local changes to \textbf{Supabase} and pulls the latest AI-optimized tasks to the mobile device.
+\end{enumerate}
+
+\begin{figure}[h]
+    \centering
+    % Placeholder for a Mermaid/Diagram reference
+    % \includegraphics[width=0.8\textwidth]{architecture_diagram.png}
+    \caption{Data Flow Architecture: Unidirectional sync and AI prescription.}
+\end{figure}
+
+\end{document}
