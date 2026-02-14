@@ -19,6 +19,10 @@ from ..schemas.storage_assignment_request import (
     AssignmentResult,
     AssignmentSummary,
     JourneyDetail,
+    PathRequest,
+    PathResponse,
+    ProductPathDetail,
+    PathSummary,
 )
 from ...config.logging_config import get_logger
 
@@ -222,4 +226,109 @@ async def assign_storage(request: StorageAssignmentRequest):
 
     except Exception as e:
         logger.error(f"Error in assign-storage: {traceback.format_exc()}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/compute-storage-paths", response_model=PathResponse)
+async def compute_storage_paths(request: PathRequest):
+    """
+    Compute detailed storage paths for a list of products.
+    
+    **Input** — list of `{product_id, quantity}` items.
+    
+    **Output** — detailed path information for each product unit including:
+    - Source (receiving zone) and target (assigned slot) locations
+    - Complete path with coordinates
+    - Distance breakdown (elevator + walking)
+    - Floor and position information
+    
+    Products are assigned to optimal storage slots based on ABC classification,
+    demand frequency, and spatial optimization using real warehouse capacity.
+    """
+    logger.info(f"POST /compute-storage-paths — {len(request.items)} items")
+    
+    try:
+        opt = _get_optimizer()
+        
+        # Reset optimizer to fresh state with real capacity
+        opt.reset()
+        
+        paths: list[ProductPathDetail] = []
+        
+        # Process each product and quantity
+        for item in request.items:
+            for unit in range(1, item.quantity + 1):
+                feat = opt.product_features.get(item.product_id)
+                raw = opt.find_best_slot(item.product_id, update_capacity=True)
+                
+                if raw is None:
+                    # Assignment failed
+                    reason = (
+                        "Product not found" if item.product_id not in opt.product_features
+                        else "No capacity available"
+                    )
+                    paths.append(ProductPathDetail(
+                        product_id=item.product_id,
+                        unit=unit,
+                        total_units=item.quantity,
+                        category=str(feat.get("categorie")) if feat else None,
+                        abc_class=str(feat.get("abc_class")) if feat else None,
+                        error=reason,
+                    ))
+                else:
+                    # Successful assignment
+                    floor = raw["floor"]
+                    pos = raw["position"]
+                    path_tuples = raw.get("path") or []
+                    path_lists = [[int(r), int(c)] for r, c in path_tuples]
+                    
+                    walk_dist = int(raw.get("walk_distance", 0))
+                    elev_dist = int(raw.get("elevator_cost", 0))
+                    total_dist = int(raw.get("total_distance", 0))
+                    
+                    journey_summary = (
+                        f"Ground(0) ─elev({elev_dist}m)─▶ "
+                        f"Floor {floor} ─walk({walk_dist}m)─▶ "
+                        f"{raw.get('emplacement_code', '?')}  │ Total: {total_dist}m"
+                    )
+                    
+                    paths.append(ProductPathDetail(
+                        product_id=item.product_id,
+                        unit=unit,
+                        total_units=item.quantity,
+                        category=str(feat.get("categorie")) if feat else None,
+                        abc_class=raw.get("abc_class"),
+                        target_slot=raw.get("emplacement_code"),
+                        target_floor=floor,
+                        target_position={"row": int(pos[0]), "col": int(pos[1])},
+                        elevator_distance=elev_dist,
+                        walk_distance=walk_dist,
+                        total_distance=total_dist,
+                        path=path_lists if path_lists else None,
+                        placement_cost=raw.get("cost"),
+                        journey_summary=journey_summary,
+                    ))
+        
+        # Compute summary statistics
+        ok = [p for p in paths if p.error is None]
+        from collections import Counter
+        floor_dist = dict(Counter(p.target_floor for p in ok))
+        unique_slots = set(p.target_slot for p in ok)
+        
+        summary = PathSummary(
+            total_products=len(request.items),
+            total_units=sum(it.quantity for it in request.items),
+            successfully_assigned=len(ok),
+            failed=len(paths) - len(ok),
+            total_distance=sum(p.total_distance or 0 for p in ok),
+            total_elevator_distance=sum(p.elevator_distance or 0 for p in ok),
+            total_walk_distance=sum(p.walk_distance or 0 for p in ok),
+            unique_slots_used=len(unique_slots),
+            floor_distribution=floor_dist,
+        )
+        
+        return PathResponse(success=True, summary=summary, paths=paths)
+        
+    except Exception as e:
+        logger.error(f"Error in compute-storage-paths: {traceback.format_exc()}")
         raise HTTPException(status_code=500, detail=str(e))
