@@ -53,8 +53,6 @@ class MainApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
         initialRoute: AppRouter.landing,
-        home: EmployeeMainScreen(), 
-        //home: AdminDashboardScreen(), 
         onGenerateRoute: AppRouter.generateRoute,
       ),
     );

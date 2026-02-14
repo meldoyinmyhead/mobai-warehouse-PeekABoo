@@ -5,6 +5,7 @@ import 'package:wms/core/routes/app_router.dart';
 import 'package:wms/features/auth/presentation/cubits/auth_cubit.dart';
 import 'package:wms/features/auth/data/user_model.dart';
 import 'package:wms/core/theme/app_theme.dart';
+import 'package:wms/core/utils/snackbar_utils.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -31,9 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final password = _passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Veuillez entrer l\'email et le mot de passe')),
-      );
+      SnackbarUtils.showError(context, 'Veuillez entrer l\'email et le mot de passe');
       return;
     }
 
@@ -58,9 +57,7 @@ class _LoginScreenState extends State<LoginScreen> {
               break;
           }
         } else if (state is Unauthenticated && state.message != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message!)),
-          );
+          SnackbarUtils.showError(context, state.message!);
         }
       },
       child: Scaffold(
@@ -68,10 +65,8 @@ class _LoginScreenState extends State<LoginScreen> {
         appBar: AppBar(
           backgroundColor: AppTheme.lightBlue, 
           elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () => Navigator.pop(context),
-          ),
+          leading: null,
+          automaticallyImplyLeading: false,
           title: Row( // Using existing logo logic
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,

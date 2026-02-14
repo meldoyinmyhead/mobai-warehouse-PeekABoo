@@ -38,6 +38,7 @@ class AiReviewRepository {
 
     // Combine and format for the UI
     List<Map<String, dynamic>> orders = [];
+    final random = DateTime.now().millisecondsSinceEpoch; // Simple seed
 
     for (var p in prepResponse) {
       orders.add({
@@ -48,11 +49,23 @@ class AiReviewRepository {
                     p['preparation_order_lines'][0]['produits'] != null) 
             ? '${p['preparation_order_lines'][0]['produits']['sku'] ?? 'SKU?'} - ${p['preparation_order_lines'][0]['produits']['nom_produit'] ?? 'Produit?'}' 
             : 'Multi-produits',
+        'sku': (p['preparation_order_lines']?.isNotEmpty == true && 
+                    p['preparation_order_lines'][0]['produits'] != null) 
+            ? p['preparation_order_lines'][0]['produits']['sku'] ?? 'SKU-000'
+            : 'SKU-MIXED',
+        'product_name': (p['preparation_order_lines']?.isNotEmpty == true && 
+                    p['preparation_order_lines'][0]['produits'] != null) 
+            ? p['preparation_order_lines'][0]['produits']['nom_produit'] ?? 'Produit Inconnu'
+            : 'Multi-produits',
         'ai_quantity': p['preparation_order_lines']?.isNotEmpty == true
             ? (p['preparation_order_lines'][0]['quantite_ai'] ?? 0)
             : 0,
         'status': p['statut'],
         'created_at': p['created_at'],
+        // Mock Data for UI Design
+        'confidence': 85 + (p['reference'].hashCode % 14), // 85-98%
+        'forecast_date': DateTime.now().add(const Duration(days: 1)),
+        'reasoning': "Historical sales data indicates a 20% spike in demand for this SKU next week due to seasonal trends.",
       });
     }
 
@@ -65,9 +78,21 @@ class AiReviewRepository {
                     p['picking_order_stops'][0]['produits'] != null)
              ? p['picking_order_stops'][0]['produits']['nom_produit'] ?? 'Produit Inconnu'
              : 'Ordre de Picking',
+        'sku': (p['picking_order_stops']?.isNotEmpty == true && 
+                    p['picking_order_stops'][0]['produits'] != null)
+             ? p['picking_order_stops'][0]['produits']['sku'] ?? 'SKU-000'
+             : 'SKU-ROUTE',
+         'product_name': (p['picking_order_stops']?.isNotEmpty == true && 
+                    p['picking_order_stops'][0]['produits'] != null)
+             ? p['picking_order_stops'][0]['produits']['nom_produit'] ?? 'Produit Inconnu'
+             : 'Optimisation de Route',
         'route_distance': p['route_distance_m'],
         'status': p['statut'],
         'created_at': p['created_at'],
+        // Mock Data
+        'confidence': 88 + (p['reference'].hashCode % 11), // 88-98%
+        'forecast_date': DateTime.now(),
+        'reasoning': "Route optimization reduced travel distance by 15% compared to standard FIFO allocation.",
       });
     }
 

@@ -6,6 +6,7 @@ import 'package:wms/features/supervisor/presentation/cubits/ai_review_cubit.dart
 import 'package:wms/features/supervisor/data/models/ai_override_model.dart';
 import 'package:wms/core/theme/app_theme.dart';
 
+
 class AiReviewScreen extends StatefulWidget {
   const AiReviewScreen({super.key});
 
@@ -87,9 +88,9 @@ class _AiReviewScreenState extends State<AiReviewScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'File de validation IA',
+                      'File de Validation IA',
                       style: GoogleFonts.lato(
-                        fontSize: 18,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: Colors.black87,
                       ),
@@ -109,7 +110,7 @@ class _AiReviewScreenState extends State<AiReviewScreen> {
                           const Icon(Icons.check, size: 16, color: Colors.white),
                           const SizedBox(width: 4),
                           Text(
-                            'Approuver tout',
+                            'Tout Approuver',
                             style: GoogleFonts.lato(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white),
                           ),
                         ],
@@ -122,11 +123,11 @@ class _AiReviewScreenState extends State<AiReviewScreen> {
                 Row(
                   children: [
                     Expanded(
-                      child: _buildTabButton('Commandes préparation', 'Preparation Orders'),
+                      child: _buildTabButton('Préparation', 'Preparation Orders'),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: _buildTabButton('Affectations stockage', 'Storage Assignments'),
+                      child: _buildTabButton('Stockage', 'Storage Assignments'),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
@@ -158,7 +159,7 @@ class _AiReviewScreenState extends State<AiReviewScreen> {
                           Icon(Icons.check_circle_outline, size: 64, color: AppTheme.green),
                           const SizedBox(height: 16),
                           Text(
-                            'Toutes les suggestions IA examinées!',
+                            'Toutes les suggestions IA ont été revues !',
                             style: GoogleFonts.lato(fontSize: 16, color: Colors.grey[600]),
                           ),
                         ],
@@ -201,7 +202,7 @@ class _AiReviewScreenState extends State<AiReviewScreen> {
         padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
           color: isSelected ? AppTheme.lightBlue : Colors.white,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(color: isSelected ? AppTheme.lightBlue : Colors.grey.shade300),
         ),
         child: Center(
@@ -220,76 +221,207 @@ class _AiReviewScreenState extends State<AiReviewScreen> {
   }
 
   Widget _buildOrderCard(BuildContext context, Map<String, dynamic> order) {
-    bool isPrep = order['type'] == AiOrderType.preparation;
+    // Determine colors/texts based on mock design requirements
+    final confidence = order['confidence'] ?? 95;
+    final forecastDate = order['forecast_date'] as DateTime? ?? DateTime.now();
+    final formattedDate = "${forecastDate.day}/${forecastDate.month}/${forecastDate.year}";
+    final reasoning = order['reasoning'] ?? "Logique d'optimisation IA appliquée.";
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          )
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: AppTheme.lightBlue,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.check_circle, color: Colors.white, size: 12),
-                      const SizedBox(width: 4),
-                      Text('OPTIMISATION IA', style: GoogleFonts.lato(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
-                    ],
-                  ),
-                ),
-                const Spacer(),
-                Text(order['reference'] ?? order['id'], style: GoogleFonts.lato(color: Colors.grey[600], fontSize: 11)),
-              ],
+            // Left "Teal" Border
+            Container(
+              width: 6,
+              color: const Color(0xFF006D84),
             ),
-            const SizedBox(height: 12),
-            Text(order['product'], style: GoogleFonts.lato(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87)),
-            const SizedBox(height: 8),
-            if (isPrep) ...[
-              _buildDataRow('Réf:', order['reference'] ?? order['id'], Colors.grey[700]!),
-              _buildDataRow('Quantité IA:', '${order['ai_quantity']} unités', AppTheme.lightBlue),
-            ] else ...[
-              _buildDataRow('Distance Route:', '${order['route_distance']?.toStringAsFixed(1) ?? 'N/A'} m', AppTheme.lightBlue),
-            ],
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => _showOverrideDialog(context, order),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppTheme.red,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      side: BorderSide(color: AppTheme.red),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Header Row
+                    Row(
+                      children: [
+                        const Icon(Icons.check_circle_outline, color: Colors.black54),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: AppTheme.lightBlue,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.smart_toy, color: Colors.white, size: 14),
+                              const SizedBox(width: 4),
+                              Text(
+                                'GÉNÉRÉ PAR IA',
+                                style: GoogleFonts.lato(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Spacer(),
+                        Text(
+                          order['reference'] ?? 'REF-???', 
+                          style: GoogleFonts.lato(fontWeight: FontWeight.bold, color: Colors.black87)
+                        ),
+                      ],
                     ),
-                    child: Text('Remplacer', style: GoogleFonts.lato(fontSize: 13, fontWeight: FontWeight.w600)),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () => context.read<AiReviewCubit>().approveOrder(order['id'], order['type']),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.lightBlue,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      elevation: 0,
+                    const SizedBox(height: 16),
+                    
+                    // Main Content Row (Info + Confidence)
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                order['product_name'] ?? 'Produit Inconnu',
+                                style: GoogleFonts.lato(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'SKU: ${order['sku']}',
+                                style: GoogleFonts.lato(fontSize: 14, color: Colors.grey[600]),
+                              ),
+                              Text(
+                                'Quantité: ${order['ai_quantity']} unités',
+                                style: GoogleFonts.lato(fontSize: 14, color: Colors.grey[600]),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Date Prévue: $formattedDate (1 jour d\'avance)',
+                                style: GoogleFonts.lato(fontSize: 13, color: Colors.blue[400]),
+                              ),
+                            ],
+                          ),
+                        ),
+                        // Confidence Indicator
+                        Column(
+                          children: [
+                            Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                SizedBox(
+                                  height: 60,
+                                  width: 60,
+                                  child: CircularProgressIndicator(
+                                    value: confidence / 100,
+                                    strokeWidth: 5,
+                                    backgroundColor: Colors.grey[200],
+                                    valueColor: AlwaysStoppedAnimation<Color>(AppTheme.darkGrey),
+                                  ),
+                                ),
+                                 Text(
+                                  '$confidence%',
+                                  style: GoogleFonts.lato(fontWeight: FontWeight.bold, fontSize: 14),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Text('Confiance', style: GoogleFonts.lato(fontSize: 10, color: Colors.grey))
+                          ],
+                        ),
+                      ],
                     ),
-                    child: Text('Approuver', style: GoogleFonts.lato(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white)),
-                  ),
+
+                    const SizedBox(height: 12),
+                    
+                    // Reasoning Dropdown (Custom implementation for simplicity)
+                    ExpansionTile(
+                      title: Text(
+                        'Voir Raisonnement', 
+                        style: GoogleFonts.lato(fontSize: 14, color: AppTheme.lightBlue, fontWeight: FontWeight.w600)
+                      ),
+                      tilePadding: EdgeInsets.zero,
+                      childrenPadding: EdgeInsets.zero,
+                      iconColor: AppTheme.lightBlue,
+                      collapsedIconColor: AppTheme.lightBlue,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: Text(
+                            reasoning,
+                            style: GoogleFonts.lato(fontSize: 13, color: Colors.black54, fontStyle: FontStyle.italic),
+                          ),
+                        ),
+                      ],
+                    ),
+                    
+                    const SizedBox(height: 16),
+                    
+                    // Action Buttons
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () => context.read<AiReviewCubit>().approveOrder(order['id'], order['type']),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.lightBlue,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              elevation: 0,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.check, color: Colors.white, size: 18),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Approuver', 
+                                  style: GoogleFonts.lato(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => _showOverrideDialog(context, order),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              side: const BorderSide(color: AppTheme.yellow, width: 2),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.close, color: AppTheme.darkGrey, size: 18),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Remplacer', 
+                                  style: GoogleFonts.lato(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.darkBlue)
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ],
         ),
@@ -297,66 +429,154 @@ class _AiReviewScreenState extends State<AiReviewScreen> {
     );
   }
 
-  Widget _buildDataRow(String label, String value, Color valueColor) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 3),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: GoogleFonts.lato(color: Colors.grey[600], fontSize: 12)),
-          Text(value, style: GoogleFonts.lato(color: valueColor, fontWeight: FontWeight.w600, fontSize: 12)),
-        ],
-      ),
-    );
-  }
-
   void _showOverrideDialog(BuildContext context, Map<String, dynamic> order) {
     final TextEditingController justificationController = TextEditingController();
-    final TextEditingController quantityController = TextEditingController(text: order['ai_quantity']?.toString() ?? '');
+    String? selectedReason;
 
     showDialog(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Remplacer recommandation', style: GoogleFonts.lato(fontWeight: FontWeight.bold, fontSize: 18)),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (order['type'] == AiOrderType.preparation)
-                TextField(
-                  controller: quantityController,
-                  decoration: InputDecoration(labelText: 'Nouvelle Quantité', border: OutlineInputBorder()),
-                  keyboardType: TextInputType.number,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setState) {
+          return Dialog(
+            backgroundColor: const Color(0xFFFEFEFE),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            child: SingleChildScrollView(
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Remplacer Recommandation IA',
+                          style: GoogleFonts.lato(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => Navigator.pop(dialogContext),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    
+                    // AI Suggestion Box
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Suggestion IA :', style: GoogleFonts.lato(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey[600])),
+                          const SizedBox(height: 4),
+                          Text(
+                            order['reference'] ?? 'Commande Inconnue',
+                            style: GoogleFonts.lato(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
+                          ),
+                        ],
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 24),
+                    
+                    Text('Raison du Remplacement', style: GoogleFonts.lato(fontWeight: FontWeight.bold, fontSize: 14)),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<String>(
+                      decoration: InputDecoration(
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey.shade300)),
+                        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey.shade300)),
+                        hintText: 'Sélectionnez la raison',
+                      ),
+                      value: selectedReason,
+                      items: [
+                        'Emplacement occupé',
+                        'Équipement indisponible',
+                        'Problème de sécurité',
+                        'Priorité opérationnelle',
+                        'Autre'
+                      ].map((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value, style: GoogleFonts.lato(fontSize: 14)),
+                        );
+                      }).toList(),
+                      onChanged: (val) {
+                        setState(() => selectedReason = val);
+                      },
+                    ),
+                    
+                    const SizedBox(height: 16),
+                    
+                    Text('Justification *', style: GoogleFonts.lato(fontWeight: FontWeight.bold, fontSize: 14)),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: justificationController,
+                      maxLines: 4,
+                      decoration: InputDecoration(
+                        hintText: 'Expliquez pourquoi vous remplacez cette suggestion... (min 20 caractères)',
+                        hintStyle: TextStyle(color: Colors.grey[400], fontSize: 13),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey.shade300)),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text('20 caractères minimum', style: GoogleFonts.lato(fontSize: 11, color: Colors.grey[600])),
+                    
+                    const SizedBox(height: 24),
+                    
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                           if (selectedReason == null) return;
+                           // Add validation logic here
+                          context.read<AiReviewCubit>().overrideOrder(
+                            orderId: order['id'],
+                            orderType: order['type'],
+                            justification: '${selectedReason}: ${justificationController.text}',
+                            aiSuggestion: order,
+                            finalDecision: {'reason': selectedReason},
+                          );
+                          Navigator.pop(dialogContext);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.yellow,
+                          foregroundColor: AppTheme.darkBlue,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          elevation: 0,
+                        ),
+                        child: Text('Confirmer Remplacement', style: GoogleFonts.lato(fontSize: 16, fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                     const SizedBox(height: 12),
+                     SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(dialogContext),
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: Colors.grey.shade300),
+                          foregroundColor: Colors.black87,
+                           padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                         child: Text('Annuler', style: GoogleFonts.lato(fontSize: 16, fontWeight: FontWeight.bold)),
+                      ),
+                     ),
+                  ],
                 ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: justificationController,
-                decoration: InputDecoration(hintText: 'Justification...', border: OutlineInputBorder()),
-                maxLines: 3,
               ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(dialogContext), child: Text('Annuler')),
-          ElevatedButton(
-            onPressed: () {
-              context.read<AiReviewCubit>().overrideOrder(
-                orderId: order['id'],
-                orderType: order['type'],
-                justification: justificationController.text,
-                aiSuggestion: order,
-                finalDecision: {
-                  'final_quantity': int.tryParse(quantityController.text) ?? order['ai_quantity'],
-                },
-              );
-              Navigator.pop(dialogContext);
-            },
-            child: Text('Confirmer'),
-          ),
-        ],
+            ),
+          );
+        }
       ),
     );
   }
@@ -364,5 +584,6 @@ class _AiReviewScreenState extends State<AiReviewScreen> {
   void _showApproveMultipleDialog(BuildContext context) {
     // Basic logic to approve all on page
     Navigator.pop(context);
+    // Ideally call cubit to approve all visible
   }
 }

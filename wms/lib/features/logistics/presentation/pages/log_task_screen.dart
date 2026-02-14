@@ -11,6 +11,8 @@ import 'package:wms/features/logistics/presentation/pages/employee_all_tasks_scr
 import 'package:wms/features/inventory/presentation/pages/employee_dashboard_screen.dart';
 import 'package:wms/features/inventory/presentation/pages/employee_main_screen.dart';
 
+import 'package:wms/core/utils/snackbar_utils.dart';
+
 class LogTaskScreen extends StatefulWidget {
   const LogTaskScreen({super.key});
 
@@ -53,11 +55,7 @@ class _LogTaskScreenState extends State<LogTaskScreen> {
 
   void _submitLog() async {
     if (_selectedType == null || _selectedTask == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select task type and specific task'),
-        ),
-      );
+      SnackbarUtils.showError(context, 'Please select task type and specific task');
       return;
     }
 
@@ -77,9 +75,7 @@ class _LogTaskScreenState extends State<LogTaskScreen> {
     );
 
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Task log submitted successfully!')),
-      );
+      SnackbarUtils.showSuccess(context, 'Task log submitted successfully!');
       Navigator.pop(context);
     }
   }
