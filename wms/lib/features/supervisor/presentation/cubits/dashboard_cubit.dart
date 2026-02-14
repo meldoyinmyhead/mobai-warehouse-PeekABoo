@@ -17,20 +17,29 @@ class SupervisorDashboardLoading extends SupervisorDashboardState {}
 class SupervisorDashboardLoaded extends SupervisorDashboardState {
   final List<TaskModel> pendingValidations;
   final List<TaskModel> flaggedTasks;
-  final List<TaskModel> aiRecommendations;
+  final List<Map<String, dynamic>> employees;
+  final List<Map<String, dynamic>> chariots;
   final int flaggedCount;
   final int aiPendingCount;
 
   const SupervisorDashboardLoaded({
     required this.pendingValidations,
     required this.flaggedTasks,
-    required this.aiRecommendations,
+    required this.employees,
+    required this.chariots,
     this.flaggedCount = 0,
     this.aiPendingCount = 0,
   });
 
   @override
-  List<Object> get props => [pendingValidations, flaggedTasks, aiRecommendations, flaggedCount, aiPendingCount];
+  List<Object> get props => [
+        pendingValidations,
+        flaggedTasks,
+        employees,
+        chariots,
+        flaggedCount,
+        aiPendingCount
+      ];
 }
 
 class SupervisorDashboardError extends SupervisorDashboardState {
@@ -52,6 +61,9 @@ class SupervisorDashboardCubit extends Cubit<SupervisorDashboardState> {
       emit(SupervisorDashboardLoading());
 
       final pendingReviews = await _aiReviewRepository.getPendingAiOrders();
+      final employees = await _aiReviewRepository.getEmployees();
+      final chariots = await _aiReviewRepository.getChariots();
+      
       List<FlagModel> flags = [];
       try {
         flags = await _flagRepository.getAllFlags();
@@ -60,7 +72,8 @@ class SupervisorDashboardCubit extends Cubit<SupervisorDashboardState> {
       emit(SupervisorDashboardLoaded(
         pendingValidations: [],
         flaggedTasks: [],
-        aiRecommendations: [],
+        employees: employees,
+        chariots: chariots,
         flaggedCount: flags.length,
         aiPendingCount: pendingReviews.length,
       ));

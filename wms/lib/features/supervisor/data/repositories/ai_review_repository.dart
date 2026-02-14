@@ -212,4 +212,28 @@ class AiReviewRepository {
       lastUpdated: drift.Value(DateTime.now()),
     ));
   }
+
+  Future<List<Map<String, dynamic>>> getEmployees() async {
+    if (await _isOnline) {
+      try {
+        final r = await http.get(Uri.parse('$_backendUrl/employees')).timeout(const Duration(seconds: 10));
+        if (r.statusCode == 200) {
+          return List<Map<String, dynamic>>.from(jsonDecode(r.body));
+        }
+      } catch (_) {}
+    }
+    return [];
+  }
+
+  Future<List<Map<String, dynamic>>> getChariots() async {
+    if (await _isOnline) {
+      try {
+        final r = await http.get(Uri.parse('$_backendUrl/chariots')).timeout(const Duration(seconds: 10));
+        if (r.statusCode == 200) {
+          return List<Map<String, dynamic>>.from(jsonDecode(r.body));
+        }
+      } catch (_) {}
+    }
+    return [];
+  }
 }

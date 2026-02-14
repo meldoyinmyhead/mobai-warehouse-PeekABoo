@@ -104,6 +104,18 @@ class Utilisateur(UtilisateurBase):
     class Config:
         from_attributes = True
 
+class ChariotBase(BaseModel):
+    code_chariot: str
+    statut: ChariotStatus
+    id_entrepot: UUID
+    last_known_location: Optional[UUID] = None
+    actif: bool = True
+
+class Chariot(ChariotBase):
+    id: UUID
+    class Config:
+        from_attributes = True
+
 class ProduitBase(BaseModel):
     sku: str
     nom_produit: str
