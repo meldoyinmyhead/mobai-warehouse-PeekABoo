@@ -96,6 +96,7 @@ class _EmployeeMapTaskScreenState extends State<EmployeeMapTaskScreen> {
                       child: CustomPaint(
                         painter: IsometricWarehousePainter(
                           layout: _floorLayouts[_currentFloor] ?? [],
+                          floor: _currentFloor,
                           aiPath: pathOffsets,
                           entities: [
                             // Show current user position (start of path)

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:wms/core/theme/app_theme.dart';
 import 'package:wms/core/widgets/adminBottomBar.dart';
-import 'package:wms/core/widgets/supervisorBottonBar.dart';
-import 'package:wms/features/warehouse/presentation/pages/admin/admin_dashboard_screen.dart';
-import 'package:wms/features/warehouse/presentation/pages/admin/analysis.dart';
+import 'package:wms/core/widgets/layout/supervisorBottonBar.dart';
+import 'package:wms/features/admin/presentation/pages/admin_dashboard_screen.dart';
+import 'package:wms/features/admin/presentation/pages/analysis.dart';
 
 class UserManagementScreen extends StatefulWidget {
   const UserManagementScreen({super.key});
