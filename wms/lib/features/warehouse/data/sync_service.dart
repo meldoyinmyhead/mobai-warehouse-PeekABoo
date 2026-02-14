@@ -21,26 +21,26 @@ class SyncService {
   }
 
   /// Syncs local changes to the remote server
-  Future<void> syncLocalToRemote() async {
-    if (!(await isOnline)) return;
+  // Future<void> syncLocalToRemote() async {
+  //   if (!(await isOnline)) return;
 
-    print("Starting sync: Local -> Remote");
+  //   print("Starting sync: Local -> Remote");
 
-    final unsyncedItems = await (_db.select(_db.syncQueue)..where((t) => t.processed.equals(false))).get();
+  //   final unsyncedItems = await (_db.select(_db.syncQueue)..where((t) => t.processed.equals(false))).get();
 
-    for (var item in unsyncedItems) {
-      try {
-        // TODO: Call your Remote API here based on item.actionType and item.payload
+  //   for (var item in unsyncedItems) {
+  //     try {
+  //       // TODO: Call your Remote API here based on item.actionType and item.payload
         
-        // If successful, mark as processed locally
-        await (_db.update(_db.syncQueue)..where((t) => t.id.equals(item.id))).write(
-          const SyncQueueCompanion(processed: Value(true)),
-        );
-      } catch (e) {
-        print("Failed to sync item ${item.id}: $e");
-      }
-    }
-  }
+  //       // If successful, mark as processed locally
+  //       await (_db.update(_db.syncQueue)..where((t) => t.id.equals(item.id))).write(
+  //         const SyncQueueCompanion(processed: Value(true)),
+  //       );
+  //     } catch (e) {
+  //       print("Failed to sync item ${item.id}: $e");
+  //     }
+  //   }
+  // }
 
   Future<void> syncRemoteToLocal() async {
     if (!(await isOnline)) return;

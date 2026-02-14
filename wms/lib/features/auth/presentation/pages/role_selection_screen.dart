@@ -25,7 +25,7 @@ class RoleSelectionScreen extends StatelessWidget {
         padding: const EdgeInsets.all(24.0),
         child: Column(
           children: [
-            Image.asset('assets/images/role_selection.png', height: 200, errorBuilder: (c,e,s) => 
+            Image.asset('assets/images/amico.png', height: 200, errorBuilder: (c,e,s) => 
                const Icon(Icons.group_work, size: 100, color: AppTheme.lightBlue)
             ),
             const SizedBox(height: 24),

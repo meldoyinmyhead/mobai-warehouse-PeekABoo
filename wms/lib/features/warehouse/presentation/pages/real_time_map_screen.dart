@@ -44,7 +44,7 @@ class RealTimeMapScreen extends StatelessWidget {
                 painter: IsometricWarehousePainter(
                   floor: state.selectedFloor,
                   entities: state.entities,
-                  aiPath: state.aiPath,
+                  aiPath: state.aiPath, layout: [],
                 ),
               ),
             ),

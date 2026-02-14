@@ -255,7 +255,7 @@ class _StorageTaskViewState extends State<StorageTaskView> {
                       painter: IsometricWarehousePainter(
                         layout: WarehouseLayoutData.getAllFloors()[floor] ?? [],
                         entities: entities,
-                        aiPath: mockPath,
+                        aiPath: mockPath, floor: '',
                       ),
                     ),
                   ),

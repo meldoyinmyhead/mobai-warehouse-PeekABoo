@@ -291,7 +291,7 @@ class _PickingTaskViewState extends State<PickingTaskView> {
                       painter: IsometricWarehousePainter(
                         layout: WarehouseLayoutData.getAllFloors()['0A']!,
                         entities: entities,
-                        aiPath: mockRoute,
+                        aiPath: mockRoute, floor: '',
                       ),
                     ),
                   ),

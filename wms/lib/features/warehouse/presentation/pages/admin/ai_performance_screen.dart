@@ -3,7 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:wms/core/theme/app_theme.dart';
 import 'package:wms/core/widgets/supervisorBottonBar.dart';
 
-
 class AIPerformanceScreen extends StatefulWidget {
   const AIPerformanceScreen({Key? key}) : super(key: key);
 

@@ -10,7 +10,7 @@ class IsometricWarehousePainter extends CustomPainter {
   IsometricWarehousePainter({
     required this.layout,
     this.entities = const [],
-    this.aiPath = const [],
+    this.aiPath = const [], required String floor,
   });
 
   static const double tileSize = 32.0;

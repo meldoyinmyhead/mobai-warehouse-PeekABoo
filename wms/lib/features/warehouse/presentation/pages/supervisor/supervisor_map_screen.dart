@@ -130,7 +130,7 @@ class _SupervisorMapScreenState extends State<SupervisorMapScreen> {
                 painter: IsometricWarehousePainter(
                   layout: _floorLayouts[_selectedFloor] ?? [],
                   entities: _showEntities ? _mockEntities : [],
-                  aiPath: _showPaths ? _mockPath : [],
+                  aiPath: _showPaths ? _mockPath : [], floor: '',
                 ),
               ),
             ),
