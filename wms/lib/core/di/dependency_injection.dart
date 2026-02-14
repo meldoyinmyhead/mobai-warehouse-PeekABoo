@@ -37,7 +37,7 @@ Future<void> setupDependencyInjection() async {
   // External (must be before SyncService so getCurrentUserId is available)
   final sharedPreferences = await SharedPreferences.getInstance();
   sl.registerSingleton<SharedPreferences>(sharedPreferences);
-  sl.registerLazySingleton<AuthRepository>(() => AuthRepository(sl<SharedPreferences>()));
+  sl.registerLazySingleton<AuthRepository>(() => AuthRepository(sl<SharedPreferences>(), sl<AppDatabase>()));
 
   // Sync Service: FastAPI as source of truth, getUserId for offline queue + connectivity trigger
   final syncService = await SyncService.init(

@@ -51,18 +51,28 @@ class AIClient:
                 print(f"AI Storage Optimization failed: {e}")
                 return []
     
-    async def optimize_picking(self, preparation_order_id: str, line_items: List[Dict[str, Any]]) -> Dict[str, Any]:
+    async def optimize_picking(
+        self, 
+        picks_data: List[Dict[str, Any]], 
+        locations_data: List[Dict[str, Any]],
+        strategy: str = "wave",
+        optimize_route: bool = True,
+        start_location: str = "DEPOT_001"
+    ) -> Dict[str, Any]:
         """
         Calls AI service to optimize picking route.
         """
         async with httpx.AsyncClient() as client:
             try:
                 payload = {
-                    "id_preparation_order": preparation_order_id,
-                    "lines": line_items
+                    "picks_data": picks_data,
+                    "locations_data": locations_data,
+                    "strategy": strategy,
+                    "optimize_route": optimize_route,
+                    "start_location": start_location
                 }
                 response = await client.post(
-                    f"{self.base_url}/optimize-picking",
+                    f"{self.base_url}/picking/optimize-picking",
                     json=payload,
                     timeout=self.timeout
                 )
@@ -70,4 +80,4 @@ class AIClient:
                 return response.json()
             except Exception as e:
                 print(f"AI Picking Optimization failed: {e}")
-                return {}
+                return {"success": False, "error": str(e)}

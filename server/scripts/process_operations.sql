@@ -6,7 +6,20 @@ create or replace function public.process_transfer(
     p_qty int,
     p_user_id uuid
 ) returns jsonb as $$
+declare
+    v_current_qty int;
+    v_trans_id uuid;
 begin
+    -- 0. Check stock availability with row lock
+    select quantite into v_current_qty
+    from public.stock_par_emplacement
+    where id_produit = p_prod_id and id_emplacement = p_from_loc
+    for update;
+
+    if v_current_qty is null or v_current_qty < p_qty then
+        raise exception 'Insufficient stock: needed %, available %', p_qty, coalesce(v_current_qty, 0);
+    end if;
+
     -- 1. Decrement source stock
     update public.stock_par_emplacement
     set quantite = quantite - p_qty,

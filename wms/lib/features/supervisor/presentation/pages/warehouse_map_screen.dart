@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:wms/core/theme/app_theme.dart';
 import 'package:wms/features/supervisor/presentation/widgets/isometric_warehouse_painter.dart';
-import 'package:wms/core/widgets/layout/supervisorBottonBar.dart';
+import 'package:wms/core/widgets/layout/supervisor_bottom_bar.dart';
 
 import 'package:wms/core/data/warehouse_layout_data.dart';
 

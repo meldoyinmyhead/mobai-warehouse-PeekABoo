@@ -60,24 +60,15 @@ class _LogTaskScreenState extends State<LogTaskScreen> {
       return;
     }
 
-    final results = await Connectivity().checkConnectivity();
-    final online = results.any((r) =>
-        r == ConnectivityResult.wifi ||
-        r == ConnectivityResult.mobile ||
-        r == ConnectivityResult.ethernet);
-    if (!online && mounted) {
-      SnackbarUtils.showError(context, 'Hors ligne. Connectez-vous pour enregistrer le journal.');
-      return;
-    }
-
+    final authCubit = context.read<AuthCubit>();
     final authState = authCubit.state;
     String userId = '';
     if (authState is Authenticated) {
       userId = authState.user.id;
     }
 
-    // 1. Log the action (Audit)
-    final ok = await authCubit.logUserAction(
+    // 1. Log the action (Audit) - now handles offline queuing
+    final logOk = await authCubit.logUserAction(
       action: 'SUBMIT_LOG',
       entityType: 'TASK',
       entityId: _selectedTask!.id,
@@ -91,19 +82,19 @@ class _LogTaskScreenState extends State<LogTaskScreen> {
 
     if (!mounted) return;
 
-    // 2. Complete the Task
-    if (ok) {
-      try {
-        await context.read<EmployeeTaskCubit>().completeTask(_selectedTask!.id, userId);
-        if(!mounted) return;
-        SnackbarUtils.showSuccess(context, 'Tâche terminée et journal enregistré.');
-        Navigator.pop(context);
-      } catch (e) {
-        SnackbarUtils.showError(context, 'Journal enregistré mais erreur lors de la complétion: $e');
+    // 2. Complete the Task - now handles offline queuing
+    try {
+      await context.read<EmployeeTaskCubit>().completeTask(_selectedTask!.id, userId);
+      if(!mounted) return;
+      
+      if (logOk) {
+        SnackbarUtils.showSuccess(context, 'Tâche enregistrée (sera synchronisée si hors ligne).');
+      } else {
+         SnackbarUtils.showWarning(context, 'Tâche terminée mais erreur de journalisation.');
       }
-      }
-    } else {
-      SnackbarUtils.showError(context, 'Impossible d\'enregistrer. Vérifiez la connexion.');
+      Navigator.pop(context);
+    } catch (e) {
+      SnackbarUtils.showError(context, 'Erreur lors de l\'enregistrement: $e');
     }
   }
 

@@ -2,7 +2,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:wms/core/widgets/layout/supervisorBottonBar.dart';
+import 'package:wms/core/widgets/layout/supervisor_bottom_bar.dart';
 import 'package:wms/core/routes/app_router.dart';
 import 'package:wms/features/supervisor/presentation/cubits/dashboard_cubit.dart';
 import 'package:wms/features/supervisor/data/repositories/ai_review_repository.dart';
@@ -482,7 +482,6 @@ class _SupervisorDashboardScreenState extends State<SupervisorDashboardScreen> {
                     const SizedBox(height: 100),
                   ],
                 ),
-              );
               );
             }
             return const SizedBox.shrink();

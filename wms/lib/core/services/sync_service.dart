@@ -57,6 +57,7 @@ class SyncService {
     // Periodic sync for real-time feel (tasks + supervisor pending reviews cache).
     _instance!._startPeriodicSync();
 
+    print("[SyncService] Initialized and listening for connectivity.");
     return _instance!;
   }
 
@@ -123,6 +124,9 @@ class SyncService {
           case 'AI_APPROVE':
             synced = await _pushApproveOrder(payload);
             break;
+          case 'AUDIT_LOG':
+            synced = await _pushAuditLog(payload);
+            break;
           case 'COMPLETE_STOP':
           case 'CONFIRM_RECEIPT':
           case 'TRANSFER_STOCK':
@@ -138,6 +142,19 @@ class SyncService {
       } catch (e) {
         print('[Sync] Error pushing action ${action.id}: $e');
       }
+    }
+  }
+
+  Future<bool> _pushAuditLog(Map<String, dynamic> payload) async {
+    try {
+      final r = await http.post(
+        Uri.parse('$_backendUrl/audit/log'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(payload),
+      ).timeout(const Duration(seconds: 15));
+      return r.statusCode >= 200 && r.statusCode < 300;
+    } catch (_) {
+      return false;
     }
   }
 

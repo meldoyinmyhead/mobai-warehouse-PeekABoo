@@ -9,9 +9,13 @@ REST API for the MobAI Warehouse Management System. Implemented in **FastAPI** (
 - Local: `http://localhost:8000`
 - Replace with your server IP when using the mobile app (e.g. `http://10.80.23.251:8000`).
 
-## Authentication
+## Authentication & Security
 
-Login returns a bearer-style token. Include it in subsequent requests (e.g. `Authorization: Bearer <access_token>`). The current implementation returns a mock token; role is embedded in the user object.
+- **Token**: Login returns a bearer-style token (`mock_token_<uuid>`). Include it in subsequent requests: `Authorization: Bearer <access_token>`.
+- **RBAC**: Role-Based Access Control is enforced on sensitive endpoints.
+  - **ADMIN**: Full access (Users, Warehouses, Configuration).
+  - **SUPERVISOR**: Operational management (Approvals, Overrides).
+  - **EMPLOYEE**: Task execution.
 
 ---
 
@@ -19,83 +23,91 @@ Login returns a bearer-style token. Include it in subsequent requests (e.g. `Aut
 
 ### Health / Root
 
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/` | Service info (message, system, warehouse). |
+| Method | Path | Description | Roles |
+|--------|------|-------------|-------|
+| GET | `/` | Service info (message, system, warehouse). | Public |
 
 ### Auth
 
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/auth/login` | Login. Body: `{ "email": "...", "password": "..." }`. Returns `access_token`, `token_type`, `user`. |
+| Method | Path | Description | Roles |
+|--------|------|-------------|-------|
+| POST | `/auth/login` | Login. Returns `access_token`, `user`. | Public |
 
 ### Audit
 
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/audit/log` | Create audit log. Body: `id_utilisateur`, `action`, `entity_type`, `entity_id`, `payload`. |
+| Method | Path | Description | Roles |
+|--------|------|-------------|-------|
+| POST | `/audit/log` | Create audit log. | Authenticated |
 
-### Users (Admin)
+### Users
 
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/users/` | List users (optional `skip`, `limit`). |
-| POST | `/users/` | Create user. |
-| PUT | `/users/{user_id}` | Update user. |
-| DELETE | `/users/{user_id}` | Delete user. |
+| Method | Path | Description | Roles |
+|--------|------|-------------|-------|
+| GET | `/users/` | List users. | **ADMIN** |
+| POST | `/users/` | Create user. | **ADMIN** |
+| PUT | `/users/{user_id}` | Update user. | **ADMIN** |
+| DELETE | `/users/{user_id}` | Delete user. | **ADMIN** |
 
 ### Warehouses (Entrepots)
 
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/entrepots/` | List warehouses. |
-| POST | `/entrepots/` | Create warehouse. |
-| PUT | `/entrepots/{entrepot_id}` | Update warehouse. |
-| DELETE | `/entrepots/{entrepot_id}` | Delete warehouse. |
+| Method | Path | Description | Roles |
+|--------|------|-------------|-------|
+| GET | `/entrepots/` | List warehouses. | Authenticated |
+| POST | `/entrepots/` | Create warehouse. | **ADMIN** |
+| PUT | `/entrepots/{entrepot_id}` | Update warehouse. | **ADMIN** |
+| DELETE | `/entrepots/{entrepot_id}` | Delete warehouse. | **ADMIN** |
 
 ### Floors (Etages)
 
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/entrepots/{entrepot_id}/etages` | Create floor for warehouse. |
-| DELETE | `/etages/{etage_id}` | Delete floor. |
+| Method | Path | Description | Roles |
+|--------|------|-------------|-------|
+| POST | `/entrepots/{entrepot_id}/etages` | Create floor. | **ADMIN** |
+| DELETE | `/etages/{etage_id}` | Delete floor. | **ADMIN** |
 
 ### Locations (Emplacements)
 
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/emplacements/` | List locations. Optional query: `zone`. |
+| Method | Path | Description | Roles |
+|--------|------|-------------|-------|
+| GET | `/emplacements/` | List locations. | Authenticated |
 
 ### Products & Stock
 
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/produits/` | List products (SKUs). |
-| GET | `/stock/` | List stock per location. |
+| Method | Path | Description | Roles |
+|--------|------|-------------|-------|
+| GET | `/produits/` | List products. | Authenticated |
+| GET | `/stock/` | List stock. | Authenticated |
 
 ### AI Services
 
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/ai/available-slots` | Empty slots for storage (optional `zone`). |
-| GET | `/ai/inventory` | Current inventory for AI (non-zero stock). |
-| POST | `/ai/forecast` | Generate preparation order(s). Body: `{ "target_date": "YYYY-MM-DD" }`. |
-| POST | `/ai/prescribe-storage` | Storage assignment for received items. Body: `{ "received_items": [{ "id_produit": "uuid", ... }] }`. |
-| POST | `/ai/optimize-picking` | Optimized picking route and create picking order. Body: `id_preparation_order`, `available_employees`, etc. |
-| POST | `/ai/log-override` | Log supervisor/admin override. Body: `order_type`, `order_id`, `user_id`, `justification`, `original_ai_suggestion`, `user_override_value`. |
+| Method | Path | Description | Roles |
+|--------|------|-------------|-------|
+| GET | `/ai/available-slots` | Empty slots for storage. | Authenticated |
+| GET | `/ai/inventory` | Current inventory for AI. | Authenticated |
+| POST | `/ai/forecast` | Generate demand forecast (Prep Order). | Authenticated |
+| POST | `/ai/prescribe-storage` | Storage assignment logic. | Authenticated |
+| POST | `/ai/optimize-picking` | Generate optimized picking route (TSP). | Authenticated |
+| POST | `/ai/log-override` | Log decision override. | **SUPERVISOR**, **ADMIN** |
+
+### Supervisor Operations
+
+| Method | Path | Description | Roles |
+|--------|------|-------------|-------|
+| GET | `/supervisor/pending-reviews` | Get orders waiting for approval. | Authenticated |
+| POST | `/supervisor/preparation-orders/{id}/approve` | Approve Prep Order. | **SUPERVISOR**, **ADMIN** |
+| POST | `/supervisor/picking-orders/{id}/approve` | Approve Picking Order. | **SUPERVISOR**, **ADMIN** |
 
 ### Employee Tasks
 
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/employee/tasks/{user_id}` | Pending picking tasks for employee (with stops and map-related fields). |
-| POST | `/employee/tasks/{task_id}/complete` | Mark task completed (and audit). |
+| Method | Path | Description | Roles |
+|--------|------|-------------|-------|
+| GET | `/employee/tasks/{user_id}` | Pending picking tasks for employee (with stops and map-related fields). | Authenticated |
+| POST | `/employee/tasks/{task_id}/complete` | Mark task completed. | Authenticated |
 
-### Scheduler (Testing)
+### Scheduler
 
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/scheduler/trigger-daily` | Manually trigger daily forecast job. |
+| Method | Path | Description | Roles |
+|--------|------|-------------|-------|
+| POST | `/scheduler/trigger-daily` | Manually trigger forecast job. | **ADMIN** |
 
 ---
 
@@ -104,7 +116,6 @@ Login returns a bearer-style token. Include it in subsequent requests (e.g. `Aut
 ### Login
 
 **Request**
-
 ```http
 POST /auth/login
 Content-Type: application/json
@@ -116,61 +127,33 @@ Content-Type: application/json
 ```
 
 **Response**
-
 ```json
 {
   "access_token": "mock_token_<uuid>",
   "token_type": "bearer",
-  "user": {
-    "id_utilisateur": "<uuid>",
-    "nom_complet": "...",
-    "email": "...",
-    "role": "ADMIN",
-    "actif": true,
-    "created_at": "...",
-    "last_login": null
-  }
+  "user": { "role": "ADMIN", ... }
 }
 ```
 
-### Get employee tasks
+### Optimize Picking (AI)
 
 **Request**
-
 ```http
-GET /employee/tasks/<user_uuid>
+POST /ai/optimize-picking
+{
+  "id_preparation_order": "<uuid>",
+  "available_employees": ["<uuid>"]
+}
 ```
 
 **Response**
-
 ```json
-[
-  {
-    "id": "<uuid>",
-    "reference": "PICK-...",
-    "assigned_to": "<uuid>",
-    "order_type": "PICKING",
-    "total_distance_m": 120.5,
-    "stops": [
-      {
-        "sequence": 1,
-        "location_code": "B7-N1-C5",
-        "product_name": "...",
-        "quantity": 10,
-        "niveau": 1,
-        "rangee": 5,
-        "colonne": 5
-      }
-    ]
-  }
-]
+{
+  "id": "<uuid>",
+  "total_distance_m": 150.0,
+  "stops": [
+    { "sequence": 0, "location_code": "ENTRANCE", "product_name": "Start", ... },
+    { "sequence": 1, "location_code": "A-01-01", "product_name": "ITEM-1", ... }
+  ]
+}
 ```
-
----
-
-## Notes
-
-- **Roles**: `ADMIN`, `SUPERVISOR`, `EMPLOYEE`. Enforce in middleware or dependencies for protected routes.
-- **IDs**: Most entities use UUIDs.
-- **Dates**: Use ISO format where applicable (e.g. `target_date` for forecast).
-- The mobile app may also use **Supabase** for Realtime and sync RPCs; see technical document for data flow and source of truth.

@@ -2,41 +2,49 @@
 
 ## Overview
 
-This document provides technical documentation for the AI-powered warehouse management system.
+This document provides technical documentation for the AI-powered warehouse management system. The AI logic is integrated directly into the Backend (`server/main.py`) and optionally delegates complex tasks to a specialized AI Service via `server/services/ai_client.py`.
 
 ## Architecture
 
-- **Core Module**: Data loading, feature engineering, segmentation
-- **Forecasting Module**: Demand prediction using ML models
-- **Optimization Module**: Storage and picking optimization
-- **API Module**: RESTful API for integration
+- **Backend (server/main.py)**: Orchestrates AI requests.
+- **Forecasting Module**: Generates `PreparationOrder` based on historical demand (`/ai/forecast`).
+- **Optimization Module**:
+    - **Storage**: Assigns slots using business logic (`/ai/prescribe-storage`).
+    - **Picking**: Optimizes routes using TSP-like algorithms (`/ai/optimize-picking`).
+- **AI Client (server/services/ai_client.py)**: Interface to external AI microservices (if deployed).
 
-## Models
+## Models & Algorithms
 
-### Forecasting Models
+### Forecasting
+1. **Naive Baseline**: 7-day moving average (MVP).
+2. **Planned**: Exponential Smoothing (Holt-Winters), XGBoost.
 
-1. **Naive Baseline**: 7-day moving average
-2. **Exponential Smoothing**: Holt-Winters method
-3. **Random Forest**: Tree-based ensemble
-4. **XGBoost**: Gradient boosting
+### Optimization
+1. **Storage Optimization**:
+   - Finds first available empty slot in the `STORAGE` zone.
+   - Future: ABC analysis to place high-velocity items closer to dispatch.
+2. **Picking Optimization**:
+   - **TSP (Travelling Salesperson)**: Orders stops to minimize travel distance.
+   - **Start Location**: Considers employee's last known location.
 
-### Optimization Algorithms
+## API Endpoints (AI Specific)
 
-1. **Storage Optimization**: ABC-XYZ analysis + distance minimization
-2. **Picking Optimization**: Wave/batch/zone picking strategies
-3. **Route Optimization**: TSP-based route planning
+These endpoints are exposed by `server/main.py`:
 
-## API Endpoints
+- `POST /ai/forecast`: Generate demand forecast.
+- `POST /ai/prescribe-storage`: Optimize storage locations.
+- `POST /ai/optimize-picking`: Optimize picking operations (Route generation).
+- `POST /ai/log-override`: Tracks human-in-the-loop decisions (Supervisor overrides).
 
-- `POST /api/v1/forecast`: Generate demand forecast
-- `POST /api/v1/optimize-storage`: Optimize storage locations
-- `POST /api/v1/optimize-picking`: Optimize picking operations
-- `GET /api/v1/health`: Health check
+## Override & Human-in-the-Loop
+
+The system enforces a **Human-in-the-Loop** workflow:
+1. AI generates a proposal (Forecast or Picking Route).
+2. Proposal acts as `PENDING_REVIEW` (PreparationOrder).
+3. Supervisor reviews and can **Approve** or **Override**.
+4. Overrides are logged (`AIOverride` table) to retrain/improve the model.
 
 ## Configuration
 
-See [config/settings.py](ai/config/settings.py) for all configuration options.
+Settings are managed via `server/.env` and `models.py` constants.
 
-## Usage Examples
-
-See API documentation at `/api/v1/docs` when running the service.

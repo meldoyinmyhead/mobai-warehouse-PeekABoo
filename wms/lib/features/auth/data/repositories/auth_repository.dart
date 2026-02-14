@@ -9,9 +9,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthRepository {
   final SharedPreferences _prefs;
+  final AppDatabase? _db; // Optional for offline queuing
   final String baseUrl = AppConfig.backendUrl;
   
-  AuthRepository(this._prefs);
+  AuthRepository(this._prefs, [this._db]);
 
   Future<Map<String, dynamic>> login(String email, String password) async {
     try {
@@ -86,7 +87,7 @@ class AuthRepository {
     await _prefs.remove('user_data');
   }
 
-  /// Logs action to backend audit_log. Returns true if sent successfully (2xx). Used for tracking (e.g. location/task log).
+  /// Logs action to backend audit_log. Returns true if sent successfully (2xx) or queued offline.
   Future<bool> logAction({
     required String userId,
     required String action,
@@ -94,21 +95,43 @@ class AuthRepository {
     required String entityId,
     Map<String, dynamic>? payload,
   }) async {
+    final body = {
+      'id_utilisateur': userId,
+      'action': action,
+      'entity_type': entityType,
+      'entity_id': entityId,
+      'payload': payload,
+    };
+
     try {
       final r = await http.post(
         Uri.parse('$baseUrl/audit/log'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'id_utilisateur': userId,
-          'action': action,
-          'entity_type': entityType,
-          'entity_id': entityId,
-          'payload': payload,
-        }),
-      ).timeout(const Duration(seconds: 10));
-      return r.statusCode >= 200 && r.statusCode < 300;
+        body: jsonEncode(body),
+      ).timeout(const Duration(seconds: 5));
+
+      if (r.statusCode >= 200 && r.statusCode < 300) {
+        return true;
+      }
+      throw Exception('Server error: ${r.statusCode}');
     } catch (e) {
-      print('Audit logging failed: $e');
+      print('Audit logging failed, queuing offline: $e');
+      
+      if (_db != null) {
+        try {
+          await _db!.into(_db!.syncQueue).insert(
+            SyncQueueCompanion.insert(
+              actionType: 'AUDIT_LOG',
+              payload: jsonEncode(body),
+              timestamp: DateTime.now(),
+              status: const Value('pending'),
+            ),
+          );
+          return true; // Successfully queued
+        } catch (dbError) {
+          print('Failed to queue audit log: $dbError');
+        }
+      }
       return false;
     }
   }
