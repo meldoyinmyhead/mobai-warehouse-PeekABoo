@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:wms/features/auth/data/user_model.dart';
-
 import 'package:wms/core/app_config.dart';
-
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wms/core/database/app_database.dart';
+import 'package:drift/drift.dart';
 
 class AuthRepository {
   final SharedPreferences _prefs;
@@ -124,7 +124,7 @@ class AuthRepository {
               actionType: 'AUDIT_LOG',
               payload: jsonEncode(body),
               timestamp: DateTime.now(),
-              status: const Value('pending'),
+              status: Value('pending'),
             ),
           );
           return true; // Successfully queued
