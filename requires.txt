@@ -1,0 +1,140 @@
+Hackathon Evaluation Criteria
+AI Agent Jury
+Scoring Method
+The AI evaluation is based on two core tasks:
+• Optimization Task — Warehouse Operations Simulation
+• Prediction Task — Demand Forecasting
+Final AI score is calculated out of 100.
+1. Optimization Task — Warehouse Operations Simulation
+Objective
+Participants must simulate warehouse optimization decisions based on operational data.
+Teams will be provided with:
+• Sequence of ingoing and outgoing products
+• Current warehouse storage state
+• Available operational resources
+The AI agent must compute optimized storage assignments, operational movements, and
+routing strategies.
+1.1 Input Data Example
+Example of ingoing and outgoing product sequence:
+Date Product Flow Type Quantity
+01-01-2026 Product A Ingoing 120
+02-01-2026 Product B Outgoing 40
+03-01-2026 Product C Ingoing 75
+04-01-2026 Product D Outgoing 30
+05-01-2026 Product E Ingoing 60
+This sequence must be processed chronologically by the optimization engine.
+1
+1.2 Operational Variables
+Optimization must take into consideration configurable warehouse constraints:
+• Number of available chariots
+• Chariot capacity
+• Storage slot availability
+• Product weight
+• Product demand frequency
+• Distance to expedition zone
+• Floor level constraints
+Teams must clearly document assumptions and constraint handling.
+1.3 Routing and Congestion Handling
+Beyond storage optimization, teams may enhance their simulation by integrating operational
+routing intelligence.
+Expected Considerations
+• Chariot route path generation
+• Shortest path computation between zones
+• Multi-chariot coordination
+• Congestion detection in warehouse corridors
+• Dynamic rerouting when paths intersect
+• Expedition zone traffic management
+• Idle vs active chariot positioning
+Solutions may include graph routing, heuristic optimization, or AI-driven path planning.
+1.4 Expected Optimization Output Format
+The solution must generate explicit operational instructions.
+Example Output
+• Product A: Receipt → Storage → Location 0H-01-01
+• Route: Receipt Zone → Corridor B → Lift 1 → Floor 0H
+• Product B: Picking → Expedition Zone
+• Route: Rack B7-0A-02-03 → Expedition Track
+• Product C: Receipt → Storage → Location 1N-C07
+Each decision must be justified by optimization logic (distance minimization, demand proximity,
+congestion avoidance, etc.).
+2
+1.5 Optimization Evaluation Criteria
+Criterion Weight Consideration
+Distance optimization efficiency High
+Storage allocation logic High
+Picking path optimization High
+Constraint handling (capacity, slots, floors. . . ) Medium
+Route path generation Medium
+Congestion handling strategies Medium
+Simulation completeness and realism High
+2. Prediction Task — Demand Forecasting
+Objective
+Participants must build a forecasting model capable of predicting product demand.
+Teams will receive historical demand data covering periods up to January 2026.
+The required output is the demand prediction for:
+08-01-2026 → 08-02-2026
+2.1 Required Output Format
+Predictions must follow this exact structure:
+Date id produit quantite demande
+09-01-2026 SKU 001 45
+10-01-2026 SKU 002 30
+11-01-2026 SKU 003 52
+12-01-2026 SKU 004 20
+13-01-2026 SKU 005 61
+Submissions not respecting this format may be penalized.
+2.2 Forecasting Evaluation Criteria
+A. Model Performance & Reliability
+Global Accuracy (WAPE)
+• Measures overall demand prediction accuracy
+• Metric: Weighted Absolute Percentage Error
+• Strong baseline target: WAPE 50%
+Forecast Bias & Inventory Risk
+• Under-forecasting risk (stock-outs, delivery failures)
+• Over-forecasting risk (dead stock, storage cost)
+Data Robustness
+3
+• Cold start handling
+• Missing time-steps resilience
+• Sparse demand patterns
+• Outlier tolerance
+B. Operational Logic & Integration
+• Automation of preparation orders
+• Day-ahead forecast triggering
+• Supervisor validation capability
+• Override support
+• Confidence scoring
+• Justification reasoning
+C. AI Explainability (XAI)
+• Feature importance visualization
+• Contextual demand explanations
+• Transparent reasoning outputs
+• Decision flow diagrams:
+Historical Data → Forecast Model → Preparation Orders
+3. Reinforcement Learning Extension (Optional)
+Teams may implement Reinforcement Learning (RL) to enhance forecasting or optimization
+performance over time.
+Objective
+Leverage feedback loops from warehouse operations to improve decision accuracy dynamically.
+Possible Applications
+• Storage placement learning
+• Dynamic picking optimization
+• Route congestion avoidance
+• Demand forecasting refinement
+• Chariot allocation efficiency
+4
+Evaluation Considerations
+• Learning strategy definition
+• Reward function design
+• Training simulation realism
+• Adaptation to operational feedback
+• Performance improvement over time
+Architecture Requirements
+• Scalable training pipeline
+• Modular AI service integration
+• Separation between inference and learning layers
+• Ability to update models without system downtime
+RL implementation is optional but may strengthen the overall AI system depth and innovation.
+Final AI Score Summary
+Optimization Task 50%
+Prediction Task 50%
+Total 100%
+5

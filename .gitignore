@@ -40,3 +40,7 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Excel temporary files
+~$*.xlsx
+~$*.xls
