@@ -71,9 +71,7 @@ class _LoginScreenState extends State<LoginScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-               Text('BBMS ', style: GoogleFonts.lato(color: AppTheme.yellow, fontWeight: FontWeight.bold, fontSize: 20)),
-               Text('ELECTRIC', style: GoogleFonts.lato(color: AppTheme.yellow, fontStyle: FontStyle.italic, fontWeight: FontWeight.w300, fontSize: 20)),
-             // Image.asset('assets/images/logo.png', height: 30), 
+            Image.asset('assets/images/logo.png', height: 30), 
             ],
           ),
           centerTitle: true,

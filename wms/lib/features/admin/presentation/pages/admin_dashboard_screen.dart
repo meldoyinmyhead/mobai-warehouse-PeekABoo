@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:wms/core/widgets/layout/supervisorBottonBar.dart';
-import 'package:wms/features/supervisor/presentation/cubits/dashboard_cubit.dart';
-import 'package:wms/features/logistics/data/repositories/task_repository.dart';
+import 'package:wms/core/widgets/supervisorBottonBar.dart';
+import 'package:wms/features/warehouse/presentation/cubits/supervisor/dashboard_cubit.dart';
+import 'package:wms/features/warehouse/data/repositories/task_repository.dart';
 import 'package:wms/core/theme/app_theme.dart';
-import 'package:wms/features/admin/presentation/pages/ai_performance_screen.dart';
-import 'package:wms/features/admin/presentation/pages/access_logs.dart';
-import 'package:wms/features/admin/presentation/pages/export_reports_screen.dart';
+import 'package:wms/features/warehouse/presentation/pages/admin/ai_performance_screen.dart';
+import 'package:wms/features/warehouse/presentation/pages/admin/access_logs.dart';
+import 'package:wms/features/warehouse/presentation/pages/admin/export_reports_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -28,16 +28,28 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
     switch (index) {
       case 0:
-        Navigator.pushReplacementNamed(context, '/admin/dashboard');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => AdminDashboardScreen()),
+        );
         break;
+
       case 1:
-        Navigator.pushReplacementNamed(context, '/admin/users');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => UserManagementScreen()),
+        );
+
         break;
+
       case 2:
         Navigator.pushReplacementNamed(context, '/admin/reports');
         break;
       case 3:
-        Navigator.pushReplacementNamed(context, '/admin/settings');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => AnalyticsScreen()),
+        );
         break;
     }
   }
@@ -56,7 +68,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             padding: const EdgeInsets.all(12.0),
             child: GestureDetector(
               onTap: () {
-                // Navigate to admin profile
+                // Naviguer vers le profil admin
               },
               child: const CircleAvatar(
                 backgroundColor: Color(0xFFF5F5F5),
@@ -75,7 +87,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 color: Color(0xFF5D6266),
               ),
               onPressed: () {
-                // Navigate to settings
+                // Naviguer vers les paramètres
               },
             ),
             IconButton(
@@ -84,7 +96,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 color: Color(0xFF5D6266),
               ),
               onPressed: () {
-                // Navigate to notifications
+                // Naviguer vers les notifications
               },
             ),
           ],
@@ -105,7 +117,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Welcome Card with Banner
+                    // Bannière de bienvenue
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: ClipRRect(
@@ -137,14 +149,26 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Column(
                         children: [
-                          Container(
-                            child: _buildQuickActionButton(
-                              icon: Icons.person_add_outlined,
-                              label: 'Créer un utilisateur',
-                              color: const Color(0xFFFDB913),
-                              width: MediaQuery.of(context).size.width * 0.9,
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const CreateNewUserScreen(),
+                                ),
+                              );
+                            },
+                            child: Container(
+                              child: _buildQuickActionButton(
+                                icon: Icons.person_add_outlined,
+                                label: 'Créer un utilisateur',
+                                color: const Color(0xFFFDB913),
+                                width: MediaQuery.of(context).size.width * 0.9,
+                              ),
                             ),
                           ),
+
                           SizedBox(height: 12),
                           Row(
                             children: [
@@ -259,7 +283,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                       ),
                                       const SizedBox(height: 12),
                                       Text(
-                                        'Dernière synchronisation',
+                                        'Dernière synchro',
                                         style: GoogleFonts.lato(
                                           fontSize: 11,
                                           color: Colors.grey[600],
@@ -267,7 +291,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        'il y a 2 min',
+                                        'Il y a 2 min',
                                         style: GoogleFonts.lato(
                                           fontSize: 13,
                                           fontWeight: FontWeight.w600,
@@ -291,7 +315,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        'Sain',
+                                        'Saine',
                                         style: GoogleFonts.lato(
                                           fontSize: 13,
                                           fontWeight: FontWeight.w600,
@@ -327,7 +351,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                   child: _buildAlertCard(
                                     icon: Icons.warning_amber_outlined,
                                     label: 'Alertes critiques',
-                                    sublabel: 'Nécessite une attention',
+                                    sublabel: 'Nécessite attention',
                                     color: const Color(0xFFFDB913),
                                   ),
                                 ),
@@ -335,8 +359,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                 Expanded(
                                   child: _buildAlertCard(
                                     icon: Icons.flag_outlined,
-                                    label: 'Tous les signalements',
-                                    sublabel: 'En attente de résolution',
+                                    label: 'Tous les drapeaux',
+                                    sublabel: 'Résolution en attente',
                                     color: const Color(0xFFE74C3C),
                                   ),
                                 ),
@@ -440,7 +464,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
                     const SizedBox(height: 24),
 
-                    // Operations Overview
+                    // Aperçu des opérations
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
@@ -524,7 +548,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
                     const SizedBox(height: 24),
 
-                    // User Activity
+                    // Activité utilisateur
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
@@ -607,7 +631,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Activité récente (Derniers 5)',
+                                    'Activité récente (5 derniers)',
                                     style: GoogleFonts.lato(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w600,
@@ -616,7 +640,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                   ),
                                   const SizedBox(height: 12),
                                   _buildActivityItem(
-                                    'Jean a complété une tâche de Réception',
+                                    'Jean a terminé une tâche de Réception',
                                     '3m',
                                   ),
                                   const SizedBox(height: 10),
@@ -639,7 +663,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
                     const SizedBox(height: 24),
 
-                    // Warehouse Utilization
+                    // Utilisation de l'entrepôt
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
@@ -807,7 +831,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             return const SizedBox.shrink();
           },
         ),
-        bottomNavigationBar: SupervisorBottomBar(
+        bottomNavigationBar: AdminBottomBar(
           currentIndex: _currentIndex,
           onTap: _onNavBarTap,
         ),
@@ -995,7 +1019,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            '$percentage% complétée',
+            '$percentage% terminée',
             style: GoogleFonts.lato(fontSize: 10, color: Colors.grey[600]),
           ),
         ],

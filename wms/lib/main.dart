@@ -3,17 +3,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wms/core/di/dependency_injection.dart';
 import 'package:wms/core/routes/app_router.dart';
 import 'package:wms/core/theme/app_theme.dart';
-import 'package:wms/features/logistics/presentation/cubits/employee_task_cubit.dart';
-import 'package:wms/features/auth/presentation/cubits/employee_profile_cubit.dart';
-import 'package:wms/features/auth/presentation/cubits/employee_settings_cubit.dart';
-import 'package:wms/features/auth/presentation/cubits/employee_notification_cubit.dart';
-import 'package:wms/features/supervisor/presentation/cubits/map_cubit.dart';
-import 'package:wms/features/supervisor/presentation/cubits/ai_review_cubit.dart';
-import 'package:wms/features/supervisor/presentation/cubits/flag_cubit.dart';
-import 'package:wms/features/inventory/presentation/cubits/receipt_cubit.dart';
+import 'package:wms/features/warehouse/presentation/cubits/employee/employee_task_cubit.dart';
+import 'package:wms/features/warehouse/presentation/cubits/employee/employee_profile_cubit.dart';
+import 'package:wms/features/warehouse/presentation/cubits/employee/employee_settings_cubit.dart';
+import 'package:wms/features/warehouse/presentation/cubits/employee/employee_notification_cubit.dart';
+import 'package:wms/features/warehouse/presentation/cubits/supervisor/map_cubit.dart';
+import 'package:wms/features/warehouse/presentation/cubits/supervisor/ai_review_cubit.dart';
 import 'package:wms/features/auth/presentation/cubits/auth_cubit.dart';
-// Imports removed
-import 'package:wms/features/supervisor/presentation/pages/supervisor_dashboard_screen.dart';
+import 'package:wms/features/auth/data/repositories/auth_repository.dart';
+import 'package:wms/features/warehouse/presentation/pages/admin/admin_dashboard_screen.dart';
+import 'package:wms/features/warehouse/presentation/pages/employee_main_screen.dart';
+import 'package:wms/features/warehouse/presentation/pages/supervisor/supervisor_dashboard_screen.dart';
 
 
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -44,10 +44,8 @@ class MainApp extends StatelessWidget {
         BlocProvider(create: (_) => EmployeeProfileCubit()..loadProfile()),
         BlocProvider(create: (_) => EmployeeSettingsCubit()),
         BlocProvider(create: (_) => EmployeeNotificationCubit()),
-        BlocProvider(create: (_) => MapCubit()),
-        BlocProvider(create: (_) => sl<AiReviewCubit>()..loadPendingReviews()),
-        BlocProvider(create: (_) => sl<FlagCubit>()..loadFlags()),
-        BlocProvider(create: (_) => sl<ReceiptCubit>()..loadIncomingOrders()),
+        BlocProvider(create: (_) => MapCubit()),        
+        BlocProvider(create: (_) => AiReviewCubit()..loadPendingReviews()),
         BlocProvider(create: (_) => sl<AuthCubit>()),
       ],
       child: MaterialApp(
