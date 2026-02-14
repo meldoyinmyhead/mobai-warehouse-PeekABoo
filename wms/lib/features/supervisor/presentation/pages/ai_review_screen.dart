@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:wms/core/widgets/layout/supervisorBottonBar.dart';
+import 'package:wms/core/widgets/layout/supervisor_bottom_bar.dart';
 import 'package:wms/features/supervisor/presentation/cubits/ai_review_cubit.dart';
 import 'package:wms/features/supervisor/data/models/ai_override_model.dart';
 import 'package:wms/core/theme/app_theme.dart';

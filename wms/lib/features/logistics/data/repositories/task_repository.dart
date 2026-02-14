@@ -5,9 +5,13 @@ import 'package:wms/core/data/repositories/base_repository_impl.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:wms/core/app_config.dart';
+import 'package:wms/core/database/app_database.dart';
+import 'package:drift/drift.dart';
 
 class TaskRepository extends BaseRepositoryImpl<TaskModel> {
-  TaskRepository() : super('tasks');
+  final AppDatabase _db;
+
+  TaskRepository(this._db) : super('tasks');
 
   @override
   TaskModel fromMap(Map<String, dynamic> map) {
@@ -18,30 +22,27 @@ class TaskRepository extends BaseRepositoryImpl<TaskModel> {
   Map<String, dynamic> toMap(TaskModel item) {
     return item.toMap();
   }
-  
-  // Custom queries for Supervisor
-  Future<List<TaskModel>> getPendingTasks() async {
-    // Placeholder implementation
-    return []; 
-  }
-  
+
+  // ... (fromMap, toMap remain same)
+
   Future<List<TaskModel>> getEmployeeTasks(String userId) async {
+    // 1. Try Network
     try {
       final response = await http.get(Uri.parse('${AppConfig.backendUrl}/employee/tasks/$userId'));
       
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
-        return data.map((item) {
-          // Map OptimizedRoute to TaskModel
-          return TaskModel(
+        final tasks = data.map((item) {
+           // ... (Mapping logic same as before) ...
+           return TaskModel(
             id: item['id'] ?? 'unknown',
             title: 'Preparation: ${item['reference'] ?? "Ref"}',
-            description: 'Picking Order',
+            description: 'Order Ref: ${item['reference'] ?? "N/A"}',
             status: TaskStatus.pending,
-            type: TaskType.picking,
+            type: _mapBackendType(item['order_type']),
             priority: TaskPriority.high,
             assignedTo: userId,
-            locationData: {}, // Could put start point here
+            locationData: {}, 
             aiPathData: (item['stops'] as List).map((s) {
               return LocationPointModel(
                 x: (s['colonne'] as num).toDouble(),
@@ -55,7 +56,7 @@ class TaskRepository extends BaseRepositoryImpl<TaskModel> {
             updatedAt: DateTime.now(),
             products: (item['stops'] as List).map((s) {
               return TaskProductModel(
-                productId: 'unknown', // Backend doesn't send prod ID in stop, maybe add?
+                productId: 'unknown',
                 name: s['product_name'],
                 expectedQuantity: s['quantity'],
                 actualQuantity: 0
@@ -67,25 +68,101 @@ class TaskRepository extends BaseRepositoryImpl<TaskModel> {
             }
           );
         }).toList();
+
+        // 2. Cache to Local DB
+        await _db.batch((batch) {
+          // Optional: clear old tasks for this user?
+          // batch.deleteWhere(...);
+          
+          for (var task in tasks) {
+            batch.insert(_db.localTasks, LocalTasksCompanion.insert(
+              id: task.id,
+              type: task.type.toString(),
+              status: task.status.toString(),
+              data: jsonEncode(task.toMap()), // Serialize full task
+              createdAt: DateTime.now(),
+              lastUpdated: DateTime.now(),
+              syncStatus: const Value('synced')
+            ), mode: InsertMode.insertOrReplace);
+          }
+        });
+        
+        return tasks;
       } else {
         throw Exception('Failed to load tasks');
       }
     } catch (e) {
-      print("Error fetching employee tasks: $e");
-      // Fallback to mock if failed (or rethrow)
-      return getAll();
+      print("Network failed, checking local cache: $e");
+      // 3. Fallback to Local DB
+      // Note: We store status as 'TaskStatus.pending' string in the cache above
+      final localTasks = await (_db.select(_db.localTasks)
+        ..where((t) => t.status.equals(TaskStatus.pending.toString()))
+      ).get();
+      
+      if (localTasks.isNotEmpty) {
+        return localTasks.map((t) => TaskModel.fromMap(jsonDecode(t.data))).toList();
+      }
+      
+      // If no local data, fallback to mock (or empty)
+      return getAll(); 
+    }
+  }
+
+  TaskType _mapBackendType(String? backendType) {
+    switch (backendType) {
+      case 'RECEIPT':
+        return TaskType.receipt;
+      case 'TRANSFER':
+        return TaskType.storage;
+      case 'PICKING':
+        return TaskType.picking;
+      case 'DELIVERY':
+        return TaskType.delivery;
+      default:
+        return TaskType.general;
     }
   }
 
   Future<bool> completeTask(String taskId) async {
+    // 1. Always attempt Network first
     try {
       final response = await http.post(
         Uri.parse('${AppConfig.backendUrl}/employee/tasks/$taskId/complete'),
-      );
-      return response.statusCode == 200;
-    } catch (e) {
-      print("Error completing task: $e");
+      ).timeout(const Duration(seconds: 5));
+
+      if (response.statusCode == 200) {
+        // Mark local cache as completed too
+        await (_db.update(_db.localTasks)..where((t) => t.id.equals(taskId))).write(
+          LocalTasksCompanion(
+            status: Value(TaskStatus.completed.toString()),
+            syncStatus: const Value('synced'),
+          ),
+        );
+        return true;
+      }
       return false;
+    } catch (e) {
+      print("Network completion failed, queuing offline: $e");
+      
+      // 2. Queue for Sync
+      await _db.into(_db.syncQueue).insert(
+        SyncQueueCompanion.insert(
+          actionType: 'COMPLETE_TASK',
+          payload: jsonEncode({'task_id': taskId}),
+          timestamp: DateTime.now(),
+          status: const Value('pending'),
+        ),
+      );
+
+      // 3. Update local state so it disappears from 'Pending' list
+      await (_db.update(_db.localTasks)..where((t) => t.id.equals(taskId))).write(
+        LocalTasksCompanion(
+          status: Value(TaskStatus.completed.toString()),
+          syncStatus: const Value('pending_update'),
+        ),
+      );
+
+      return true; // Return true because it's "successfully" queued
     }
   }
 
@@ -121,7 +198,11 @@ class TaskRepository extends BaseRepositoryImpl<TaskModel> {
         priority: TaskPriority.medium,
         assignedTo: 'Emp001',
         locationData: {'floor': 'N2', 'slot': 'C5', 'zone': 'B7'},
-        aiPathData: [],
+        aiPathData: [
+           LocationPointModel(x: 2.0, y: 5.0, z: 2.0, sequenceOrder: 1, locId: "RECEPTION"),
+           LocationPointModel(x: 10.0, y: 5.0, z: 2.0, sequenceOrder: 2, locId: "AISLE"),
+           LocationPointModel(x: 20.0, y: 10.0, z: 2.0, sequenceOrder: 3, locId: "C5"),
+        ],
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
         details: {

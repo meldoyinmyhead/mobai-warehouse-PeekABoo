@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:wms/core/theme/app_theme.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wms/features/auth/presentation/cubits/auth_cubit.dart';
+import 'package:wms/core/routes/app_router.dart';
 
 class SupervisorProfileScreen extends StatefulWidget {
   const SupervisorProfileScreen({super.key});
@@ -174,9 +175,37 @@ class _SupervisorProfileScreenState extends State<SupervisorProfileScreen> {
                 ),
 
                 const SizedBox(height: 24),
-                
-                // Edit buttons removed for now as we are just displaying DB data
-                // If editing is needed, we need to implement update logic in AuthCubit
+
+                // Logout Button
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        context.read<AuthCubit>().logout();
+                        Navigator.pushNamedAndRemoveUntil(context, AppRouter.landing, (route) => false);
+                      },
+                      icon: const Icon(Icons.logout, color: Colors.red),
+                      label: Text(
+                        'Se déconnecter',
+                        style: GoogleFonts.lato(
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Colors.red),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 32),
               ],
             ),
           ),
