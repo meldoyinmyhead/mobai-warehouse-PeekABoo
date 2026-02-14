@@ -60,13 +60,43 @@ class _SupervisorDashboardScreenState extends State<SupervisorDashboardScreen> {
           elevation: 0,
           leading: Padding(
           padding: const EdgeInsets.all(12.0),
-          child: GestureDetector(
-          onTap: () => Navigator.pushNamed(context, AppRouter.supervisorProfile),
-            child: const CircleAvatar(
-              backgroundColor: Colors.white,
-              child: Icon(Icons.person_outline, color: Color(0xFF5D6266)),
+            child: PopupMenuButton<String>(
+              offset: const Offset(0, 40),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              icon: const CircleAvatar(
+                backgroundColor: Colors.white,
+                child: Icon(Icons.person_outline, color: Color(0xFF5D6266)),
+              ),
+              onSelected: (value) {
+                if (value == 'profile') {
+                  Navigator.pushNamed(context, AppRouter.supervisorProfile);
+                } else if (value == 'logout') {
+                  Navigator.pushNamedAndRemoveUntil(context, AppRouter.login, (route) => false);
+                }
+              },
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                 PopupMenuItem<String>(
+                  value: 'profile',
+                  child: Row(
+                    children: [
+                      Icon(Icons.person_outline, color: Colors.grey[700], size: 20),
+                      const SizedBox(width: 12),
+                      Text('View Full Profile', style: GoogleFonts.lato(color: Colors.black87)),
+                    ],
+                  ),
+                ),
+                 PopupMenuItem<String>(
+                  value: 'logout',
+                  child: Row(
+                    children: [
+                      const Icon(Icons.logout, color: AppTheme.red, size: 20),
+                      const SizedBox(width: 12),
+                      Text('Log Out', style: GoogleFonts.lato(color: AppTheme.red)),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ),
         ),
           title: Row(
             mainAxisAlignment: MainAxisAlignment.center,

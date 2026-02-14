@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wms/core/theme/app_theme.dart';
-import 'package:wms/features/auth/presentation/cubits/employee_profile_cubit.dart';
+import 'package:wms/features/auth/presentation/cubits/auth_cubit.dart';
 
 class EmployeeProfileScreen extends StatefulWidget {
   const EmployeeProfileScreen({super.key});
@@ -19,7 +19,12 @@ class _EmployeeProfileScreenState extends State<EmployeeProfileScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<EmployeeProfileCubit>().loadProfile();
+    // Pre-fill controllers if we have auth state (optimistic)
+    final authState = context.read<AuthCubit>().state;
+    if (authState is Authenticated) {
+      _emailController.text = authState.user.email;
+      // Phone not available yet
+    }
   }
 
   @override
@@ -35,19 +40,21 @@ class _EmployeeProfileScreenState extends State<EmployeeProfileScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: BlocConsumer<EmployeeProfileCubit, EmployeeProfileState>(
-        listener: (context, state) {
-          if (state is EmployeeProfileLoaded) {
-            _emailController.text = state.email;
-            _phoneController.text = state.phone;
-          }
-        },
+      body: BlocBuilder<AuthCubit, AuthState>(
         builder: (context, state) {
-          if (state is EmployeeProfileLoading) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (state is EmployeeProfileError) {
-            return Center(child: Text(state.message));
-          } else if (state is EmployeeProfileLoaded) {
+          if (state is Authenticated) {
+             final user = state.user;
+             final name = user.fullName.isNotEmpty ? user.fullName : 'Utilisateur';
+             final role = user.role.name;
+             final employeeId = user.id;
+             final email = user.email;
+             final isActive = user.isActive;
+
+             // Sync controllers if not editing
+             if (!_isEditing) {
+               _emailController.text = email;
+             }
+            
             return SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -59,32 +66,14 @@ class _EmployeeProfileScreenState extends State<EmployeeProfileScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
                     child: Column(
                       children: [
-                        Stack(
-                          children: [
-                            CircleAvatar(
-                              radius: 50,
-                              backgroundColor: Colors.grey[300],
-                              child: Icon(Icons.person, size: 50, color: Colors.grey[600]),
-                            ),
-                            if (_isEditing)
-                              Positioned(
-                                right: 0,
-                                bottom: 0,
-                                child: CircleAvatar(
-                                  radius: 15,
-                                  backgroundColor: const Color(0xFF00796B),
-                                  child: IconButton(
-                                    padding: EdgeInsets.zero,
-                                    icon: const Icon(Icons.camera_alt, size: 15, color: Colors.white),
-                                    onPressed: () {},
-                                  ),
-                                ),
-                              ),
-                          ],
+                        CircleAvatar(
+                          radius: 50,
+                          backgroundColor: Colors.grey[300],
+                          child: Icon(Icons.person, size: 50, color: Colors.grey[600]),
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          state.name,
+                          name,
                           style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
@@ -93,18 +82,27 @@ class _EmployeeProfileScreenState extends State<EmployeeProfileScreen> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          state.role,
+                          role,
                           style: TextStyle(
                             fontSize: 14,
                             color: Colors.grey[600],
                           ),
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Opérations d\'entrepôt',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[500],
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: isActive ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: isActive ? Colors.green : Colors.red),
+                          ),
+                          child: Text(
+                            isActive ? 'Actif' : 'Inactif',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: isActive ? Colors.green : Colors.red,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ],
@@ -130,22 +128,11 @@ class _EmployeeProfileScreenState extends State<EmployeeProfileScreen> {
                           ),
                         ),
                         const SizedBox(height: 20),
-                        _buildInfoField('Nom d\'utilisateur', state.name, enabled: false),
+                        _buildInfoField('Nom complet', name, enabled: false),
                         const SizedBox(height: 16),
-                        _buildInfoField('Nom de famille', state.name.split(' ').last, enabled: false),
+                        _buildInfoField('ID Employé', employeeId, enabled: false, isGrey: true),
                         const SizedBox(height: 16),
-                        _buildInfoField('ID employé', state.employeeId, enabled: false, isGrey: true),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 0, top: 4),
-                          child: Text(
-                            'L\'ID employé ne peut pas être modifié',
-                            style: TextStyle(fontSize: 11, color: Colors.grey[500]),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        _buildTextField('Email', _emailController, enabled: _isEditing),
-                        const SizedBox(height: 16),
-                        _buildTextField('Téléphone', _phoneController, enabled: _isEditing),
+                        _buildInfoField('Email', email, enabled: false),
                       ],
                     ),
                   ),
@@ -161,7 +148,7 @@ class _EmployeeProfileScreenState extends State<EmployeeProfileScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          'Informations de travail',
+                          'Informations de compte',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -169,99 +156,19 @@ class _EmployeeProfileScreenState extends State<EmployeeProfileScreen> {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        _buildWorkRow('Département:', 'Opérations d\'entrepôt'),
+                        _buildWorkRow('Rôle:', role),
                         const Divider(height: 24),
-                        _buildWorkRow('Rôle:', state.role),
-                        const Divider(height: 24),
-                        _buildWorkRow('ID employé:', state.employeeId),
+                        _buildWorkRow('Statut:', isActive ? 'Actif' : 'Inactif'),
                       ],
                     ),
                   ),
 
-                  const SizedBox(height: 24),
-
-                  // Action Buttons
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: !_isEditing
-                        ? SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                setState(() {
-                                  _isEditing = true;
-                                });
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppTheme.lightBlue,
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                              child: const Text(
-                                'Modifier le profil',
-                                style: TextStyle(fontSize: 16, color: Colors.white),
-                              ),
-                            ),
-                          )
-                        : Row(
-                            children: [
-                              Expanded(
-                                child: OutlinedButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      _isEditing = false;
-                                    });
-                                    context.read<EmployeeProfileCubit>().loadProfile();
-                                  },
-                                  style: OutlinedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(vertical: 16),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    side: const BorderSide(color: Color(0xFF00796B)),
-                                  ),
-                                  child: const Text(
-                                    'Annuler',
-                                    style: TextStyle(fontSize: 16, color: Color(0xFF00796B)),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    context.read<EmployeeProfileCubit>().updateProfile(
-                                          email: _emailController.text,
-                                          phone: _phoneController.text,
-                                        );
-                                    setState(() {
-                                      _isEditing = false;
-                                    });
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF00796B),
-                                    padding: const EdgeInsets.symmetric(vertical: 16),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
-                                  child: const Text(
-                                    'Enregistrer',
-                                    style: TextStyle(fontSize: 16, color: Colors.white),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                  ),
                   const SizedBox(height: 32),
                 ],
               ),
             );
           }
-          return const SizedBox.shrink();
+          return const Center(child: Text('User not authenticated'));
         },
       ),
     );

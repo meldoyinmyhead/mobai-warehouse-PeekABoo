@@ -1,6 +1,10 @@
 import 'package:wms/features/logistics/data/models/task_model.dart';
 import 'package:wms/features/logistics/data/models/task_product_model.dart';
+import 'package:wms/features/supervisor/data/models/location_point_model.dart';
 import 'package:wms/core/data/repositories/base_repository_impl.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:wms/core/app_config.dart';
 
 class TaskRepository extends BaseRepositoryImpl<TaskModel> {
   TaskRepository() : super('tasks');
@@ -19,6 +23,70 @@ class TaskRepository extends BaseRepositoryImpl<TaskModel> {
   Future<List<TaskModel>> getPendingTasks() async {
     // Placeholder implementation
     return []; 
+  }
+  
+  Future<List<TaskModel>> getEmployeeTasks(String userId) async {
+    try {
+      final response = await http.get(Uri.parse('${AppConfig.backendUrl}/employee/tasks/$userId'));
+      
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return data.map((item) {
+          // Map OptimizedRoute to TaskModel
+          return TaskModel(
+            id: item['id'] ?? 'unknown',
+            title: 'Preparation: ${item['reference'] ?? "Ref"}',
+            description: 'Picking Order',
+            status: TaskStatus.pending,
+            type: TaskType.picking,
+            priority: TaskPriority.high,
+            assignedTo: userId,
+            locationData: {}, // Could put start point here
+            aiPathData: (item['stops'] as List).map((s) {
+              return LocationPointModel(
+                x: (s['colonne'] as num).toDouble(),
+                y: (s['rangee'] as num).toDouble(),
+                z: (s['niveau'] as num).toDouble(),
+                sequenceOrder: s['sequence'] as int,
+                locId: s['location_code'] as String
+              );
+            }).toList(),
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+            products: (item['stops'] as List).map((s) {
+              return TaskProductModel(
+                productId: 'unknown', // Backend doesn't send prod ID in stop, maybe add?
+                name: s['product_name'],
+                expectedQuantity: s['quantity'],
+                actualQuantity: 0
+              );
+            }).toList(),
+            details: {
+              'distance': item['total_distance_m'],
+              'stops_count': (item['stops'] as List).length
+            }
+          );
+        }).toList();
+      } else {
+        throw Exception('Failed to load tasks');
+      }
+    } catch (e) {
+      print("Error fetching employee tasks: $e");
+      // Fallback to mock if failed (or rethrow)
+      return getAll();
+    }
+  }
+
+  Future<bool> completeTask(String taskId) async {
+    try {
+      final response = await http.post(
+        Uri.parse('${AppConfig.backendUrl}/employee/tasks/$taskId/complete'),
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      print("Error completing task: $e");
+      return false;
+    }
   }
 
   @override

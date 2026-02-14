@@ -8,6 +8,8 @@ import 'package:wms/core/data/warehouse_layout_data.dart';
 import 'package:wms/core/theme/app_theme.dart';
 import 'package:wms/core/widgets/task_views/flag.dart';
 
+import 'package:wms/core/utils/snackbar_utils.dart';
+
 class PickingTaskView extends StatefulWidget {
   final TaskModel task;
 
@@ -395,12 +397,7 @@ class _PickingTaskViewState extends State<PickingTaskView> {
               await offlineRepo.completePickingStop(widget.task.id, 1);
               
               if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Tâche sauvegardée localement! (Queue Sync)', style: GoogleFonts.lato()),
-                    backgroundColor: AppTheme.green,
-                  ),
-                );
+                SnackbarUtils.showSuccess(context, 'Tâche sauvegardée localement! (Queue Sync)');
                 Navigator.pop(context);
               }
             },

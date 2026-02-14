@@ -40,7 +40,7 @@ class _FlagManagementScreenState extends State<FlagManagementScreen> {
           Navigator.pushReplacementNamed(context, '/supervisor/map');
           break;
         case 2:
-          Navigator.pushReplacementNamed(context, '/supervisor/review');
+          Navigator.pushReplacementNamed(context, '/supervisor/ai_review');
           break;
         case 3:
           break;
@@ -140,111 +140,251 @@ class _FlagManagementScreenState extends State<FlagManagementScreen> {
   }
 
   Widget _buildFlagCard(FlagModel flag) {
-    Color typeColor = AppTheme.lightBlue;
-    if (flag.type == FlagType.DAMAGED) typeColor = AppTheme.red;
-    if (flag.type == FlagType.QUANTITY) typeColor = AppTheme.yellow;
+    // Colors based on the design image
+    const Color leftBorderColor = Color(0xFF006D84); // User requested specific teal
+    Color iconBgColor = const Color(0xFFE0F2F1); // Light Teal
+    Color iconColor = const Color(0xFF00796B); // Teal
+    
+    if (flag.type == FlagType.DAMAGED) {
+      iconBgColor = const Color(0xFFFFEBEE); // Light Red
+      iconColor = const Color(0xFFD32F2F); // Red
+    } else if (flag.type == FlagType.QUANTITY) {
+      iconBgColor = const Color(0xFFE3F2FD); // Light Blue
+      iconColor = const Color(0xFF1976D2); // Blue
+    }
 
-    String statusText = 'En Attente';
-    if (flag.status == FlagStatus.IN_PROGRESS) statusText = 'En Cours';
-    if (flag.status == FlagStatus.RESOLVED) statusText = 'Résolu';
+    String statusText = 'Pending';
+    Color statusBg = Colors.blue.withOpacity(0.1);
+    Color statusTextColor = Colors.blue;
+    
+    if (flag.status == FlagStatus.IN_PROGRESS) {
+      statusText = 'In Review';
+      statusBg = Colors.orange.withOpacity(0.1);
+      statusTextColor = Colors.orange[800]!;
+    } else if (flag.status == FlagStatus.RESOLVED) {
+      statusText = 'Resolved';
+      statusBg = Colors.green.withOpacity(0.1);
+      statusTextColor = Colors.green;
+    }
 
-    return Card(
+    // Simple time ago logic
+    final now = DateTime.now();
+    final diff = now.difference(flag.createdAt);
+    String timeAgo = '${diff.inMinutes} mins ago';
+    if (diff.inMinutes > 60) timeAgo = '${diff.inHours} hours ago';
+    if (diff.inHours > 24) timeAgo = '${diff.inDays} days ago';
+
+    return Container(
       margin: const EdgeInsets.only(bottom: 16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          )
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: typeColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    flag.type.name,
-                    style: GoogleFonts.lato(color: typeColor, fontWeight: FontWeight.bold, fontSize: 12),
-                  ),
+            // Left "Green Thingy" Border
+            Container(
+              width: 6,
+              color: leftBorderColor,
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Icon Circle
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: iconBgColor,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            _getIconForType(flag.type),
+                            color: iconColor,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        // Main Content
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Tags Row
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: iconBgColor,
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      flag.type.name,
+                                      style: GoogleFonts.lato(
+                                        color: iconColor,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 11,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: statusBg,
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      statusText,
+                                      style: GoogleFonts.lato(
+                                        color: statusTextColor,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 11,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              // Title
+                              Text(
+                                flag.description.isNotEmpty ? flag.description : 'Signalement #${flag.id.substring(0, 8)}',
+                                style: GoogleFonts.lato(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  color: Colors.black87,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 8),
+                              // Details: User
+                              Row(
+                                children: [
+                                  Icon(Icons.person_outline, size: 14, color: Colors.grey[600]),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    flag.reporterName ?? 'Unknown User',
+                                    style: GoogleFonts.lato(color: Colors.grey[600], fontSize: 13),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Icon(Icons.location_on_outlined, size: 14, color: Colors.grey[600]),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    flag.locationCode ?? 'No Loc',
+                                    style: GoogleFonts.lato(color: Colors.grey[600], fontSize: 13),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              // Details: Content Text
+                              Text(
+                                flag.description, // Or a separate specific text if description is used for title
+                                style: GoogleFonts.lato(color: Colors.grey[500], fontSize: 13),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 12),
+                              // Footer
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(Icons.access_time, size: 14, color: Colors.grey[400]),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        timeAgo,
+                                        style: GoogleFonts.lato(color: Colors.grey[400], fontSize: 12),
+                                      ),
+                                    ],
+                                  ),
+                                  if (flag.status != FlagStatus.RESOLVED)
+                                  GestureDetector(
+                                    onTap: () => _showActionSheet(context, flag),
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.arrow_forward, size: 14, color: Colors.blue[300]),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          'Actions',
+                                          style: GoogleFonts.lato(color: Colors.blue[300], fontSize: 12, fontWeight: FontWeight.bold),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                Text(statusText, style: GoogleFonts.lato(color: Colors.grey[600], fontSize: 12)),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              flag.description,
-              style: GoogleFonts.lato(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Icon(Icons.house_outlined, size: 16, color: AppTheme.darkBlue),
-                const SizedBox(width: 8),
-                Text(
-                  'Entrepôt: ${flag.warehouseCode ?? 'N/A'}',
-                  style: GoogleFonts.lato(color: Colors.black87, fontWeight: FontWeight.w600, fontSize: 13),
-                ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Row(
-              children: [
-                Icon(Icons.person_outline, size: 16, color: Colors.grey[600]),
-                const SizedBox(width: 8),
-                Text(
-                  'Rapporteur: ${flag.reporterName ?? 'Inconnu'}',
-                  style: GoogleFonts.lato(color: Colors.grey[700], fontSize: 13),
-                ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Row(
-              children: [
-                Icon(Icons.location_on_outlined, size: 16, color: Colors.grey[600]),
-                const SizedBox(width: 8),
-                Text(
-                  'Emplacement: ${flag.locationCode ?? 'N/A'}',
-                  style: GoogleFonts.lato(color: Colors.grey[600], fontSize: 12),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            if (flag.taskRef != null && flag.taskRef!.isNotEmpty)
-              Text(
-                'Réf. Tâche: ${flag.taskRef}',
-                style: GoogleFonts.lato(color: Colors.grey[500], fontSize: 11, fontStyle: FontStyle.italic),
               ),
-            const SizedBox(height: 16),
-            if (flag.status != FlagStatus.RESOLVED)
-              Row(
-                children: [
-                  if (flag.status == FlagStatus.PENDING)
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => context.read<FlagCubit>().setFlagInProgress(flag.id),
-                        child: Text('Traiter', style: GoogleFonts.lato(color: AppTheme.darkBlue)),
-                      ),
-                    ),
-                  if (flag.status == FlagStatus.PENDING) const SizedBox(width: 12),
-                   Expanded(
-                    child: ElevatedButton(
-                      onPressed: () => context.read<FlagCubit>().resolveFlag(flag.id),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.yellow,
-                        foregroundColor: Colors.black87,
-                      ),
-                      child: Text('Résoudre', style: GoogleFonts.lato(fontWeight: FontWeight.bold)),
-                    ),
-                  ),
-                ],
-              )
+            ),
           ],
         ),
       ),
+    );
+  }
+
+  IconData _getIconForType(FlagType type) {
+    switch (type) {
+      case FlagType.DAMAGED: return Icons.cancel_outlined;
+      case FlagType.QUANTITY: return Icons.info_outline;
+      case FlagType.LOCATION: return Icons.place_outlined; // Replaces MISPLACEMENT
+      case FlagType.OTHER: return Icons.help_outline; // Replaces QUALITY/default
+      default: return Icons.warning_amber_rounded;
+    }
+  }
+
+  void _showActionSheet(BuildContext context, FlagModel flag) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+      builder: (ctx) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.check_circle_outline, color: Colors.green),
+                title: const Text('Resolve'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  context.read<FlagCubit>().resolveFlag(flag.id);
+                },
+              ),
+               ListTile(
+                leading: const Icon(Icons.pending_actions, color: Colors.orange),
+                title: const Text('Mark In Progress'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  context.read<FlagCubit>().setFlagInProgress(flag.id);
+                },
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

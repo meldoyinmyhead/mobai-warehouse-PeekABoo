@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:wms/core/theme/app_theme.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wms/features/auth/presentation/cubits/auth_cubit.dart';
 
 class SupervisorProfileScreen extends StatefulWidget {
   const SupervisorProfileScreen({super.key});
@@ -42,202 +44,144 @@ class _SupervisorProfileScreenState extends State<SupervisorProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: Text(
-          'Profil',
-          style: GoogleFonts.lato(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            color: Colors.black,
+    return BlocBuilder<AuthCubit, AuthState>(
+      builder: (context, state) {
+        String name = '';
+        String email = '';
+        String userId = '';
+        String role = '';
+        bool isActive = true;
+
+        if (state is Authenticated) {
+          name = state.user.fullName;
+          email = state.user.email;
+          userId = state.user.id;
+          role = state.user.role.name;
+          isActive = state.user.isActive;
+        }
+
+        if (!_isEditing) {
+          _emailController.text = email;
+        }
+
+        return Scaffold(
+          backgroundColor: Colors.white,
+          appBar: AppBar(
+            title: Text(
+              'Profil',
+              style: GoogleFonts.lato(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.black,
+              ),
+            ),
+            backgroundColor: Colors.white,
+            elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.black),
+              onPressed: () => Navigator.pop(context),
+            ),
           ),
-        ),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // Profile Header Card
-            Container(
-              width: double.infinity,
-              color: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-              child: Column(
-                children: [
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundColor: Colors.grey[300],
-                    child: Icon(
-                      Icons.person,
-                      size: 50,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    _name,
-                    style: GoogleFonts.lato(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    _role,
-                    style: GoogleFonts.lato(
-                      fontSize: 13,
-                      color: Colors.grey[700],
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    _department,
-                    style: GoogleFonts.lato(
-                      fontSize: 12,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Personal Information Card
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: _buildProfileCard(
-                title: 'Informations personnelles',
-                icon: Icons.person_outline,
-                children: [
-                  _buildPersonalField('Nom d\'utilisateur', _firstName),
-                  const SizedBox(height: 12),
-                  _buildPersonalField('Nom de famille', _lastName),
-                  const SizedBox(height: 12),
-                  _buildPersonalFieldWithIndicator(
-                    'ID d\'utilisateur',
-                    _supervisorId,
-                  ),
-                  const SizedBox(height: 12),
-                  _buildPersonalField('Email', _email),
-                  const SizedBox(height: 12),
-                  _buildPersonalField('Téléphone', _phone),
-                ],
-              ),
-            ),
-
-            // Work Information Card
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: _buildProfileCard(
-                title: 'Informations de travail',
-                icon: Icons.work_outline,
-                children: [
-                  _buildWorkField('Département', _department),
-                  const SizedBox(height: 12),
-                  _buildWorkField('Rôle', _role),
-                  const SizedBox(height: 12),
-                  _buildWorkField('ID employé', _supervisorId),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // Edit Profile Button / Save & Cancel
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: _isEditing
-                  ? Row(
-                      children: [
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: () {
-                              setState(() {
-                                _isEditing = false;
-                              });
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.grey[300],
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                            ),
-                            child: Text(
-                              'Annuler',
-                              style: GoogleFonts.lato(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black87,
-                              ),
-                            ),
-                          ),
+          body: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Profile Header Card
+                Container(
+                  width: double.infinity,
+                  color: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                  child: Column(
+                    children: [
+                      CircleAvatar(
+                        radius: 50,
+                        backgroundColor: Colors.grey[300],
+                        child: Icon(
+                          Icons.person,
+                          size: 50,
+                          color: Colors.grey[600],
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: () {
-                              setState(() {
-                                _isEditing = false;
-                              });
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppTheme.darkBlue,
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                            ),
-                            child: Text(
-                              'Enregistrer',
-                              style: GoogleFonts.lato(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        name.isNotEmpty ? name : 'Utilisateur',
+                        style: GoogleFonts.lato(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
                         ),
-                      ],
-                    )
-                  : SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            _isEditing = true;
-                          });
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.darkBlue,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(6),
-                          ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        role,
+                        style: GoogleFonts.lato(
+                          fontSize: 13,
+                          color: Colors.grey[700],
+                        ),
+                      ),
+                       const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: isActive ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: isActive ? Colors.green : Colors.red),
                         ),
                         child: Text(
-                          'Modifier le profil',
+                          isActive ? 'Actif' : 'Inactif',
                           style: GoogleFonts.lato(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
+                            fontSize: 10,
+                            color: isActive ? Colors.green : Colors.red,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
-                    ),
-            ),
+                    ],
+                  ),
+                ),
 
-            const SizedBox(height: 32),
-          ],
-        ),
-      ),
+                // Personal Information Card
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: _buildProfileCard(
+                    title: 'Informations personnelles',
+                    icon: Icons.person_outline,
+                    children: [
+                      _buildPersonalField('Nom complet', name),
+                      const SizedBox(height: 12),
+                      _buildPersonalFieldWithIndicator(
+                        'ID Utilisateur',
+                        userId,
+                      ),
+                      const SizedBox(height: 12),
+                      _buildPersonalField('Email', email),
+                    ],
+                  ),
+                ),
+
+                // Work Information Card
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: _buildProfileCard(
+                    title: 'Informations de compte',
+                    icon: Icons.work_outline,
+                    children: [
+                      _buildWorkField('Rôle', role),
+                      const SizedBox(height: 12),
+                      _buildWorkField('Statut', isActive ? 'Actif' : 'Inactif'),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+                
+                // Edit buttons removed for now as we are just displaying DB data
+                // If editing is needed, we need to implement update logic in AuthCubit
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 

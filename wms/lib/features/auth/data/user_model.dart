@@ -21,13 +21,13 @@ class UserModel {
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      id: json['id_utilisateur'],
-      fullName: json['nom_complet'],
+      id: json['id_utilisateur'] ?? '',
+      fullName: json['nom_complet'] ?? 'Utilisateur',
       role: UserRole.values.firstWhere(
-        (e) => e.name.toUpperCase() == (json['role'] as String).toUpperCase(),
+        (e) => e.name.toUpperCase() == (json['role'] as String? ?? 'EMPLOYEE').toUpperCase(),
         orElse: () => UserRole.EMPLOYEE,
       ),
-      email: json['email'],
+      email: json['email'] ?? '',
       isActive: json['actif'] ?? true,
     );
   }
