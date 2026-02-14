@@ -16,7 +16,14 @@ def check_db():
         cur = conn.cursor()
         
         print("\n--- Checking 'utilisateurs' table ---")
-        cur.execute("SELECT id_utilisateur, email, role FROM public.utilisateurs")
+        print("\n--- Checking 'utilisateurs' table columns ---")
+        cur.execute("SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'utilisateurs'")
+        columns = cur.fetchall()
+        for col in columns:
+            print(f"Column: {col[0]} | Type: {col[1]}")
+
+        print("\n--- Checking 'utilisateurs' data ---")
+        cur.execute("SELECT * FROM public.utilisateurs LIMIT 1")
         rows = cur.fetchall()
         
         if not rows:

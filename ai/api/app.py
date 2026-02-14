@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from ..config.settings import settings
 from ..config.logging_config import get_logger
-from .routes import forecast, storage, picking, health
+from .routes import forecast, storage, picking, health, route, storage_assignment
 from .middleware.error_handler import ErrorHandlerMiddleware
 from .middleware.request_logger import RequestLoggerMiddleware
 
@@ -42,6 +42,8 @@ app.include_router(health.router, prefix=settings.API_PREFIX, tags=["Health"])
 app.include_router(forecast.router, prefix=settings.API_PREFIX, tags=["Forecast"])
 app.include_router(storage.router, prefix=settings.API_PREFIX, tags=["Storage"])
 app.include_router(picking.router, prefix=settings.API_PREFIX, tags=["Picking"])
+app.include_router(route.router,   prefix=settings.API_PREFIX, tags=["Route Optimization"])
+app.include_router(storage_assignment.router, prefix=settings.API_PREFIX, tags=["Storage Assignment"])
 
 logger.info(f"FastAPI application initialized: {settings.APP_NAME} v{settings.APP_VERSION}")
 

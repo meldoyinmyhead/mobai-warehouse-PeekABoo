@@ -10,36 +10,31 @@ class AuthRepository {
   
   Future<Map<String, dynamic>> login(String email, String password) async {
     try {
-      final response = await Supabase.instance.client.auth.signInWithPassword(
-        email: email,
-        password: password,
+      final response = await http.post(
+        Uri.parse('$baseUrl/auth/login'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'email': email,
+          'password': password,
+        }),
       );
 
-      if (response.user != null) {
-        try {
-          // Fetch user profile from public.utilisateurs to get role and name
-          final userProfile = await Supabase.instance.client
-              .from('utilisateurs')
-              .select()
-              .eq('id_utilisateur', response.user!.id)
-              .single();
-
-          return {
-            'user': userProfile, 
-            'access_token': response.session?.accessToken,
-          };
-        } on PostgrestException catch (e) {
-          if (e.code == 'PGRST116') {
-            throw Exception('Profil introuvable dans la base de données. Veuillez contacter l\'administrateur.');
-          }
-          rethrow;
-        }
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return {
+          'user': data['user'],
+          'access_token': data['access_token'],
+        };
+      } else if (response.statusCode == 401) {
+        throw Exception('Email ou mot de passe incorrect.');
+      } else if (response.statusCode == 403) {
+        throw Exception('Compte désactivé contactez l\'administrateur.');
       } else {
-        throw Exception('Login failed: No user returned');
+        throw Exception('Erreur de connexion: ${response.statusCode}');
       }
     } catch (e) {
-      if (e is Exception) rethrow;
-      throw Exception('Login failed: ${e.toString()}');
+      if (e is Exception) rethrow; // Rethrow friendly exceptions
+      throw Exception('Erreur technique: ${e.toString()}');
     }
   }
 

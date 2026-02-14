@@ -7,6 +7,7 @@ import 'package:wms/features/auth/presentation/pages/employee_profile_screen.dar
 import 'package:wms/features/auth/presentation/pages/employee_settings_screen.dart';
 import 'package:wms/features/auth/presentation/pages/employee_notifications_screen.dart';
 import 'package:wms/features/logistics/presentation/pages/task_detail_screen.dart';
+import 'package:wms/features/logistics/presentation/pages/employee_task_detail_screen.dart';
 import 'package:wms/features/supervisor/presentation/pages/ai_review_screen.dart';
 import 'package:wms/features/logistics/presentation/pages/log_task_screen.dart';
 import 'package:wms/features/supervisor/presentation/pages/warehouse_map_screen.dart';
@@ -76,6 +77,9 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const EmployeeNotificationsScreen());
       case employeeTaskDetail:
         final task = settings.arguments as TaskModel;
+        if (task.type == TaskType.picking) {
+          return MaterialPageRoute(builder: (_) => EmployeeMapTaskScreen(task: task));
+        }
         return MaterialPageRoute(builder: (_) => EmployeeTaskDetailScreen(task: task));
       case logTask:
         return MaterialPageRoute(builder: (_) => const LogTaskScreen());
