@@ -1,6 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:wms/features/logistics/data/models/task_model.dart';
+import 'package:wms/features/supervisor/data/repositories/ai_review_repository.dart';
+import 'package:wms/features/supervisor/data/repositories/flag_repository.dart';
+import 'package:wms/features/supervisor/data/models/flag_model.dart';
 
 // States
 abstract class SupervisorDashboardState extends Equatable {
@@ -14,16 +17,29 @@ class SupervisorDashboardLoading extends SupervisorDashboardState {}
 class SupervisorDashboardLoaded extends SupervisorDashboardState {
   final List<TaskModel> pendingValidations;
   final List<TaskModel> flaggedTasks;
-  final List<TaskModel> aiRecommendations;
+  final List<Map<String, dynamic>> employees;
+  final List<Map<String, dynamic>> chariots;
+  final int flaggedCount;
+  final int aiPendingCount;
 
   const SupervisorDashboardLoaded({
     required this.pendingValidations,
     required this.flaggedTasks,
-    required this.aiRecommendations,
+    required this.employees,
+    required this.chariots,
+    this.flaggedCount = 0,
+    this.aiPendingCount = 0,
   });
 
   @override
-  List<Object> get props => [pendingValidations, flaggedTasks, aiRecommendations];
+  List<Object> get props => [
+        pendingValidations,
+        flaggedTasks,
+        employees,
+        chariots,
+        flaggedCount,
+        aiPendingCount
+      ];
 }
 
 class SupervisorDashboardError extends SupervisorDashboardState {
@@ -33,39 +49,36 @@ class SupervisorDashboardError extends SupervisorDashboardState {
   List<Object> get props => [message];
 }
 
-// Cubit
+// Cubit: real data from AiReviewRepository and FlagRepository.
 class SupervisorDashboardCubit extends Cubit<SupervisorDashboardState> {
-  // We need a concrete TaskRepository here. For now, assuming BaseRepositoryImpl<TaskModel> logic exists
-  // in a specific TaskRepository class (not fully implemented in previous steps, but structured).
-  // Ideally, I should create a TaskRepository class similar to EntrepotRepository.
-  // I will assume for this step that I'm fetching data from a "TaskRepository".
-  // Note: I will need to create TaskRepository to make this compile fully if not exist.
-  final dynamic _taskRepository; 
+  final AiReviewRepository _aiReviewRepository;
+  final FlagRepository _flagRepository;
 
-  SupervisorDashboardCubit(this._taskRepository) : super(SupervisorDashboardLoading());
+  SupervisorDashboardCubit(this._aiReviewRepository, this._flagRepository) : super(SupervisorDashboardLoading());
 
   Future<void> loadDashboard() async {
     try {
       emit(SupervisorDashboardLoading());
+
+      final pendingReviews = await _aiReviewRepository.getPendingAiOrders();
+      final employees = await _aiReviewRepository.getEmployees();
+      final chariots = await _aiReviewRepository.getChariots();
       
-      // Fetch data
-      // In a real scenario, we'd have specific methods in TaskRepository for these queries
-      // final tasks = await _taskRepository.getAll();
-      
-      // Mocking logic for structure demonstration until TaskRepository is fully generic-typed
-      final List<TaskModel> tasks = []; 
-      
-      final pending = tasks.where((t) => t.status == TaskStatus.pending).toList();
-      final flagged = []; // Logic for flagged tasks (status or separate field)
-      final ai = []; // Logic for AI recommendations
+      List<FlagModel> flags = [];
+      try {
+        flags = await _flagRepository.getAllFlags();
+      } catch (_) {}
 
       emit(SupervisorDashboardLoaded(
-        pendingValidations: pending, 
-        flaggedTasks: List<TaskModel>.from(flagged), 
-        aiRecommendations: List<TaskModel>.from(ai)
+        pendingValidations: [],
+        flaggedTasks: [],
+        employees: employees,
+        chariots: chariots,
+        flaggedCount: flags.length,
+        aiPendingCount: pendingReviews.length,
       ));
     } catch (e) {
-      emit(SupervisorDashboardError("Failed to load dashboard: $e"));
+      emit(SupervisorDashboardError("Échec du chargement: $e"));
     }
   }
 }

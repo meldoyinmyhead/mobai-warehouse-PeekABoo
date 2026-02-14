@@ -13,8 +13,11 @@ class AppTheme {
   static const Color veryLightGrey = Color(0xFFF4F2F2);
   
   static const Color primaryTeal = Color(0xFF00796B);
+  /// Dark teal for headers (BMS design)
+  static const Color headerTeal = Color(0xFF006B70);
   static const Color accentGold = Color(0xFFFFD700);
   static const Color errorRed = Color(0xFFD32F2F);
+  static const Color errorBackground = Color(0xFFFFCCCC);
 
   static ThemeData get lightTheme {
     return ThemeData(

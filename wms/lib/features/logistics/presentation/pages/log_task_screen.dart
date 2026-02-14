@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:wms/core/routes/app_router.dart';
 import 'package:wms/core/theme/app_theme.dart';
 import 'package:wms/features/auth/presentation/cubits/auth_cubit.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:wms/features/logistics/presentation/cubits/employee_task_cubit.dart';
 import 'package:wms/features/logistics/data/models/task_model.dart';
 import 'package:wms/core/widgets/layout/modern_floating_navbar.dart';
@@ -55,14 +56,19 @@ class _LogTaskScreenState extends State<LogTaskScreen> {
 
   void _submitLog() async {
     if (_selectedType == null || _selectedTask == null) {
-      SnackbarUtils.showError(context, 'Please select task type and specific task');
+      SnackbarUtils.showError(context, 'Veuillez sélectionner le type de tâche et la tâche.');
       return;
     }
 
     final authCubit = context.read<AuthCubit>();
+    final authState = authCubit.state;
+    String userId = '';
+    if (authState is Authenticated) {
+      userId = authState.user.id;
+    }
 
-    // Log action to backend
-    await authCubit.logUserAction(
+    // 1. Log the action (Audit) - now handles offline queuing
+    final logOk = await authCubit.logUserAction(
       action: 'SUBMIT_LOG',
       entityType: 'TASK',
       entityId: _selectedTask!.id,
@@ -74,9 +80,21 @@ class _LogTaskScreenState extends State<LogTaskScreen> {
       },
     );
 
-    if (mounted) {
-      SnackbarUtils.showSuccess(context, 'Task log submitted successfully!');
+    if (!mounted) return;
+
+    // 2. Complete the Task - now handles offline queuing
+    try {
+      await context.read<EmployeeTaskCubit>().completeTask(_selectedTask!.id, userId);
+      if(!mounted) return;
+      
+      if (logOk) {
+        SnackbarUtils.showSuccess(context, 'Tâche enregistrée (sera synchronisée si hors ligne).');
+      } else {
+         SnackbarUtils.showWarning(context, 'Tâche terminée mais erreur de journalisation.');
+      }
       Navigator.pop(context);
+    } catch (e) {
+      SnackbarUtils.showError(context, 'Erreur lors de l\'enregistrement: $e');
     }
   }
 

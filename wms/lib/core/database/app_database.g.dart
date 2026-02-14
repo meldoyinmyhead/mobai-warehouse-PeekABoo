@@ -1129,12 +1129,796 @@ class SyncQueueCompanion extends UpdateCompanion<SyncQueueData> {
   }
 }
 
+class $LocalPendingReviewsTable extends LocalPendingReviews
+    with TableInfo<$LocalPendingReviewsTable, LocalPendingReview> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalPendingReviewsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _orderTypeMeta = const VerificationMeta(
+    'orderType',
+  );
+  @override
+  late final GeneratedColumn<String> orderType = GeneratedColumn<String>(
+    'order_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _referenceMeta = const VerificationMeta(
+    'reference',
+  );
+  @override
+  late final GeneratedColumn<String> reference = GeneratedColumn<String>(
+    'reference',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dataMeta = const VerificationMeta('data');
+  @override
+  late final GeneratedColumn<String> data = GeneratedColumn<String>(
+    'data',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _lastUpdatedMeta = const VerificationMeta(
+    'lastUpdated',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lastUpdated = GeneratedColumn<DateTime>(
+    'last_updated',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _syncedMeta = const VerificationMeta('synced');
+  @override
+  late final GeneratedColumn<bool> synced = GeneratedColumn<bool>(
+    'synced',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("synced" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    orderType,
+    reference,
+    data,
+    status,
+    createdAt,
+    lastUpdated,
+    synced,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_pending_reviews';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LocalPendingReview> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('order_type')) {
+      context.handle(
+        _orderTypeMeta,
+        orderType.isAcceptableOrUnknown(data['order_type']!, _orderTypeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_orderTypeMeta);
+    }
+    if (data.containsKey('reference')) {
+      context.handle(
+        _referenceMeta,
+        reference.isAcceptableOrUnknown(data['reference']!, _referenceMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_referenceMeta);
+    }
+    if (data.containsKey('data')) {
+      context.handle(
+        _dataMeta,
+        this.data.isAcceptableOrUnknown(data['data']!, _dataMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dataMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('last_updated')) {
+      context.handle(
+        _lastUpdatedMeta,
+        lastUpdated.isAcceptableOrUnknown(
+          data['last_updated']!,
+          _lastUpdatedMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_lastUpdatedMeta);
+    }
+    if (data.containsKey('synced')) {
+      context.handle(
+        _syncedMeta,
+        synced.isAcceptableOrUnknown(data['synced']!, _syncedMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LocalPendingReview map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalPendingReview(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      orderType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}order_type'],
+      )!,
+      reference: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reference'],
+      )!,
+      data: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}data'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      lastUpdated: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_updated'],
+      )!,
+      synced: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}synced'],
+      )!,
+    );
+  }
+
+  @override
+  $LocalPendingReviewsTable createAlias(String alias) {
+    return $LocalPendingReviewsTable(attachedDatabase, alias);
+  }
+}
+
+class LocalPendingReview extends DataClass
+    implements Insertable<LocalPendingReview> {
+  final String id;
+  final String orderType;
+  final String reference;
+  final String data;
+  final String status;
+  final DateTime createdAt;
+  final DateTime lastUpdated;
+  final bool synced;
+  const LocalPendingReview({
+    required this.id,
+    required this.orderType,
+    required this.reference,
+    required this.data,
+    required this.status,
+    required this.createdAt,
+    required this.lastUpdated,
+    required this.synced,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['order_type'] = Variable<String>(orderType);
+    map['reference'] = Variable<String>(reference);
+    map['data'] = Variable<String>(data);
+    map['status'] = Variable<String>(status);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['last_updated'] = Variable<DateTime>(lastUpdated);
+    map['synced'] = Variable<bool>(synced);
+    return map;
+  }
+
+  LocalPendingReviewsCompanion toCompanion(bool nullToAbsent) {
+    return LocalPendingReviewsCompanion(
+      id: Value(id),
+      orderType: Value(orderType),
+      reference: Value(reference),
+      data: Value(data),
+      status: Value(status),
+      createdAt: Value(createdAt),
+      lastUpdated: Value(lastUpdated),
+      synced: Value(synced),
+    );
+  }
+
+  factory LocalPendingReview.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalPendingReview(
+      id: serializer.fromJson<String>(json['id']),
+      orderType: serializer.fromJson<String>(json['orderType']),
+      reference: serializer.fromJson<String>(json['reference']),
+      data: serializer.fromJson<String>(json['data']),
+      status: serializer.fromJson<String>(json['status']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      lastUpdated: serializer.fromJson<DateTime>(json['lastUpdated']),
+      synced: serializer.fromJson<bool>(json['synced']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'orderType': serializer.toJson<String>(orderType),
+      'reference': serializer.toJson<String>(reference),
+      'data': serializer.toJson<String>(data),
+      'status': serializer.toJson<String>(status),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'lastUpdated': serializer.toJson<DateTime>(lastUpdated),
+      'synced': serializer.toJson<bool>(synced),
+    };
+  }
+
+  LocalPendingReview copyWith({
+    String? id,
+    String? orderType,
+    String? reference,
+    String? data,
+    String? status,
+    DateTime? createdAt,
+    DateTime? lastUpdated,
+    bool? synced,
+  }) => LocalPendingReview(
+    id: id ?? this.id,
+    orderType: orderType ?? this.orderType,
+    reference: reference ?? this.reference,
+    data: data ?? this.data,
+    status: status ?? this.status,
+    createdAt: createdAt ?? this.createdAt,
+    lastUpdated: lastUpdated ?? this.lastUpdated,
+    synced: synced ?? this.synced,
+  );
+  LocalPendingReview copyWithCompanion(LocalPendingReviewsCompanion data) {
+    return LocalPendingReview(
+      id: data.id.present ? data.id.value : this.id,
+      orderType: data.orderType.present ? data.orderType.value : this.orderType,
+      reference: data.reference.present ? data.reference.value : this.reference,
+      data: data.data.present ? data.data.value : this.data,
+      status: data.status.present ? data.status.value : this.status,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      lastUpdated: data.lastUpdated.present
+          ? data.lastUpdated.value
+          : this.lastUpdated,
+      synced: data.synced.present ? data.synced.value : this.synced,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalPendingReview(')
+          ..write('id: $id, ')
+          ..write('orderType: $orderType, ')
+          ..write('reference: $reference, ')
+          ..write('data: $data, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('lastUpdated: $lastUpdated, ')
+          ..write('synced: $synced')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    orderType,
+    reference,
+    data,
+    status,
+    createdAt,
+    lastUpdated,
+    synced,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalPendingReview &&
+          other.id == this.id &&
+          other.orderType == this.orderType &&
+          other.reference == this.reference &&
+          other.data == this.data &&
+          other.status == this.status &&
+          other.createdAt == this.createdAt &&
+          other.lastUpdated == this.lastUpdated &&
+          other.synced == this.synced);
+}
+
+class LocalPendingReviewsCompanion extends UpdateCompanion<LocalPendingReview> {
+  final Value<String> id;
+  final Value<String> orderType;
+  final Value<String> reference;
+  final Value<String> data;
+  final Value<String> status;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> lastUpdated;
+  final Value<bool> synced;
+  final Value<int> rowid;
+  const LocalPendingReviewsCompanion({
+    this.id = const Value.absent(),
+    this.orderType = const Value.absent(),
+    this.reference = const Value.absent(),
+    this.data = const Value.absent(),
+    this.status = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.lastUpdated = const Value.absent(),
+    this.synced = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocalPendingReviewsCompanion.insert({
+    required String id,
+    required String orderType,
+    required String reference,
+    required String data,
+    required String status,
+    required DateTime createdAt,
+    required DateTime lastUpdated,
+    this.synced = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       orderType = Value(orderType),
+       reference = Value(reference),
+       data = Value(data),
+       status = Value(status),
+       createdAt = Value(createdAt),
+       lastUpdated = Value(lastUpdated);
+  static Insertable<LocalPendingReview> custom({
+    Expression<String>? id,
+    Expression<String>? orderType,
+    Expression<String>? reference,
+    Expression<String>? data,
+    Expression<String>? status,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? lastUpdated,
+    Expression<bool>? synced,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (orderType != null) 'order_type': orderType,
+      if (reference != null) 'reference': reference,
+      if (data != null) 'data': data,
+      if (status != null) 'status': status,
+      if (createdAt != null) 'created_at': createdAt,
+      if (lastUpdated != null) 'last_updated': lastUpdated,
+      if (synced != null) 'synced': synced,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocalPendingReviewsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? orderType,
+    Value<String>? reference,
+    Value<String>? data,
+    Value<String>? status,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? lastUpdated,
+    Value<bool>? synced,
+    Value<int>? rowid,
+  }) {
+    return LocalPendingReviewsCompanion(
+      id: id ?? this.id,
+      orderType: orderType ?? this.orderType,
+      reference: reference ?? this.reference,
+      data: data ?? this.data,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
+      lastUpdated: lastUpdated ?? this.lastUpdated,
+      synced: synced ?? this.synced,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (orderType.present) {
+      map['order_type'] = Variable<String>(orderType.value);
+    }
+    if (reference.present) {
+      map['reference'] = Variable<String>(reference.value);
+    }
+    if (data.present) {
+      map['data'] = Variable<String>(data.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (lastUpdated.present) {
+      map['last_updated'] = Variable<DateTime>(lastUpdated.value);
+    }
+    if (synced.present) {
+      map['synced'] = Variable<bool>(synced.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalPendingReviewsCompanion(')
+          ..write('id: $id, ')
+          ..write('orderType: $orderType, ')
+          ..write('reference: $reference, ')
+          ..write('data: $data, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('lastUpdated: $lastUpdated, ')
+          ..write('synced: $synced, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $LocalAdminCacheTable extends LocalAdminCache
+    with TableInfo<$LocalAdminCacheTable, LocalAdminCacheData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalAdminCacheTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _keyMeta = const VerificationMeta('key');
+  @override
+  late final GeneratedColumn<String> key = GeneratedColumn<String>(
+    'key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dataMeta = const VerificationMeta('data');
+  @override
+  late final GeneratedColumn<String> data = GeneratedColumn<String>(
+    'data',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [key, data, updatedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_admin_cache';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LocalAdminCacheData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('key')) {
+      context.handle(
+        _keyMeta,
+        key.isAcceptableOrUnknown(data['key']!, _keyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_keyMeta);
+    }
+    if (data.containsKey('data')) {
+      context.handle(
+        _dataMeta,
+        this.data.isAcceptableOrUnknown(data['data']!, _dataMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dataMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {key};
+  @override
+  LocalAdminCacheData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalAdminCacheData(
+      key: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}key'],
+      )!,
+      data: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}data'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $LocalAdminCacheTable createAlias(String alias) {
+    return $LocalAdminCacheTable(attachedDatabase, alias);
+  }
+}
+
+class LocalAdminCacheData extends DataClass
+    implements Insertable<LocalAdminCacheData> {
+  final String key;
+  final String data;
+  final DateTime updatedAt;
+  const LocalAdminCacheData({
+    required this.key,
+    required this.data,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['key'] = Variable<String>(key);
+    map['data'] = Variable<String>(data);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  LocalAdminCacheCompanion toCompanion(bool nullToAbsent) {
+    return LocalAdminCacheCompanion(
+      key: Value(key),
+      data: Value(data),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory LocalAdminCacheData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalAdminCacheData(
+      key: serializer.fromJson<String>(json['key']),
+      data: serializer.fromJson<String>(json['data']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'key': serializer.toJson<String>(key),
+      'data': serializer.toJson<String>(data),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  LocalAdminCacheData copyWith({
+    String? key,
+    String? data,
+    DateTime? updatedAt,
+  }) => LocalAdminCacheData(
+    key: key ?? this.key,
+    data: data ?? this.data,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  LocalAdminCacheData copyWithCompanion(LocalAdminCacheCompanion data) {
+    return LocalAdminCacheData(
+      key: data.key.present ? data.key.value : this.key,
+      data: data.data.present ? data.data.value : this.data,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalAdminCacheData(')
+          ..write('key: $key, ')
+          ..write('data: $data, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(key, data, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalAdminCacheData &&
+          other.key == this.key &&
+          other.data == this.data &&
+          other.updatedAt == this.updatedAt);
+}
+
+class LocalAdminCacheCompanion extends UpdateCompanion<LocalAdminCacheData> {
+  final Value<String> key;
+  final Value<String> data;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const LocalAdminCacheCompanion({
+    this.key = const Value.absent(),
+    this.data = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocalAdminCacheCompanion.insert({
+    required String key,
+    required String data,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : key = Value(key),
+       data = Value(data),
+       updatedAt = Value(updatedAt);
+  static Insertable<LocalAdminCacheData> custom({
+    Expression<String>? key,
+    Expression<String>? data,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (key != null) 'key': key,
+      if (data != null) 'data': data,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocalAdminCacheCompanion copyWith({
+    Value<String>? key,
+    Value<String>? data,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return LocalAdminCacheCompanion(
+      key: key ?? this.key,
+      data: data ?? this.data,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (key.present) {
+      map['key'] = Variable<String>(key.value);
+    }
+    if (data.present) {
+      map['data'] = Variable<String>(data.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalAdminCacheCompanion(')
+          ..write('key: $key, ')
+          ..write('data: $data, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $LocalTasksTable localTasks = $LocalTasksTable(this);
   late final $LocalInventoryTable localInventory = $LocalInventoryTable(this);
   late final $SyncQueueTable syncQueue = $SyncQueueTable(this);
+  late final $LocalPendingReviewsTable localPendingReviews =
+      $LocalPendingReviewsTable(this);
+  late final $LocalAdminCacheTable localAdminCache = $LocalAdminCacheTable(
+    this,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1143,6 +1927,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     localTasks,
     localInventory,
     syncQueue,
+    localPendingReviews,
+    localAdminCache,
   ];
 }
 
@@ -1772,6 +2558,453 @@ typedef $$SyncQueueTableProcessedTableManager =
       SyncQueueData,
       PrefetchHooks Function()
     >;
+typedef $$LocalPendingReviewsTableCreateCompanionBuilder =
+    LocalPendingReviewsCompanion Function({
+      required String id,
+      required String orderType,
+      required String reference,
+      required String data,
+      required String status,
+      required DateTime createdAt,
+      required DateTime lastUpdated,
+      Value<bool> synced,
+      Value<int> rowid,
+    });
+typedef $$LocalPendingReviewsTableUpdateCompanionBuilder =
+    LocalPendingReviewsCompanion Function({
+      Value<String> id,
+      Value<String> orderType,
+      Value<String> reference,
+      Value<String> data,
+      Value<String> status,
+      Value<DateTime> createdAt,
+      Value<DateTime> lastUpdated,
+      Value<bool> synced,
+      Value<int> rowid,
+    });
+
+class $$LocalPendingReviewsTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalPendingReviewsTable> {
+  $$LocalPendingReviewsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get orderType => $composableBuilder(
+    column: $table.orderType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reference => $composableBuilder(
+    column: $table.reference,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get data => $composableBuilder(
+    column: $table.data,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lastUpdated => $composableBuilder(
+    column: $table.lastUpdated,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get synced => $composableBuilder(
+    column: $table.synced,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LocalPendingReviewsTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalPendingReviewsTable> {
+  $$LocalPendingReviewsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get orderType => $composableBuilder(
+    column: $table.orderType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reference => $composableBuilder(
+    column: $table.reference,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get data => $composableBuilder(
+    column: $table.data,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lastUpdated => $composableBuilder(
+    column: $table.lastUpdated,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get synced => $composableBuilder(
+    column: $table.synced,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LocalPendingReviewsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalPendingReviewsTable> {
+  $$LocalPendingReviewsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get orderType =>
+      $composableBuilder(column: $table.orderType, builder: (column) => column);
+
+  GeneratedColumn<String> get reference =>
+      $composableBuilder(column: $table.reference, builder: (column) => column);
+
+  GeneratedColumn<String> get data =>
+      $composableBuilder(column: $table.data, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get lastUpdated => $composableBuilder(
+    column: $table.lastUpdated,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get synced =>
+      $composableBuilder(column: $table.synced, builder: (column) => column);
+}
+
+class $$LocalPendingReviewsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LocalPendingReviewsTable,
+          LocalPendingReview,
+          $$LocalPendingReviewsTableFilterComposer,
+          $$LocalPendingReviewsTableOrderingComposer,
+          $$LocalPendingReviewsTableAnnotationComposer,
+          $$LocalPendingReviewsTableCreateCompanionBuilder,
+          $$LocalPendingReviewsTableUpdateCompanionBuilder,
+          (
+            LocalPendingReview,
+            BaseReferences<
+              _$AppDatabase,
+              $LocalPendingReviewsTable,
+              LocalPendingReview
+            >,
+          ),
+          LocalPendingReview,
+          PrefetchHooks Function()
+        > {
+  $$LocalPendingReviewsTableTableManager(
+    _$AppDatabase db,
+    $LocalPendingReviewsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalPendingReviewsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocalPendingReviewsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$LocalPendingReviewsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> orderType = const Value.absent(),
+                Value<String> reference = const Value.absent(),
+                Value<String> data = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> lastUpdated = const Value.absent(),
+                Value<bool> synced = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalPendingReviewsCompanion(
+                id: id,
+                orderType: orderType,
+                reference: reference,
+                data: data,
+                status: status,
+                createdAt: createdAt,
+                lastUpdated: lastUpdated,
+                synced: synced,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String orderType,
+                required String reference,
+                required String data,
+                required String status,
+                required DateTime createdAt,
+                required DateTime lastUpdated,
+                Value<bool> synced = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalPendingReviewsCompanion.insert(
+                id: id,
+                orderType: orderType,
+                reference: reference,
+                data: data,
+                status: status,
+                createdAt: createdAt,
+                lastUpdated: lastUpdated,
+                synced: synced,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LocalPendingReviewsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LocalPendingReviewsTable,
+      LocalPendingReview,
+      $$LocalPendingReviewsTableFilterComposer,
+      $$LocalPendingReviewsTableOrderingComposer,
+      $$LocalPendingReviewsTableAnnotationComposer,
+      $$LocalPendingReviewsTableCreateCompanionBuilder,
+      $$LocalPendingReviewsTableUpdateCompanionBuilder,
+      (
+        LocalPendingReview,
+        BaseReferences<
+          _$AppDatabase,
+          $LocalPendingReviewsTable,
+          LocalPendingReview
+        >,
+      ),
+      LocalPendingReview,
+      PrefetchHooks Function()
+    >;
+typedef $$LocalAdminCacheTableCreateCompanionBuilder =
+    LocalAdminCacheCompanion Function({
+      required String key,
+      required String data,
+      required DateTime updatedAt,
+      Value<int> rowid,
+    });
+typedef $$LocalAdminCacheTableUpdateCompanionBuilder =
+    LocalAdminCacheCompanion Function({
+      Value<String> key,
+      Value<String> data,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$LocalAdminCacheTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalAdminCacheTable> {
+  $$LocalAdminCacheTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get key => $composableBuilder(
+    column: $table.key,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get data => $composableBuilder(
+    column: $table.data,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LocalAdminCacheTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalAdminCacheTable> {
+  $$LocalAdminCacheTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get key => $composableBuilder(
+    column: $table.key,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get data => $composableBuilder(
+    column: $table.data,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LocalAdminCacheTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalAdminCacheTable> {
+  $$LocalAdminCacheTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get key =>
+      $composableBuilder(column: $table.key, builder: (column) => column);
+
+  GeneratedColumn<String> get data =>
+      $composableBuilder(column: $table.data, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$LocalAdminCacheTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LocalAdminCacheTable,
+          LocalAdminCacheData,
+          $$LocalAdminCacheTableFilterComposer,
+          $$LocalAdminCacheTableOrderingComposer,
+          $$LocalAdminCacheTableAnnotationComposer,
+          $$LocalAdminCacheTableCreateCompanionBuilder,
+          $$LocalAdminCacheTableUpdateCompanionBuilder,
+          (
+            LocalAdminCacheData,
+            BaseReferences<
+              _$AppDatabase,
+              $LocalAdminCacheTable,
+              LocalAdminCacheData
+            >,
+          ),
+          LocalAdminCacheData,
+          PrefetchHooks Function()
+        > {
+  $$LocalAdminCacheTableTableManager(
+    _$AppDatabase db,
+    $LocalAdminCacheTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalAdminCacheTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocalAdminCacheTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LocalAdminCacheTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> key = const Value.absent(),
+                Value<String> data = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalAdminCacheCompanion(
+                key: key,
+                data: data,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String key,
+                required String data,
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => LocalAdminCacheCompanion.insert(
+                key: key,
+                data: data,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LocalAdminCacheTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LocalAdminCacheTable,
+      LocalAdminCacheData,
+      $$LocalAdminCacheTableFilterComposer,
+      $$LocalAdminCacheTableOrderingComposer,
+      $$LocalAdminCacheTableAnnotationComposer,
+      $$LocalAdminCacheTableCreateCompanionBuilder,
+      $$LocalAdminCacheTableUpdateCompanionBuilder,
+      (
+        LocalAdminCacheData,
+        BaseReferences<
+          _$AppDatabase,
+          $LocalAdminCacheTable,
+          LocalAdminCacheData
+        >,
+      ),
+      LocalAdminCacheData,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -1782,4 +3015,8 @@ class $AppDatabaseManager {
       $$LocalInventoryTableTableManager(_db, _db.localInventory);
   $$SyncQueueTableTableManager get syncQueue =>
       $$SyncQueueTableTableManager(_db, _db.syncQueue);
+  $$LocalPendingReviewsTableTableManager get localPendingReviews =>
+      $$LocalPendingReviewsTableTableManager(_db, _db.localPendingReviews);
+  $$LocalAdminCacheTableTableManager get localAdminCache =>
+      $$LocalAdminCacheTableTableManager(_db, _db.localAdminCache);
 }

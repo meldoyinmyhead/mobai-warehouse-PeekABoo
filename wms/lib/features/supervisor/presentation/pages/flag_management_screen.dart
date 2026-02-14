@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:wms/core/theme/app_theme.dart';
-import 'package:wms/core/widgets/layout/supervisorBottonBar.dart';
+import 'package:wms/core/widgets/layout/supervisor_bottom_bar.dart';
 import 'package:wms/features/supervisor/data/models/flag_model.dart';
 import 'package:wms/features/supervisor/presentation/cubits/flag_cubit.dart';
+import 'package:wms/features/supervisor/data/repositories/flag_repository.dart';
+
 
 class FlagManagementScreen extends StatefulWidget {
   const FlagManagementScreen({super.key});
@@ -19,11 +21,10 @@ class _FlagManagementScreenState extends State<FlagManagementScreen> {
   
   final List<String> _filters = ['Tous', 'PENDING', 'IN_PROGRESS', 'RESOLVED'];
 
-  @override
-  void initState() {
-    super.initState();
+  void _loadFlags() {
     context.read<FlagCubit>().loadFlags();
   }
+
 
   void _onNavBarTap(int index) {
       if (index == _currentIndex) return;
@@ -49,15 +50,18 @@ class _FlagManagementScreenState extends State<FlagManagementScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.veryLightGrey,
-      appBar: AppBar(
-        title: Text('Gestion des Signalements', style: GoogleFonts.lato(color: Colors.black87, fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-        automaticallyImplyLeading: false,
-      ),
+    return BlocProvider(
+      create: (context) => FlagCubit(FlagRepository())..loadFlags(),
+      child: Scaffold(
+        backgroundColor: AppTheme.veryLightGrey,
+        appBar: AppBar(
+          title: Text('Gestion des Signalements', style: GoogleFonts.lato(color: Colors.black87, fontWeight: FontWeight.bold)),
+          backgroundColor: Colors.white,
+          elevation: 0,
+          centerTitle: true,
+          automaticallyImplyLeading: false,
+        ),
+
       body: Column(
         children: [
           _buildFilterBar(),
@@ -98,6 +102,7 @@ class _FlagManagementScreenState extends State<FlagManagementScreen> {
       bottomNavigationBar: SupervisorBottomBar(
         currentIndex: _currentIndex,
         onTap: _onNavBarTap,
+      ),
       ),
     );
   }

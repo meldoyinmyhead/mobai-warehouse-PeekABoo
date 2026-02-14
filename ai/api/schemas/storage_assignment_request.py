@@ -111,3 +111,72 @@ class StorageAssignmentResponse(BaseModel):
     summary: AssignmentSummary
     assignments: List[AssignmentResult]
     skipped: List[dict]                       = Field(default_factory=list, description="Products that failed")
+
+
+# ═══════════════════════════════════════════════════════════════════
+#  SCHEMAS — Storage Path Computation
+# ═══════════════════════════════════════════════════════════════════
+
+class PathItem(BaseModel):
+    """Single product for path computation."""
+    product_id: str = Field(..., examples=["31851"], description="Product ID")
+    quantity: int   = Field(1, ge=1, description="Number of units")
+
+
+class PathRequest(BaseModel):
+    """POST body for /compute-storage-paths."""
+    items: List[PathItem] = Field(..., min_length=1, description="List of products to compute paths for")
+
+
+class ProductPathDetail(BaseModel):
+    """Detailed path information for a single product unit."""
+    product_id: str
+    unit: int
+    total_units: int
+    category: Optional[str] = None
+    abc_class: Optional[str] = None
+    
+    # Source information (receiving zone)
+    source: str = "Ground Floor (0) - Receiving Zone"
+    
+    # Target information (assigned slot)
+    target_slot: Optional[str] = None
+    target_floor: Optional[int] = None
+    target_position: Optional[dict] = None  # {"row": int, "col": int}
+    
+    # Distance breakdown
+    elevator_distance: Optional[int] = None
+    walk_distance: Optional[int] = None
+    total_distance: Optional[int] = None
+    
+    # Full path (list of [row, col] coordinates on target floor)
+    path: Optional[List[List[int]]] = None
+    
+    # Cost metrics
+    placement_cost: Optional[float] = None
+    
+    # Journey summary
+    journey_summary: Optional[str] = None
+    
+    # Error if assignment failed
+    error: Optional[str] = None
+
+
+class PathSummary(BaseModel):
+    """Aggregate statistics for path computation."""
+    total_products: int
+    total_units: int
+    successfully_assigned: int
+    failed: int
+    total_distance: int
+    total_elevator_distance: int
+    total_walk_distance: int
+    unique_slots_used: int
+    floor_distribution: dict
+
+
+class PathResponse(BaseModel):
+    """Top-level response for /compute-storage-paths."""
+    success: bool
+    summary: PathSummary
+    paths: List[ProductPathDetail]

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wms/core/theme/app_theme.dart';
+import 'package:wms/core/utils/snackbar_utils.dart';
 import 'package:wms/features/logistics/data/models/task_model.dart';
 import 'package:wms/features/logistics/presentation/cubits/employee_task_cubit.dart';
+import 'package:wms/features/auth/presentation/cubits/auth_cubit.dart';
 
 class EmployeeAllTasksScreen extends StatefulWidget {
   const EmployeeAllTasksScreen({super.key});
@@ -12,6 +14,50 @@ class EmployeeAllTasksScreen extends StatefulWidget {
 }
 
 class _EmployeeAllTasksScreenState extends State<EmployeeAllTasksScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _loadTasks();
+  }
+
+  void _loadTasks() {
+    final authState = context.read<AuthCubit>().state;
+    if (authState is Authenticated) {
+      context.read<EmployeeTaskCubit>().loadTasks(authState.user.id);
+    }
+  }
+
+  /// Enregistrer: marks task completed (backend picking_orders + audit_log; locally LocalTasks + SyncQueue if offline).
+  Future<void> _onEnregistrer(BuildContext context, TaskModel task) async {
+    final authState = context.read<AuthCubit>().state;
+    if (authState is! Authenticated) {
+      SnackbarUtils.showError(context, 'Session expirée. Reconnectez-vous.');
+      return;
+    }
+    final userId = authState.user.id;
+    try {
+      await context.read<EmployeeTaskCubit>().completeTask(task.id, userId);
+      await context.read<AuthCubit>().logUserAction(
+            action: 'TASK_RECORDED',
+            entityType: 'PICKING_ORDER',
+            entityId: task.id,
+            payload: {
+              'task_type': task.type.name,
+              'task_title': task.title,
+              'timestamp': DateTime.now().toIso8601String(),
+            },
+          );
+      if (mounted) {
+        SnackbarUtils.showSuccess(context, 'Tâche enregistrée. Synchronisation en cours si hors ligne.');
+        _loadTasks();
+      }
+    } catch (e) {
+      if (mounted) {
+        SnackbarUtils.showError(context, 'Erreur: ${e.toString().replaceFirst(RegExp(r'^Exception:?\s*'), '')}');
+      }
+    }
+  }
+
   final List<String> _filters = [
     'Tout',
     'Réception',
@@ -56,11 +102,14 @@ class _EmployeeAllTasksScreenState extends State<EmployeeAllTasksScreen> {
             ),
           ),
         ),
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [Image.asset('assets/images/logo.png', height: 30)],
-        ),
+        centerTitle: true,
+        title: Image.asset('assets/images/logo.png', height: 30),
+        iconTheme: const IconThemeData(color: Color(0xFF5D6266)),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh, color: Color(0xFF5D6266)),
+            onPressed: _loadTasks,
+          ),
           IconButton(
             icon: const Icon(Icons.settings_outlined, color: Color(0xFF5D6266)),
             onPressed: () => Navigator.pushNamed(context, '/employee/settings'),
@@ -190,19 +239,25 @@ class _EmployeeAllTasksScreenState extends State<EmployeeAllTasksScreen> {
                 if (state is EmployeeTaskLoading) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (state is EmployeeTaskLoaded) {
-                  final tasks = state.filter == 'All'
-                      ? state.tasks
-                      : state.tasks
-                          .where((t) =>
-                              t.title.contains(state.filter) ||
-                              t.type.toString().contains(state.filter))
-                          .toList();
+                  final tasks = context.read<EmployeeTaskCubit>().filteredTasks;
 
                   if (tasks.isEmpty) {
                     return Center(
-                      child: Text(
-                        "Aucune tâche trouvée",
-                        style: TextStyle(color: Colors.grey[600]),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.assignment_outlined, size: 64, color: Colors.grey[300]),
+                          const SizedBox(height: 16),
+                          Text(
+                            "Aucune tâche trouvée",
+                            style: TextStyle(color: Colors.grey[600], fontSize: 16),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            "Essayez de changer le filtre",
+                            style: TextStyle(color: Colors.grey[400], fontSize: 14),
+                          ),
+                        ],
                       ),
                     );
                   }
@@ -228,24 +283,33 @@ class _EmployeeAllTasksScreenState extends State<EmployeeAllTasksScreen> {
   Widget _buildTaskCard(BuildContext context, TaskModel task, double screenWidth) {
     Color iconColor = AppTheme.lightBlue;
     IconData icon = Icons.inventory_2;
-    String taskType = 'Réception';
+    String taskTypeLabel = 'Général';
 
-    if (task.title.contains('Receipt')) {
-      iconColor = AppTheme.lightBlue;
-      icon = Icons.inventory_2;
-      taskType = 'Réception';
-    } else if (task.title.contains('Storage')) {
-      iconColor = AppTheme.green;
-      icon = Icons.warehouse_outlined;
-      taskType = 'Stockage';
-    } else if (task.title.contains('Picking')) {
-      iconColor = AppTheme.lightBlue;
-      icon = Icons.shopping_cart_outlined;
-      taskType = 'Préparation';
-    } else if (task.title.contains('Delivery')) {
-      iconColor = AppTheme.darkBlue;
-      icon = Icons.local_shipping_outlined;
-      taskType = 'Livraison';
+    switch (task.type) {
+      case TaskType.receipt:
+        iconColor = AppTheme.lightBlue;
+        icon = Icons.inventory_2;
+        taskTypeLabel = 'Réception';
+        break;
+      case TaskType.storage:
+        iconColor = AppTheme.green;
+        icon = Icons.warehouse_outlined;
+        taskTypeLabel = 'Stockage';
+        break;
+      case TaskType.picking:
+        iconColor = AppTheme.lightBlue;
+        icon = Icons.shopping_cart_outlined;
+        taskTypeLabel = 'Préparation';
+        break;
+      case TaskType.delivery:
+        iconColor = AppTheme.darkBlue;
+        icon = Icons.local_shipping_outlined;
+        taskTypeLabel = 'Livraison';
+        break;
+      default:
+        iconColor = Colors.grey;
+        icon = Icons.task_outlined;
+        taskTypeLabel = 'Tâche';
     }
 
     return Card(
@@ -282,7 +346,7 @@ class _EmployeeAllTasksScreenState extends State<EmployeeAllTasksScreen> {
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
-                              taskType,
+                              taskTypeLabel,
                               style: TextStyle(
                                 color: iconColor,
                                 fontSize: 11,
@@ -307,7 +371,7 @@ class _EmployeeAllTasksScreenState extends State<EmployeeAllTasksScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Téléphones mobiles Samsung',
+                        task.title,
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 15,
@@ -317,17 +381,20 @@ class _EmployeeAllTasksScreenState extends State<EmployeeAllTasksScreen> {
                       const SizedBox(height: 6),
                       Row(
                         children: [
-                          Icon(Icons.location_on_outlined, size: 14, color: Colors.grey[500]),
+                          Icon(Icons.description_outlined, size: 14, color: Colors.grey[500]),
                           const SizedBox(width: 4),
-                          Text(
-                            'Porte A',
-                            style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                          Expanded(
+                            child: Text(
+                              task.description,
+                              style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Commande: ${task.id}',
+                        'ID: ${task.id.split('-').first}',
                         style: TextStyle(color: Colors.grey[500], fontSize: 11),
                       ),
                     ],
@@ -348,7 +415,7 @@ class _EmployeeAllTasksScreenState extends State<EmployeeAllTasksScreen> {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.lightBlue,
+                      backgroundColor: iconColor,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
@@ -363,13 +430,11 @@ class _EmployeeAllTasksScreenState extends State<EmployeeAllTasksScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: () {
-                      // Log Directly
-                    },
+                    onPressed: () => _onEnregistrer(context, task),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: AppTheme.lightBlue,
+                      foregroundColor: iconColor,
                       padding: const EdgeInsets.symmetric(vertical: 12),
-                      side: const BorderSide(color: AppTheme.lightBlue),
+                      side: BorderSide(color: iconColor),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),

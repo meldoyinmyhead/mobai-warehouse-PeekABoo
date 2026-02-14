@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wms/core/theme/app_theme.dart';
 import 'package:wms/features/auth/presentation/cubits/auth_cubit.dart';
+import 'package:wms/core/routes/app_router.dart';
 
 class EmployeeProfileScreen extends StatefulWidget {
   const EmployeeProfileScreen({super.key});
@@ -160,6 +161,29 @@ class _EmployeeProfileScreenState extends State<EmployeeProfileScreen> {
                         const Divider(height: 24),
                         _buildWorkRow('Statut:', isActive ? 'Actif' : 'Inactif'),
                       ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 32),
+                  
+                  // Logout Button
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          context.read<AuthCubit>().logout();
+                          Navigator.pushNamedAndRemoveUntil(context, AppRouter.landing, (route) => false);
+                        },
+                        icon: const Icon(Icons.logout, color: Colors.red),
+                        label: const Text('Se déconnecter', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Colors.red),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                      ),
                     ),
                   ),
 

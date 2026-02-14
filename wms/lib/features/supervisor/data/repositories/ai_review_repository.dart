@@ -1,122 +1,239 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'dart:convert';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:drift/drift.dart' as drift;
+import 'package:http/http.dart' as http;
+import 'package:wms/core/app_config.dart';
+import 'package:wms/core/database/app_database.dart';
 import 'package:wms/features/supervisor/data/models/ai_override_model.dart';
 
+/// Fetches pending AI reviews from FastAPI when online and caches in local DB.
+/// When offline: reads from LocalPendingReviews. Approve/override queue to SyncQueue and sync when online.
 class AiReviewRepository {
-  final SupabaseClient _supabase = Supabase.instance.client;
+  final AppDatabase _db;
+  final String _backendUrl;
+  final Connectivity _connectivity = Connectivity();
 
-  /// Fetch all orders pending AI validation
+  AiReviewRepository(this._db, {String? backendUrl})
+      : _backendUrl = backendUrl ?? AppConfig.backendUrl;
+
+  Future<bool> get _isOnline async {
+    final results = await _connectivity.checkConnectivity();
+    return results.any((r) =>
+        r == ConnectivityResult.wifi ||
+        r == ConnectivityResult.mobile ||
+        r == ConnectivityResult.ethernet);
+  }
+
+  /// Get pending AI orders: from backend when online (and cache locally), from local DB when offline.
   Future<List<Map<String, dynamic>>> getPendingAiOrders() async {
-    // 1. Get Pending Review Preparation Orders
-    final prepResponse = await _supabase
-        .from('preparation_orders')
-        .select('''
-          *,
-          preparation_order_lines (
-            id,
-            quantite_ai,
-            produits (sku, nom_produit)
-          )
-        ''')
-        .eq('statut', 'PENDING_REVIEW');
-    
-    print('DEBUG: Prep Response: $prepResponse');
+    if (await _isOnline) {
+      try {
+        final r = await http
+            .get(Uri.parse('$_backendUrl/supervisor/pending-reviews'))
+            .timeout(const Duration(seconds: 15));
+        if (r.statusCode == 200) {
+          final data = jsonDecode(r.body) as Map<String, dynamic>;
+          final prepList = data['preparation_orders'] as List? ?? [];
+          final pickList = data['picking_orders'] as List? ?? [];
+          await _cachePendingReviews(prepList, pickList);
+          return _formatOrdersForUi(prepList, pickList);
+        }
+      } catch (_) {}
+    }
 
-    // 2. Get Pending Review Picking Orders
-    final pickResponse = await _supabase
-        .from('picking_orders')
-        .select('''
-          *,
-          picking_order_stops (
-            stop_sequence,
-            quantite,
-            produits (sku, nom_produit)
-          )
-        ''')
-        .eq('statut', 'PENDING_REVIEW');
-    
-    print('DEBUG: Pick Response: $pickResponse');
+    // Offline: read from local cache
+    final local = await (_db.select(_db.localPendingReviews)
+          ..where((t) => t.status.equals('pending')))
+        .get();
+    return local.map((row) {
+      final m = jsonDecode(row.data) as Map<String, dynamic>;
+      return Map<String, dynamic>.from(m);
+    }).toList();
+  }
 
-    // Combine and format for the UI
-    List<Map<String, dynamic>> orders = [];
-    final random = DateTime.now().millisecondsSinceEpoch; // Simple seed
+  Future<void> _cachePendingReviews(List prepList, List pickList) async {
+    final now = DateTime.now();
+    for (final o in prepList) {
+      final id = o['id']?.toString();
+      if (id == null) continue;
+      await _db.into(_db.localPendingReviews).insertOnConflictUpdate(
+        LocalPendingReviewsCompanion(
+          id: drift.Value(id),
+          orderType: const drift.Value('preparation'),
+          reference: drift.Value(o['reference']?.toString() ?? ''),
+          data: drift.Value(jsonEncode(o)),
+          status: drift.Value(o['statut']?.toString() ?? 'pending'),
+          createdAt: drift.Value(now),
+          lastUpdated: drift.Value(now),
+          synced: const drift.Value(false),
+        ),
+      );
+    }
+    for (final o in pickList) {
+      final id = o['id']?.toString();
+      if (id == null) continue;
+      await _db.into(_db.localPendingReviews).insertOnConflictUpdate(
+        LocalPendingReviewsCompanion(
+          id: drift.Value(id),
+          orderType: const drift.Value('picking'),
+          reference: drift.Value(o['reference']?.toString() ?? ''),
+          data: drift.Value(jsonEncode(o)),
+          status: drift.Value(o['statut']?.toString() ?? 'pending'),
+          createdAt: drift.Value(now),
+          lastUpdated: drift.Value(now),
+          synced: const drift.Value(false),
+        ),
+      );
+    }
+  }
 
-    for (var p in prepResponse) {
+  List<Map<String, dynamic>> _formatOrdersForUi(List prepList, List pickList) {
+    final orders = <Map<String, dynamic>>[];
+    for (final p in prepList) {
+      final lines = p['lines'] as List? ?? [];
+      final first = lines.isNotEmpty ? lines[0] as Map<String, dynamic>? : null;
       orders.add({
         'id': p['id'],
         'reference': p['reference'],
         'type': AiOrderType.preparation,
-        'product': (p['preparation_order_lines']?.isNotEmpty == true && 
-                    p['preparation_order_lines'][0]['produits'] != null) 
-            ? '${p['preparation_order_lines'][0]['produits']['sku'] ?? 'SKU?'} - ${p['preparation_order_lines'][0]['produits']['nom_produit'] ?? 'Produit?'}' 
+        'product': first != null
+            ? '${first['sku'] ?? 'SKU?'} - ${first['nom_produit'] ?? 'Produit?'}'
             : 'Multi-produits',
-        'sku': (p['preparation_order_lines']?.isNotEmpty == true && 
-                    p['preparation_order_lines'][0]['produits'] != null) 
-            ? p['preparation_order_lines'][0]['produits']['sku'] ?? 'SKU-000'
-            : 'SKU-MIXED',
-        'product_name': (p['preparation_order_lines']?.isNotEmpty == true && 
-                    p['preparation_order_lines'][0]['produits'] != null) 
-            ? p['preparation_order_lines'][0]['produits']['nom_produit'] ?? 'Produit Inconnu'
-            : 'Multi-produits',
-        'ai_quantity': p['preparation_order_lines']?.isNotEmpty == true
-            ? (p['preparation_order_lines'][0]['quantite_ai'] ?? 0)
-            : 0,
+        'sku': first?['sku'] ?? 'SKU-000',
+        'product_name': first?['nom_produit'] ?? 'Multi-produits',
+        'ai_quantity': first?['quantite_ai'] ?? 0,
         'status': p['statut'],
         'created_at': p['created_at'],
-        // Mock Data for UI Design
-        'confidence': 85 + (p['reference'].hashCode % 14), // 85-98%
+        'confidence': 85,
         'forecast_date': DateTime.now().add(const Duration(days: 1)),
-        'reasoning': "Historical sales data indicates a 20% spike in demand for this SKU next week due to seasonal trends.",
+        'reasoning': 'AI forecast based on historical demand.',
       });
     }
-
-    for (var p in pickResponse) {
+    for (final p in pickList) {
+      final stops = p['stops'] as List? ?? [];
+      final first = stops.isNotEmpty ? stops[0] as Map<String, dynamic>? : null;
       orders.add({
         'id': p['id'],
         'reference': p['reference'],
         'type': AiOrderType.picking,
-        'product': (p['picking_order_stops']?.isNotEmpty == true && 
-                    p['picking_order_stops'][0]['produits'] != null)
-             ? p['picking_order_stops'][0]['produits']['nom_produit'] ?? 'Produit Inconnu'
-             : 'Ordre de Picking',
-        'sku': (p['picking_order_stops']?.isNotEmpty == true && 
-                    p['picking_order_stops'][0]['produits'] != null)
-             ? p['picking_order_stops'][0]['produits']['sku'] ?? 'SKU-000'
-             : 'SKU-ROUTE',
-         'product_name': (p['picking_order_stops']?.isNotEmpty == true && 
-                    p['picking_order_stops'][0]['produits'] != null)
-             ? p['picking_order_stops'][0]['produits']['nom_produit'] ?? 'Produit Inconnu'
-             : 'Optimisation de Route',
+        'product': first?['nom_produit'] ?? 'Ordre de Picking',
+        'sku': first?['sku'] ?? 'SKU-ROUTE',
+        'product_name': first?['nom_produit'] ?? 'Optimisation de Route',
         'route_distance': p['route_distance_m'],
         'status': p['statut'],
         'created_at': p['created_at'],
-        // Mock Data
-        'confidence': 88 + (p['reference'].hashCode % 11), // 88-98%
+        'confidence': 88,
         'forecast_date': DateTime.now(),
-        'reasoning': "Route optimization reduced travel distance by 15% compared to standard FIFO allocation.",
+        'reasoning': 'Route optimization minimises travel distance.',
       });
     }
-
     return orders;
   }
 
+  /// Approve order: online → call backend; offline → queue and update local.
   Future<void> approveOrder(String orderId, AiOrderType type) async {
-    final table = type == AiOrderType.preparation ? 'preparation_orders' : 'picking_orders';
-    await _supabase
-        .from(table)
-        .update({'statut': 'APPROVED'})
-        .eq('id', orderId);
+    if (await _isOnline) {
+      try {
+        final path = type == AiOrderType.picking
+            ? '$_backendUrl/supervisor/picking-orders/$orderId/approve'
+            : '$_backendUrl/supervisor/preparation-orders/$orderId/approve';
+        final r = await http.post(Uri.parse(path)).timeout(const Duration(seconds: 15));
+        if (r.statusCode == 200) {
+          await _markLocalReviewStatus(orderId, 'approved');
+          return;
+        }
+      } catch (_) {}
+    }
+
+    // Offline: queue for sync and update local
+    await _db.into(_db.syncQueue).insert(
+      SyncQueueCompanion.insert(
+        actionType: 'AI_APPROVE',
+        payload: jsonEncode({
+          'order_id': orderId,
+          'order_type': type.name,
+        }),
+        timestamp: DateTime.now(),
+        status: const drift.Value('pending'),
+      ),
+    );
+    await _markLocalReviewStatus(orderId, 'approved');
   }
 
+  /// Override with justification: online → POST /ai/log-override; offline → queue (justification stored in payload).
   Future<void> saveOverride(AiOverrideModel override) async {
-    await _supabase
-        .from('ai_overrides')
-        .insert(override.toMap());
-        
-    // Also update the original order status
-    final table = override.orderType == AiOrderType.preparation ? 'preparation_orders' : 'picking_orders';
-    await _supabase
-        .from(table)
-        .update({'statut': 'OVERRIDDEN'})
-        .eq('id', override.orderId);
+    final payload = {
+      'order_type': override.orderType.name.toUpperCase(),
+      'order_id': override.orderId,
+      'justification': override.justification,
+      'original_ai_suggestion': override.aiSuggestion,
+      'user_override_value': override.finalDecision,
+    };
+
+    if (await _isOnline) {
+      try {
+        final body = {
+          'user_id': override.overriddenBy,
+          ...payload,
+        };
+        final r = await http
+            .post(
+              Uri.parse('$_backendUrl/ai/log-override'),
+              headers: {'Content-Type': 'application/json'},
+              body: jsonEncode(body),
+            )
+            .timeout(const Duration(seconds: 15));
+        if (r.statusCode == 200) {
+          await _markLocalReviewStatus(override.orderId, 'overridden');
+          return;
+        }
+      } catch (_) {}
+    }
+
+    // Offline: queue override (justification and decision stored in SyncQueue)
+    await _db.into(_db.syncQueue).insert(
+      SyncQueueCompanion.insert(
+        actionType: 'AI_OVERRIDE',
+        payload: jsonEncode({
+          ...payload,
+          'user_id': override.overriddenBy,
+        }),
+        timestamp: DateTime.now(),
+        status: const drift.Value('pending'),
+      ),
+    );
+    await _markLocalReviewStatus(override.orderId, 'overridden');
+  }
+
+  Future<void> _markLocalReviewStatus(String orderId, String status) async {
+    await (_db.update(_db.localPendingReviews)..where((t) => t.id.equals(orderId)))
+        .write(LocalPendingReviewsCompanion(
+      status: drift.Value(status),
+      lastUpdated: drift.Value(DateTime.now()),
+    ));
+  }
+
+  Future<List<Map<String, dynamic>>> getEmployees() async {
+    if (await _isOnline) {
+      try {
+        final r = await http.get(Uri.parse('$_backendUrl/employees')).timeout(const Duration(seconds: 10));
+        if (r.statusCode == 200) {
+          return List<Map<String, dynamic>>.from(jsonDecode(r.body));
+        }
+      } catch (_) {}
+    }
+    return [];
+  }
+
+  Future<List<Map<String, dynamic>>> getChariots() async {
+    if (await _isOnline) {
+      try {
+        final r = await http.get(Uri.parse('$_backendUrl/chariots')).timeout(const Duration(seconds: 10));
+        if (r.statusCode == 200) {
+          return List<Map<String, dynamic>>.from(jsonDecode(r.body));
+        }
+      } catch (_) {}
+    }
+    return [];
   }
 }

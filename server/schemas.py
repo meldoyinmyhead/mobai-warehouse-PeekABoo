@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr
-from typing import List, Optional, Any
+from typing import List, Optional, Any, Dict
 from uuid import UUID
 from datetime import datetime, date
 from models import Role, TransactionType, TransactionStatus, Zone, EmplacementType, OrderStatus, ChariotStatus
@@ -18,21 +18,59 @@ class TokenResponse(BaseModel):
 class EntrepotBase(BaseModel):
     code_entrepot: str
     nom_entrepot: str
+    adresse: Optional[str] = None
     ville: str
+    heures_ouverture: Optional[str] = None
+    manager_id: Optional[UUID] = None
+    largeur: float = 0.0
+    longueur: float = 0.0
+    hauteur: float = 0.0
+    type_climat: Optional[str] = None
+    layout_map: Optional[Dict] = None
     actif: bool = True
 
 class EntrepotCreate(EntrepotBase):
     pass
 
+class EntrepotUpdate(BaseModel):
+    nom_entrepot: Optional[str] = None
+    adresse: Optional[str] = None
+    ville: Optional[str] = None
+    heures_ouverture: Optional[str] = None
+    manager_id: Optional[UUID] = None
+    largeur: Optional[float] = None
+    longueur: Optional[float] = None
+    hauteur: Optional[float] = None
+    type_climat: Optional[str] = None
+    layout_map: Optional[Dict] = None
+    actif: Optional[bool] = None
+
+class EtageBase(BaseModel):
+    id_entrepot: UUID
+    nom_etage: str
+    code_etage: str
+    nombre_emplacements: int = 0
+
+class EtageCreate(EtageBase):
+    pass
+
+class Etage(EtageBase):
+    id: UUID
+    created_at: datetime
+    class Config:
+        from_attributes = True
+
 class Entrepot(EntrepotBase):
     id_entrepot: UUID
     created_at: datetime
+    etages: List[Etage] = []
     class Config:
         from_attributes = True
 
 class EmplacementBase(BaseModel):
     code_emplacement: str
     id_entrepot: UUID
+    id_etage: Optional[UUID] = None
     zone: Zone
     type_emplacement: EmplacementType
     niveau: int = 0
@@ -63,6 +101,18 @@ class Utilisateur(UtilisateurBase):
     id_utilisateur: UUID
     created_at: datetime
     last_login: Optional[datetime] = None
+    class Config:
+        from_attributes = True
+
+class ChariotBase(BaseModel):
+    code_chariot: str
+    statut: ChariotStatus
+    id_entrepot: UUID
+    last_known_location: Optional[UUID] = None
+    actif: bool = True
+
+class Chariot(ChariotBase):
+    id: UUID
     class Config:
         from_attributes = True
 
@@ -233,6 +283,7 @@ class OptimizedRoute(BaseModel):
     id: Optional[UUID] = None
     reference: Optional[str] = None
     assigned_to: Optional[UUID]
+    order_type: Optional[TransactionType] = TransactionType.PICKING
     total_distance_m: float
     stops: List[PickingStop]
 

@@ -41,4 +41,20 @@ class UserModel {
       'actif': isActive,
     };
   }
+
+  UserModel copyWith({
+    String? id,
+    String? fullName,
+    UserRole? role,
+    String? email,
+    bool? isActive,
+  }) {
+    return UserModel(
+      id: id ?? this.id,
+      fullName: fullName ?? this.fullName,
+      role: role ?? this.role,
+      email: email ?? this.email,
+      isActive: isActive ?? this.isActive,
+    );
+  }
 }
