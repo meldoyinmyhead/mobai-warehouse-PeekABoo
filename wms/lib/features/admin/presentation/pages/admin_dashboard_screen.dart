@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:wms/core/widgets/supervisorBottonBar.dart';
-import 'package:wms/features/warehouse/presentation/cubits/supervisor/dashboard_cubit.dart';
-import 'package:wms/features/warehouse/data/repositories/task_repository.dart';
+import 'package:wms/core/di/dependency_injection.dart';
 import 'package:wms/core/theme/app_theme.dart';
-import 'package:wms/features/warehouse/presentation/pages/admin/ai_performance_screen.dart';
-import 'package:wms/features/warehouse/presentation/pages/admin/access_logs.dart';
-import 'package:wms/features/warehouse/presentation/pages/admin/export_reports_screen.dart';
+import 'package:wms/core/widgets/adminBottomBar.dart';
+import 'package:wms/features/admin/presentation/pages/access_logs.dart';
+import 'package:wms/features/admin/presentation/pages/ai_performance_screen.dart';
+import 'package:wms/features/admin/presentation/pages/analysis.dart';
+import 'package:wms/features/admin/presentation/pages/create_user.dart';
+import 'package:wms/features/admin/presentation/pages/export_reports_screen.dart';
+import 'package:wms/features/admin/presentation/pages/user_management.dart';
+import 'package:wms/features/supervisor/presentation/cubits/dashboard_cubit.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -58,7 +61,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) =>
-          SupervisorDashboardCubit(TaskRepository())..loadDashboard(),
+          sl<SupervisorDashboardCubit>()..loadDashboard(),
       child: Scaffold(
         backgroundColor: AppTheme.veryLightGrey,
         appBar: AppBar(
@@ -108,7 +111,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             } else if (state is SupervisorDashboardError) {
               return Center(
                 child: Text(
-                  'Erreur: ${state.message}',
+                  'Erreur: ${(state as SupervisorDashboardError).message}',
                   style: GoogleFonts.lato(color: AppTheme.red),
                 ),
               );
@@ -155,7 +158,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) =>
-                                      const CreateNewUserScreen(),
+                                      CreateNewUserScreen(),
                                 ),
                               );
                             },
@@ -179,7 +182,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) =>
-                                            const AccessLogsScreen(),
+                                            AccessLogsScreen(),
                                       ),
                                     );
                                   },
@@ -200,7 +203,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) =>
-                                            const ExportReportsScreen(),
+                                            ExportReportsScreen(),
                                       ),
                                     );
                                   },
@@ -393,7 +396,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const AIPerformanceScreen(),
+                              builder: (context) => AIPerformanceScreen(),
                             ),
                           );
                         },
