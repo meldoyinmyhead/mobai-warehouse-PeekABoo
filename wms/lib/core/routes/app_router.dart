@@ -21,6 +21,9 @@ import 'package:wms/features/auth/presentation/pages/landing_page.dart';
 import 'package:wms/features/auth/presentation/pages/onboarding_screen.dart';
 import 'package:wms/features/auth/presentation/pages/role_selection_screen.dart';
 import 'package:wms/features/auth/presentation/pages/login_screen.dart';
+import 'package:wms/features/auth/presentation/pages/forgot_password_screen.dart';
+import 'package:wms/features/auth/presentation/pages/check_email_screen.dart';
+import 'package:wms/features/admin/presentation/pages/admin_dashboard_screen.dart';
 import 'package:wms/features/supervisor/presentation/pages/flag_management_screen.dart';
 import 'package:wms/features/supervisor/presentation/pages/supervisor_settings_screen.dart';
 import 'package:wms/features/admin/presentation/pages/admin_dashboard_screen.dart';
@@ -41,6 +44,8 @@ class AppRouter {
   static const String onboarding = '/onboarding';
   static const String roleSelection = '/role_selection';
   static const String login = '/login';
+  static const String forgotPassword = '/forgot_password';
+  static const String checkEmail = '/check_email';
   static const String supervisorDashboard = '/supervisor/dashboard';
   static const String supervisorMap = '/supervisor/map';
   static const String supervisorAiReview = '/supervisor/ai_review';
@@ -77,6 +82,13 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const RoleSelectionScreen());
       case login:
         return MaterialPageRoute(builder: (_) => const LoginScreen());
+      case forgotPassword:
+        return MaterialPageRoute(builder: (_) => const ForgotPasswordScreen());
+      case checkEmail:
+        final email = settings.arguments as String?;
+        return MaterialPageRoute(
+          builder: (_) => CheckEmailScreen(email: email ?? ''),
+        );
       case supervisorDashboard:
         return MaterialPageRoute(builder: (_) => const SupervisorDashboardScreen());
       case supervisorMap:
@@ -178,6 +190,8 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const AdminProfileScreen());
       case logTask:
         return MaterialPageRoute(builder: (_) => const LogTaskScreen());
+      case adminDashboard:
+        return MaterialPageRoute(builder: (_) => const AdminDashboardScreen());
       default:
         return MaterialPageRoute(
             builder: (_) => Scaffold(

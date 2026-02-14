@@ -35,51 +35,124 @@ class LandingPage extends StatelessWidget {
         }
       },
       child: Scaffold(
-        backgroundColor: AppTheme.darkBlue,
-        body: Center(
+        backgroundColor: AppTheme.headerTeal,
+        body: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(32.0),
+            padding: const EdgeInsets.symmetric(horizontal: 32.0),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.asset('assets/images/logo.png',
-                    height: 80,
-                    errorBuilder: (c, e, s) =>
-                        const Icon(Icons.warehouse, size: 80, color: Colors.white)),
-                const SizedBox(height: 24),
-                Image.asset("assets/images/logo.png"),
-                const SizedBox(height: 120),
-                Text(
-                  'Powering Warehouse Excellence,',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.lato(fontSize: 18, color: Colors.white70),
-                ),
-                Text(
-                  'One Task at a Time',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.lato(fontSize: 18, color: Colors.white70),
-                ),
-                const Spacer(),
-                SizedBox(
-                  width: double.infinity,
-                  height: 56,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.pushNamed(context, AppRouter.onboarding),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.yellow,
-                      foregroundColor: AppTheme.darkBlue,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                      elevation: 0,
+                // Center content vertically and horizontally: logo, then text, then button
+                Expanded(
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Logo: BMS ELECTRIC (centered)
+                        Image.asset(
+                          'assets/images/logo.png',
+                          height: 72,
+                          fit: BoxFit.contain,
+                          errorBuilder: (_, __, ___) => Image.asset(
+                            'assets/images/logo.png',
+                            height: 72,
+                            fit: BoxFit.contain,
+                            errorBuilder: (_, __, ___) => Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'BMS',
+                                  style: GoogleFonts.lato(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.w900,
+                                    color: AppTheme.yellow,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                                Text(
+                                  ' ELECTRIC',
+                                  style: GoogleFonts.lato(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 80),
+                        // Slogan - white, two lines, centered (above the button)
+                        Text(
+                          'Powering Warehouse Excellence,',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.lato(
+                            fontSize: 18,
+                            color: Colors.white,
+                            height: 1.4,
+                          ),
+                        ),
+                        Text(
+                          'One Task at a Time',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.lato(
+                            fontSize: 18,
+                            color: Colors.white,
+                            height: 1.4,
+                          ),
+                        ),
+                        const SizedBox(height: 40),
+                        // Get Started - bright yellow, white text
+                        SizedBox(
+                          width: double.infinity,
+                          height: 56,
+                          child: ElevatedButton(
+                            onPressed: () => Navigator.pushNamed(context, AppRouter.onboarding),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.yellow,
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: Text(
+                              'Get Started',
+                              style: GoogleFonts.lato(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    child: Text('Get Started',
-                        style: GoogleFonts.lato(fontSize: 18, fontWeight: FontWeight.bold)),
                   ),
                 ),
-                const SizedBox(height: 40),
-                Text(
-                  'Version 1.0.0 Developed by MobAI\n© 2026 BBMS ELEC. All rights reserved.',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.lato(fontSize: 10, color: Colors.white30),
+                // Footer pinned to bottom
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 24),
+                  child: Column(
+                    children: [
+                      Text(
+                        'Version 1.0.0 Developed by Mobini',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.lato(
+                          fontSize: 11,
+                          color: AppTheme.lightGrey,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '© 2026 IENE ELEC. All rights reserved.',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.lato(
+                          fontSize: 11,
+                          color: AppTheme.lightGrey,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),

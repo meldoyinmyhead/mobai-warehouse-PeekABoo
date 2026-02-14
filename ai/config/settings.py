@@ -80,6 +80,7 @@ class Settings(BaseSettings):
         env_file = ".env"
         env_file_encoding = "utf-8"
         case_sensitive = True
+        extra = "allow"  # Allow extra fields from .env (e.g., SUPABASE_URL, DB_PASS)
 
 
 # Global settings instance

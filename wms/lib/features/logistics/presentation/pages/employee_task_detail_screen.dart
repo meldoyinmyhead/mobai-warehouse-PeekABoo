@@ -95,11 +95,11 @@ class _EmployeeMapTaskScreenState extends State<EmployeeMapTaskScreen> {
                       width: 2000,
                       height: 2000,
                       child: CustomPaint(
-                          painter: IsometricWarehousePainter(
-                            layout: _floorLayouts[_currentFloor] ?? [],
-                            aiPath: pathOffsets,
-                            floor: _currentFloor,
-                            entities: [
+                        painter: IsometricWarehousePainter(
+                          layout: _floorLayouts[_currentFloor] ?? [],
+                          floor: _currentFloor,
+                          aiPath: pathOffsets,
+                          entities: [
                             // Show current user position (start of path)
                             if (pathOffsets.isNotEmpty)
                               {'x': pathOffsets.first.dx, 'y': pathOffsets.first.dy, 'color': AppTheme.lightBlue, 'label': 'Moi', 'type': 'employee'}

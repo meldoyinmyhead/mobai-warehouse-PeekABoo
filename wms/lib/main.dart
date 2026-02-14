@@ -17,6 +17,7 @@ import 'package:wms/features/inventory/presentation/pages/employee_main_screen.d
 import 'package:wms/features/supervisor/presentation/pages/supervisor_dashboard_screen.dart';
 
 
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:wms/core/app_config.dart';
 import 'package:wms/features/supervisor/data/repositories/ai_review_repository.dart';
@@ -50,6 +51,7 @@ class MainApp extends StatelessWidget {
         BlocProvider(create: (_) => AiReviewCubit(sl<AiReviewRepository>())..loadPendingReviews()),
         BlocProvider(create: (_) => sl<AuthCubit>()..checkSession()),
         BlocProvider(create: (_) => sl<ReceiptCubit>()), // Added ReceiptCubit based on import and common pattern
+
       ],
       child: MaterialApp(
         title: 'WMS App',

@@ -6,8 +6,13 @@ import 'package:wms/core/di/dependency_injection.dart';
 import 'package:wms/core/routes/app_router.dart';
 import 'package:wms/core/widgets/layout/admin_app_bar.dart';
 import 'package:wms/features/supervisor/presentation/cubits/dashboard_cubit.dart';
-import 'package:wms/features/admin/presentation/pages/admin_placeholders.dart';
 import 'package:wms/features/logistics/data/repositories/task_repository.dart';
+
+// Imports from the incoming change for specific pages
+import 'package:wms/features/admin/presentation/pages/access_logs.dart';
+import 'package:wms/features/admin/presentation/pages/ai_performance_screen.dart';
+import 'package:wms/features/admin/presentation/pages/export_reports_screen.dart';
+import 'package:wms/features/admin/presentation/pages/create_new_user_screen.dart'; // Ensure correct import name
 
 class AdminDashboardScreen extends StatefulWidget {
   final bool isView;
@@ -20,9 +25,12 @@ class AdminDashboardScreen extends StatefulWidget {
 class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   @override
   Widget build(BuildContext context) {
+    // We use the HEAD dependency injection approach as it specifies the repository explicitly, 
+    // which is often safer if the generic sl<SupervisorDashboardCubit>() isn't a factory.
+    // However, if strict DI is preferred, sl<SupervisorDashboardCubit>() is cleaner.
+    // Given HEAD used constructor injection, I'll stick to that to match HEAD's pattern.
     return BlocProvider(
-      create: (context) =>
-          SupervisorDashboardCubit(sl<TaskRepository>())..loadDashboard(),
+      create: (context) => SupervisorDashboardCubit(sl<TaskRepository>())..loadDashboard(),
       child: BlocBuilder<SupervisorDashboardCubit, SupervisorDashboardState>(
         builder: (context, state) {
           if (state is SupervisorDashboardLoading) {
@@ -35,110 +43,261 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               ),
             );
           } else if (state is SupervisorDashboardLoaded) {
-              return SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Bannière de bienvenue
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Image.asset(
-                          'assets/images/admin.png',
+            // We return the ScrollView directly without a Scaffold, 
+            // assuming this is used inside AdminMainScreen which likely has the Scaffold.
+            return SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Bannière de bienvenue
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image.asset(
+                        'assets/images/admin.png',
+                        width: double.infinity,
+                        height: 170,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Container(
                           width: double.infinity,
                           height: 170,
-                          fit: BoxFit.cover,
+                          color: Colors.grey[300],
+                          child: const Icon(Icons.image_not_supported),
                         ),
                       ),
                     ),
+                  ),
 
-                    // Actions rapides
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        'Actions rapides',
-                        style: GoogleFonts.lato(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
+                  // Actions rapides
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      'Actions rapides',
+                      style: GoogleFonts.lato(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
                       ),
                     ),
+                  ),
 
-                    const SizedBox(height: 12),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Column(
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.pushNamed(context, AppRouter.adminWarehouseConfig);
-                            },
-                            child: _buildQuickActionButton(
-                              icon: Icons.warehouse_outlined,
-                              label: 'Configuration de l\'entrepôt',
-                              color: AppTheme.lightBlue,
-                              width: MediaQuery.of(context).size.width * 0.9,
-                            ),
+                  const SizedBox(height: 12),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Column(
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.pushNamed(context, AppRouter.adminWarehouseConfig);
+                          },
+                          child: _buildQuickActionButton(
+                            icon: Icons.warehouse_outlined,
+                            label: 'Configuration de l\'entrepôt',
+                            color: AppTheme.lightBlue,
+                            width: MediaQuery.of(context).size.width * 0.9,
                           ),
-                          const SizedBox(height: 12),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.pushNamed(context, AppRouter.adminCreateUser);
-                            },
-                            child: Container(
-                              child: _buildQuickActionButton(
-                                icon: Icons.person_add_outlined,
-                                label: 'Créer un utilisateur',
-                                color: const Color(0xFFFDB913),
-                                width: MediaQuery.of(context).size.width * 0.9,
+                        ),
+                        const SizedBox(height: 12),
+                        GestureDetector(
+                          onTap: () {
+                             Navigator.pushNamed(context, AppRouter.adminCreateUser);
+                          },
+                          child: _buildQuickActionButton(
+                            icon: Icons.person_add_outlined,
+                            label: 'Créer un utilisateur',
+                            color: const Color(0xFFFDB913),
+                            width: MediaQuery.of(context).size.width * 0.9,
+                          ),
+                        ),
+
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const AccessLogsScreen(),
+                                    ),
+                                  );
+                                },
+                                child: _buildQuickActionButton(
+                                  icon: Icons.description_outlined,
+                                  label: 'Historique d\'accès',
+                                  color: const Color(0xFF4A9B9F),
+                                  width: MediaQuery.of(context).size.width * 0.4,
+                                ),
                               ),
                             ),
-                          ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const ExportReportsScreen(),
+                                    ),
+                                  );
+                                },
+                                child: _buildQuickActionButton(
+                                  icon: Icons.download_outlined,
+                                  label: 'Exporter',
+                                  color: const Color(0xFF4A9B9F),
+                                  width: MediaQuery.of(context).size.width * 0.4,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
 
-                          SizedBox(height: 12),
+                  const SizedBox(height: 24),
+
+                  // Santé du système
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      'Santé du système',
+                      style: GoogleFonts.lato(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          _buildHealthMetric(
+                            icon: Icons.check_circle_outline,
+                            label: 'Statut du système',
+                            value: 'Tous les systèmes en ligne',
+                            color: const Color(0xFF4A9B9F),
+                          ),
+                          const SizedBox(height: 16),
                           Row(
                             children: [
                               Expanded(
-                                child: GestureDetector(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            AccessLogsScreen(),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Serveur',
+                                      style: GoogleFonts.lato(
+                                        fontSize: 11,
+                                        color: Colors.grey[600],
                                       ),
-                                    );
-                                  },
-                                  child: _buildQuickActionButton(
-                                    icon: Icons.description_outlined,
-                                    label: 'Historique d\'accès',
-                                    color: const Color(0xFF4A9B9F),
-                                    width:
-                                        MediaQuery.of(context).size.width * 0.4,
-                                  ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'En ligne',
+                                      style: GoogleFonts.lato(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                        color: const Color(0xFF27AE60),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Text(
+                                      'Dernière synchro',
+                                      style: GoogleFonts.lato(
+                                        fontSize: 11,
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Il y a 2 min',
+                                      style: GoogleFonts.lato(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Base de données',
+                                      style: GoogleFonts.lato(
+                                        fontSize: 11,
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Saine',
+                                      style: GoogleFonts.lato(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                        color: const Color(0xFF27AE60),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Text(
+                                      'Disponibilité',
+                                      style: GoogleFonts.lato(
+                                        fontSize: 11,
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      '99.8%',
+                                      style: GoogleFonts.lato(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildAlertCard(
+                                  icon: Icons.warning_amber_outlined,
+                                  label: 'Alertes critiques',
+                                  sublabel: 'Nécessite attention',
+                                  color: const Color(0xFFFDB913),
                                 ),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
-                                child: GestureDetector(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            ExportReportsScreen(),
-                                      ),
-                                    );
-                                  },
-                                  child: _buildQuickActionButton(
-                                    icon: Icons.download_outlined,
-                                    label: 'Exporter',
-                                    color: const Color(0xFF4A9B9F),
-                                    width:
-                                        MediaQuery.of(context).size.width * 0.4,
-                                  ),
+                                child: _buildAlertCard(
+                                  icon: Icons.flag_outlined,
+                                  label: 'Tous les drapeaux',
+                                  sublabel: 'Résolution en attente',
+                                  color: const Color(0xFFE74C3C),
                                 ),
                               ),
                             ],
@@ -146,24 +305,34 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         ],
                       ),
                     ),
+                  ),
 
-                    const SizedBox(height: 24),
+                  const SizedBox(height: 24),
 
-                    // Santé du système
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        'Santé du système',
-                        style: GoogleFonts.lato(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
+                  // Performances IA
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      'Performances IA',
+                      style: GoogleFonts.lato(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                  ),
+                  const SizedBox(height: 12),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const AIPerformanceScreen(),
+                          ),
+                        );
+                      },
                       child: Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
@@ -179,587 +348,413 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         ),
                         child: Column(
                           children: [
-                            _buildHealthMetric(
-                              icon: Icons.check_circle_outline,
-                              label: 'Statut du système',
-                              value: 'Tous les systèmes en ligne',
-                              color: const Color(0xFF4A9B9F),
-                            ),
-                            const SizedBox(height: 16),
                             Row(
                               children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Serveur',
-                                        style: GoogleFonts.lato(
-                                          fontSize: 11,
-                                          color: Colors.grey[600],
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        'En ligne',
-                                        style: GoogleFonts.lato(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w600,
-                                          color: const Color(0xFF27AE60),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 12),
-                                      Text(
-                                        'Dernière synchro',
-                                        style: GoogleFonts.lato(
-                                          fontSize: 11,
-                                          color: Colors.grey[600],
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        'Il y a 2 min',
-                                        style: GoogleFonts.lato(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.black87,
-                                        ),
-                                      ),
-                                    ],
+                                Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF4A9B9F).withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(8),
                                   ),
-                                ),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Base de données',
-                                        style: GoogleFonts.lato(
-                                          fontSize: 11,
-                                          color: Colors.grey[600],
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        'Saine',
-                                        style: GoogleFonts.lato(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w600,
-                                          color: const Color(0xFF27AE60),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 12),
-                                      Text(
-                                        'Disponibilité',
-                                        style: GoogleFonts.lato(
-                                          fontSize: 11,
-                                          color: Colors.grey[600],
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        '99.8%',
-                                        style: GoogleFonts.lato(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.black87,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _buildAlertCard(
-                                    icon: Icons.warning_amber_outlined,
-                                    label: 'Alertes critiques',
-                                    sublabel: 'Nécessite attention',
-                                    color: const Color(0xFFFDB913),
+                                  child: const Icon(
+                                    Icons.analytics_outlined,
+                                    color: Color(0xFF4A9B9F),
+                                    size: 24,
                                   ),
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
-                                  child: _buildAlertCard(
-                                    icon: Icons.flag_outlined,
-                                    label: 'Tous les drapeaux',
-                                    sublabel: 'Résolution en attente',
-                                    color: const Color(0xFFE74C3C),
+                                  child: Text(
+                                    'Performances IA',
+                                    style: GoogleFonts.lato(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black87,
+                                    ),
                                   ),
                                 ),
+                                Icon(
+                                  Icons.arrow_forward_ios,
+                                  size: 16,
+                                  color: Colors.grey[400],
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 20),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                _buildPerformanceStat('94%', 'Prévisions'),
+                                _buildPerformanceStat('87%', 'Optimisation'),
+                                _buildPerformanceStat('18', 'Remplacements'),
                               ],
                             ),
                           ],
                         ),
                       ),
                     ),
+                  ),
 
-                    const SizedBox(height: 24),
+                  const SizedBox(height: 24),
 
-                    // Performances IA
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        'Performances IA',
-                        style: GoogleFonts.lato(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
+                  // Aperçu des opérations
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      'Aperçu des opérations',
+                      style: GoogleFonts.lato(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => AIPerformanceScreen(),
-                            ),
-                          );
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
-                                blurRadius: 10,
-                                offset: const Offset(0, 2),
+                  ),
+                  const SizedBox(height: 12),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildOperationCard(
+                                  icon: Icons.receipt_long_outlined,
+                                  label: 'Réception',
+                                  count: '24',
+                                  percentage: 95,
+                                  color: AppTheme.lightBlue,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _buildOperationCard(
+                                  icon: Icons.storage_outlined,
+                                  label: 'Stockage',
+                                  count: '18',
+                                  percentage: 88,
+                                  color: AppTheme.yellow,
+                                ),
                               ),
                             ],
                           ),
-                          child: Column(
+                          const SizedBox(height: 12),
+                          Row(
                             children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(10),
-                                    decoration: BoxDecoration(
-                                      color: const Color(
-                                        0xFF4A9B9F,
-                                      ).withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(8),
+                              Expanded(
+                                child: _buildOperationCard(
+                                  icon: Icons.shopping_cart_outlined,
+                                  label: 'Préparation',
+                                  count: '32',
+                                  percentage: 96,
+                                  color: AppTheme.darkBlue,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _buildOperationCard(
+                                  icon: Icons.local_shipping_outlined,
+                                  label: 'Livraison',
+                                  count: '15',
+                                  percentage: 97,
+                                  color: AppTheme.red,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // Activité utilisateur
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      'Activité utilisateur',
+                      style: GoogleFonts.lato(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.supervised_user_circle_outlined,
+                                      color: AppTheme.darkBlue,
+                                      size: 20,
                                     ),
-                                    child: const Icon(
-                                      Icons.analytics_outlined,
-                                      color: Color(0xFF4A9B9F),
-                                      size: 24,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Text(
-                                      'Performances IA',
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Utilisateurs actifs',
                                       style: GoogleFonts.lato(
-                                        fontSize: 14,
+                                        fontSize: 13,
                                         fontWeight: FontWeight.w600,
                                         color: Colors.black87,
                                       ),
                                     ),
-                                  ),
-                                  Icon(
-                                    Icons.arrow_forward_ios,
-                                    size: 16,
-                                    color: Colors.grey[400],
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 20),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: [
-                                  _buildPerformanceStat('94%', 'Prévisions'),
-                                  _buildPerformanceStat('87%', 'Optimisation'),
-                                  _buildPerformanceStat('18', 'Remplacements'),
-                                ],
-                              ),
-                            ],
+                                  ],
+                                ),
+                                Icon(
+                                  Icons.arrow_forward_ios,
+                                  color: Colors.grey[400],
+                                  size: 16,
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // Aperçu des opérations
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        'Aperçu des opérations',
-                        style: GoogleFonts.lato(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 10,
-                              offset: const Offset(0, 2),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
                             ),
-                          ],
-                        ),
-                        child: Column(
-                          children: [
-                            Row(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
-                                Expanded(
-                                  child: _buildOperationCard(
-                                    icon: Icons.receipt_long_outlined,
-                                    label: 'Réception',
-                                    count: '24',
-                                    percentage: 95,
-                                    color: AppTheme.lightBlue,
+                                _buildUserCountCard('48', 'Employés'),
+                                _buildUserCountCard('12', 'Superviseurs'),
+                                _buildUserCountCard('3', 'Admins'),
+                              ],
+                            ),
+                          ),
+                          Divider(color: Colors.grey[200], height: 1),
+                          Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Activité récente (5 derniers)',
+                                  style: GoogleFonts.lato(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.grey[600],
                                   ),
                                 ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: _buildOperationCard(
-                                    icon: Icons.storage_outlined,
-                                    label: 'Stockage',
-                                    count: '18',
-                                    percentage: 88,
-                                    color: AppTheme.yellow,
-                                  ),
+                                const SizedBox(height: 12),
+                                _buildActivityItem(
+                                  'Jean a terminé une tâche de Réception',
+                                  '3m',
+                                ),
+                                const SizedBox(height: 10),
+                                _buildActivityItem(
+                                  'Sarah a commencé une tâche de Stockage',
+                                  '1h',
+                                ),
+                                const SizedBox(height: 10),
+                                _buildActivityItem(
+                                  'Mike a signalé un problème d\'emplacement',
+                                  '8h',
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 12),
-                            Row(
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // Utilisation de l'entrepôt
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      'Utilisation de l\'entrepôt',
+                      style: GoogleFonts.lato(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Expanded(
-                                  child: _buildOperationCard(
-                                    icon: Icons.shopping_cart_outlined,
-                                    label: 'Préparation',
-                                    count: '32',
-                                    percentage: 96,
-                                    color: AppTheme.darkBlue,
-                                  ),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.assessment_outlined,
+                                      color: AppTheme.lightBlue,
+                                      size: 20,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Aperçu des capacités',
+                                      style: GoogleFonts.lato(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: _buildOperationCard(
-                                    icon: Icons.local_shipping_outlined,
-                                    label: 'Livraison',
-                                    count: '15',
-                                    percentage: 97,
-                                    color: AppTheme.red,
-                                  ),
+                                Icon(
+                                  Icons.arrow_forward_ios,
+                                  color: Colors.grey[400],
+                                  size: 16,
                                 ),
                               ],
                             ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // Activité utilisateur
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        'Activité utilisateur',
-                        style: GoogleFonts.lato(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 10,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        Icons.supervised_user_circle_outlined,
-                                        color: AppTheme.darkBlue,
-                                        size: 20,
+                          ),
+                          Divider(color: Colors.grey[200], height: 1),
+                          Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Capacité de stockage',
+                                      style: GoogleFonts.lato(
+                                        fontSize: 12,
+                                        color: Colors.grey[600],
                                       ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        'Utilisateurs actifs',
-                                        style: GoogleFonts.lato(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.black87,
-                                        ),
+                                    ),
+                                    Text(
+                                      '87%',
+                                      style: GoogleFonts.lato(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.black87,
                                       ),
-                                    ],
-                                  ),
-                                  Icon(
-                                    Icons.arrow_forward_ios,
-                                    color: Colors.grey[400],
-                                    size: 16,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: [
-                                  _buildUserCountCard('48', 'Employés'),
-                                  _buildUserCountCard('12', 'Superviseurs'),
-                                  _buildUserCountCard('3', 'Admins'),
-                                ],
-                              ),
-                            ),
-                            Divider(color: Colors.grey[200], height: 1),
-                            Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Activité récente (5 derniers)',
-                                    style: GoogleFonts.lato(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.grey[600],
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(4),
+                                  child: LinearProgressIndicator(
+                                    value: 0.87,
+                                    minHeight: 6,
+                                    backgroundColor: Colors.grey[200],
+                                    valueColor: const AlwaysStoppedAnimation<Color>(
+                                      AppTheme.lightBlue,
                                     ),
                                   ),
-                                  const SizedBox(height: 12),
-                                  _buildActivityItem(
-                                    'Jean a terminé une tâche de Réception',
-                                    '3m',
-                                  ),
-                                  const SizedBox(height: 10),
-                                  _buildActivityItem(
-                                    'Sarah a commencé une tâche de Stockage',
-                                    '1h',
-                                  ),
-                                  const SizedBox(height: 10),
-                                  _buildActivityItem(
-                                    'Mike a signalé un problème d\'emplacement',
-                                    '8h',
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // Utilisation de l'entrepôt
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        'Utilisation de l\'entrepôt',
-                        style: GoogleFonts.lato(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 10,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        Icons.assessment_outlined,
-                                        color: AppTheme.lightBlue,
-                                        size: 20,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        'Aperçu des capacités',
-                                        style: GoogleFonts.lato(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.black87,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Icon(
-                                    Icons.arrow_forward_ios,
-                                    color: Colors.grey[400],
-                                    size: 16,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Divider(color: Colors.grey[200], height: 1),
-                            Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        'Capacité de stockage',
-                                        style: GoogleFonts.lato(
-                                          fontSize: 12,
-                                          color: Colors.grey[600],
-                                        ),
-                                      ),
-                                      Text(
-                                        '87%',
-                                        style: GoogleFonts.lato(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.black87,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 8),
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(4),
-                                    child: LinearProgressIndicator(
-                                      value: 0.87,
-                                      minHeight: 6,
-                                      backgroundColor: Colors.grey[200],
-                                      valueColor:
-                                          const AlwaysStoppedAnimation<Color>(
-                                            AppTheme.lightBlue,
+                                ),
+                                const SizedBox(height: 16),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Chariots actifs',
+                                          style: GoogleFonts.lato(
+                                            fontSize: 11,
+                                            color: Colors.grey[600],
                                           ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          '24/32',
+                                          style: GoogleFonts.lato(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.black87,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'Chariots actifs',
-                                            style: GoogleFonts.lato(
-                                              fontSize: 11,
-                                              color: Colors.grey[600],
-                                            ),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Zones occupées',
+                                          style: GoogleFonts.lato(
+                                            fontSize: 11,
+                                            color: Colors.grey[600],
                                           ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            '24/32',
-                                            style: GoogleFonts.lato(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.black87,
-                                            ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          '234/456',
+                                          style: GoogleFonts.lato(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.black87,
                                           ),
-                                        ],
-                                      ),
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'Zones occupées',
-                                            style: GoogleFonts.lato(
-                                              fontSize: 11,
-                                              color: Colors.grey[600],
-                                            ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            '234/456',
-                                            style: GoogleFonts.lato(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.black87,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
+                  ),
 
-                    const SizedBox(height: 100),
-                  ],
-                ),
-              );
-            }
-            return const SizedBox.shrink();
-          },
-        ),
-        bottomNavigationBar: widget.isView ? null : const AdminAppBar(title: 'Tableau de Bord'),
+                  const SizedBox(height: 100),
+                ],
+              ),
+            );
+          }
+          return const SizedBox.shrink();
+        },
       ),
     );
   }
