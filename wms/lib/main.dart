@@ -48,7 +48,7 @@ class MainApp extends StatelessWidget {
         BlocProvider(create: (_) => EmployeeSettingsCubit()),
         BlocProvider(create: (_) => EmployeeNotificationCubit()),
         BlocProvider(create: (_) => MapCubit()),        
-        BlocProvider(create: (_) => AiReviewCubit(sl<AiReviewRepository>())..loadPendingReviews()),
+        BlocProvider(create: (_) => AiReviewCubit(sl<AiReviewRepository>(), sl<AuthRepository>())..loadPendingReviews()),
         BlocProvider(create: (_) => sl<AuthCubit>()..checkSession()),
         BlocProvider(create: (_) => sl<ReceiptCubit>()), // Added ReceiptCubit based on import and common pattern
 

@@ -1,20 +1,48 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wms/core/theme/app_theme.dart';
+import 'package:wms/features/auth/presentation/cubits/auth_cubit.dart';
 import 'package:wms/features/logistics/data/models/task_model.dart';
 import 'package:wms/features/logistics/presentation/cubits/employee_task_cubit.dart';
-import 'package:wms/features/logistics/data/repositories/task_repository.dart';
 import 'package:wms/core/di/dependency_injection.dart';
 
-
-class EmployeeDashboardScreen extends StatelessWidget {
+class EmployeeDashboardScreen extends StatefulWidget {
   const EmployeeDashboardScreen({super.key});
 
   @override
+  State<EmployeeDashboardScreen> createState() => _EmployeeDashboardScreenState();
+}
+
+class _EmployeeDashboardScreenState extends State<EmployeeDashboardScreen> {
+  bool _isOnline = true;
+  bool _tasksLoaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkConnectivity();
+    Connectivity().onConnectivityChanged.listen((_) => _checkConnectivity());
+  }
+
+  Future<void> _checkConnectivity() async {
+    final results = await Connectivity().checkConnectivity();
+    final online = results.any((r) =>
+        r == ConnectivityResult.wifi ||
+        r == ConnectivityResult.mobile ||
+        r == ConnectivityResult.ethernet);
+    if (mounted && _isOnline != online) setState(() => _isOnline = online);
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final authState = context.watch<AuthCubit>().state;
+    if (!_tasksLoaded && authState is Authenticated) {
+      _tasksLoaded = true;
+      context.read<EmployeeTaskCubit>().loadTasks(authState.user.id);
+    }
     final screenWidth = MediaQuery.of(context).size.width;
-    final bool isOnline = true; // Change this based on your online/offline logic
-    
+
     return Scaffold(
       backgroundColor: AppTheme.lightGrey,
       appBar: AppBar(
@@ -50,6 +78,23 @@ class EmployeeDashboardScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
+          if (!_isOnline)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              color: Colors.amber.shade100,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.cloud_off, size: 18, color: Colors.amber.shade900),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Hors ligne — les changements seront synchronisés au retour de la connexion',
+                    style: TextStyle(fontSize: 12, color: Colors.amber.shade900),
+                  ),
+                ],
+              ),
+            ),
           Expanded(
             child: Container(
               decoration: const BoxDecoration(
@@ -64,7 +109,7 @@ class EmployeeDashboardScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildWelcomeCard(screenWidth, isOnline),
+                    _buildWelcomeCard(screenWidth, _isOnline),
                     const SizedBox(height: 24),
                     const Text(
                       "Tâches d'aujourd'hui",
@@ -75,9 +120,28 @@ class EmployeeDashboardScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    _buildTaskGrid(),
-                    const SizedBox(height: 24),
-                    _buildProgressCard(),
+                    BlocBuilder<EmployeeTaskCubit, EmployeeTaskState>(
+                      builder: (context, state) {
+                        int receipt = 0, storage = 0, picking = 0, delivery = 0, total = 0, completed = 0;
+                        if (state is EmployeeTaskLoaded) {
+                          final tasks = state.tasks;
+                          receipt = tasks.where((t) => t.type == TaskType.receipt).length;
+                          storage = tasks.where((t) => t.type == TaskType.storage).length;
+                          picking = tasks.where((t) => t.type == TaskType.picking).length;
+                          delivery = tasks.where((t) => t.type == TaskType.delivery).length;
+                          total = tasks.length;
+                          completed = tasks.where((t) => t.status == TaskStatus.completed).length;
+                        }
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildTaskGrid(receipt, storage, picking, delivery),
+                            const SizedBox(height: 24),
+                            _buildProgressCard(completed, total),
+                          ],
+                        );
+                      },
+                    ),
                     const SizedBox(height: 24),
                     const Text(
                       'Activités récentes',
@@ -187,17 +251,17 @@ class EmployeeDashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTaskGrid() {
+  Widget _buildTaskGrid(int receipt, int storage, int picking, int delivery) {
     return Column(
       children: [
         Row(
           children: [
             Expanded(
-              child: _buildStatCard('5', 'Réception', 'assets/icons/receipt.png'),
+              child: _buildStatCard('$receipt', 'Réception', 'assets/icons/receipt.png'),
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: _buildStatCard('8', 'Stockage', 'assets/icons/storage.png'),
+              child: _buildStatCard('$storage', 'Stockage', 'assets/icons/storage.png'),
             ),
           ],
         ),
@@ -205,11 +269,11 @@ class EmployeeDashboardScreen extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: _buildStatCard('12', 'Préparation', 'assets/icons/chariot.png'),
+              child: _buildStatCard('$picking', 'Préparation', 'assets/icons/chariot.png'),
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: _buildStatCard('3', 'Livraison', 'assets/icons/delivery.png'),
+              child: _buildStatCard('$delivery', 'Livraison', 'assets/icons/delivery.png'),
             ),
           ],
         ),
@@ -260,7 +324,7 @@ class EmployeeDashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProgressCard() {
+  Widget _buildProgressCard(int completed, int total) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -275,17 +339,17 @@ class EmployeeDashboardScreen extends StatelessWidget {
         const SizedBox(height: 12),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: const [
-            Text(
-              'Tâches terminées',
+          children: [
+            const Text(
+              'Tâches à faire / terminées',
               style: TextStyle(
                 fontSize: 14,
                 color: Colors.black54,
               ),
             ),
             Text(
-              '18/28',
-              style: TextStyle(
+              '$completed / $total',
+              style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
                 color: AppTheme.darkBlue,
@@ -297,7 +361,7 @@ class EmployeeDashboardScreen extends StatelessWidget {
         ClipRRect(
           borderRadius: BorderRadius.circular(10),
           child: LinearProgressIndicator(
-            value: 18 / 28,
+            value: total > 0 ? completed / total : 0.0,
             minHeight: 8,
             backgroundColor: Colors.grey[200],
             valueColor: const AlwaysStoppedAnimation<Color>(

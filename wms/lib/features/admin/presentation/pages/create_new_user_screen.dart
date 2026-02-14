@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:math';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:wms/core/theme/app_theme.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -213,22 +214,40 @@ class _CreateNewUserScreenState extends State<CreateNewUserScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+
           TextFormField(
             controller: _passwordController,
             obscureText: true,
             decoration: InputDecoration(
-              suffixIcon: const Icon(Icons.visibility_outlined, color: Colors.grey),
+              suffixIcon: IconButton(
+                icon: const Icon(Icons.refresh, color: Color(0xFF4A9B9F)),
+                onPressed: _generatePassword,
+                tooltip: 'Générer un mot de passe',
+              ),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
             ),
           ),
           const SizedBox(height: 8),
-          Text(
-            'Auto-generated secure password',
-            style: GoogleFonts.lato(fontSize: 11, color: Colors.grey[500]),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Mot de passe sécurisé (min 12 chars)',
+                style: GoogleFonts.lato(fontSize: 11, color: Colors.grey[500]),
+              ),
+              TextButton(
+                 onPressed: _generatePassword,
+                 child: Text(
+                   'Générer',
+                   style: GoogleFonts.lato(fontSize: 12, fontWeight: FontWeight.bold, color: const Color(0xFF4A9B9F)),
+                 ),
+              )
+            ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 4),
           Row(
             children: [
+
               Checkbox(
                 value: _sendEmail,
                 onChanged: (val) => setState(() => _sendEmail = val!),
@@ -332,7 +351,7 @@ class _CreateNewUserScreenState extends State<CreateNewUserScreen> {
   void _submit() {
     if (_formKey.currentState!.validate()) {
       final newUser = UserModel(
-        id: '', 
+        id: '',
         fullName: '${_firstNameController.text} ${_lastNameController.text}',
         email: _emailController.text,
         role: _selectedRole,
@@ -341,5 +360,15 @@ class _CreateNewUserScreenState extends State<CreateNewUserScreen> {
       context.read<AdminUserCubit>().createUser(newUser, _passwordController.text);
       Navigator.pop(context);
     }
+  }
+
+  void _generatePassword() {
+    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#\$%&*';
+    final rnd = Random();
+    final password = String.fromCharCodes(Iterable.generate(
+        12, (_) => chars.codeUnitAt(rnd.nextInt(chars.length))));
+    setState(() {
+      _passwordController.text = password;
+    });
   }
 }

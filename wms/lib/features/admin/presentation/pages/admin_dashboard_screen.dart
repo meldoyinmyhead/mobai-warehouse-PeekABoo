@@ -1,3 +1,4 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -6,13 +7,16 @@ import 'package:wms/core/di/dependency_injection.dart';
 import 'package:wms/core/routes/app_router.dart';
 import 'package:wms/core/widgets/layout/admin_app_bar.dart';
 import 'package:wms/features/supervisor/presentation/cubits/dashboard_cubit.dart';
-import 'package:wms/features/logistics/data/repositories/task_repository.dart';
+import 'package:wms/features/supervisor/data/repositories/ai_review_repository.dart';
+import 'package:wms/features/supervisor/data/repositories/flag_repository.dart';
+import 'package:wms/features/admin/data/repositories/admin_repository.dart';
 
-// Imports from the incoming change for specific pages
+// Imports for specific pages
+import 'package:wms/features/auth/presentation/cubits/auth_cubit.dart';
 import 'package:wms/features/admin/presentation/pages/access_logs.dart';
 import 'package:wms/features/admin/presentation/pages/ai_performance_screen.dart';
 import 'package:wms/features/admin/presentation/pages/export_reports_screen.dart';
-import 'package:wms/features/admin/presentation/pages/create_new_user_screen.dart'; // Ensure correct import name
+import 'package:wms/features/admin/presentation/pages/create_new_user_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   final bool isView;
@@ -23,34 +27,124 @@ class AdminDashboardScreen extends StatefulWidget {
 }
 
 class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
+  bool _isOnline = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkConnectivity();
+    Connectivity().onConnectivityChanged.listen((_) => _checkConnectivity());
+  }
+
+  Future<void> _checkConnectivity() async {
+    final results = await Connectivity().checkConnectivity();
+    final online = results.any((r) =>
+        r == ConnectivityResult.wifi ||
+        r == ConnectivityResult.mobile ||
+        r == ConnectivityResult.ethernet);
+    if (mounted && _isOnline != online) setState(() => _isOnline = online);
+  }
+
   @override
   Widget build(BuildContext context) {
-    // We use the HEAD dependency injection approach as it specifies the repository explicitly, 
-    // which is often safer if the generic sl<SupervisorDashboardCubit>() isn't a factory.
-    // However, if strict DI is preferred, sl<SupervisorDashboardCubit>() is cleaner.
-    // Given HEAD used constructor injection, I'll stick to that to match HEAD's pattern.
     return BlocProvider(
-      create: (context) => SupervisorDashboardCubit(sl<TaskRepository>())..loadDashboard(),
-      child: BlocBuilder<SupervisorDashboardCubit, SupervisorDashboardState>(
-        builder: (context, state) {
-          if (state is SupervisorDashboardLoading) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (state is SupervisorDashboardError) {
-            return Center(
-              child: Text(
-                'Erreur: ${state.message}',
-                style: GoogleFonts.lato(color: AppTheme.red),
+      create: (context) => SupervisorDashboardCubit(sl<AiReviewRepository>(), sl<FlagRepository>())..loadDashboard(),
+      child: Scaffold(
+        backgroundColor: AppTheme.veryLightGrey,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          leading: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: PopupMenuButton<String>(
+              offset: const Offset(0, 48),
+              onSelected: (value) {
+                if (value == 'profile') {
+                  Navigator.pushNamed(context, '/admin/profile');
+                } else if (value == 'logout') {
+                  context.read<AuthCubit>().logout();
+                  Navigator.pushNamedAndRemoveUntil(context, AppRouter.landing, (route) => false);
+                }
+              },
+              itemBuilder: (context) => [
+                const PopupMenuItem(
+                  value: 'profile',
+                  child: Row(
+                    children: [
+                      Icon(Icons.person_outline, color: Color(0xFF5D6266), size: 18),
+                      SizedBox(width: 12),
+                      Text('Mon Profil'),
+                    ],
+                  ),
+                ),
+                const PopupMenuItem(
+                  value: 'logout',
+                  child: Row(
+                    children: [
+                      Icon(Icons.logout, color: Colors.redAccent, size: 18),
+                      SizedBox(width: 12),
+                      Text('Déconnexion', style: TextStyle(color: Colors.redAccent)),
+                    ],
+                  ),
+                ),
+              ],
+              child: const CircleAvatar(
+                backgroundColor: Color(0xFFF5F5F5),
+                child: Icon(Icons.person_outline, color: Color(0xFF5D6266)),
               ),
-            );
-          } else if (state is SupervisorDashboardLoaded) {
-            // We return the ScrollView directly without a Scaffold, 
-            // assuming this is used inside AdminMainScreen which likely has the Scaffold.
-            return SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Bannière de bienvenue
-                  Padding(
+            ),
+          ),
+          centerTitle: true,
+          title: Image.asset('assets/images/logo.png', height: 30),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.settings_outlined, color: Color(0xFF5D6266)),
+              onPressed: () => Navigator.pushNamed(context, '/admin/settings'),
+            ),
+            IconButton(
+              icon: const Icon(Icons.notifications_outlined, color: Color(0xFF5D6266)),
+              onPressed: () {}, // Notifications
+            ),
+          ],
+        ),
+        body: Column(
+          children: [
+            if (!_isOnline)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                color: Colors.amber.shade100,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.cloud_off, size: 18, color: Colors.amber.shade900),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Hors ligne — synchronisation au retour de la connexion',
+                      style: TextStyle(fontSize: 12, color: Colors.amber.shade900),
+                    ),
+                  ],
+                ),
+              ),
+            Expanded(
+              child: BlocBuilder<SupervisorDashboardCubit, SupervisorDashboardState>(
+                builder: (context, state) {
+                  if (state is SupervisorDashboardLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (state is SupervisorDashboardError) {
+                    return Center(
+                      child: Text(
+                        'Erreur: ${state.message}',
+                        style: GoogleFonts.lato(color: AppTheme.red),
+                      ),
+                    );
+                  } else if (state is SupervisorDashboardLoaded) {
+                    return SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Bannière de bienvenue
+                          Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(10),
@@ -157,6 +251,51 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     ),
                   ),
 
+                  const SizedBox(height: 24),
+
+                  // Statistiques réelles (entrepôts, utilisateurs)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      'Statistiques',
+                      style: GoogleFonts.lato(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: FutureBuilder<Map<String, int>>(
+                      future: () async {
+                        try {
+                          final admin = sl<AdminRepository>();
+                          final warehouses = await admin.getWarehouses();
+                          final users = await admin.getUsers();
+                          return {'warehouses': warehouses.length, 'users': users.length};
+                        } catch (_) {
+                          return {'warehouses': 0, 'users': 0};
+                        }
+                      }(),
+                      builder: (context, snap) {
+                        final w = snap.data?['warehouses'] ?? 0;
+                        final u = snap.data?['users'] ?? 0;
+                        return Row(
+                          children: [
+                            Expanded(
+                              child: _buildStatTile(Icons.warehouse_outlined, 'Entrepôts', '$w'),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _buildStatTile(Icons.people_outline, 'Utilisateurs', '$u'),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
                   const SizedBox(height: 24),
 
                   // Santé du système
@@ -755,6 +894,41 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           }
           return const SizedBox.shrink();
         },
+      )),
+    ],
+  ),
+    ),
+    );
+  }
+
+  Widget _buildStatTile(IconData icon, String label, String count) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: AppTheme.lightBlue, size: 24),
+          const SizedBox(height: 8),
+          Text(
+            count,
+            style: GoogleFonts.lato(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87),
+          ),
+          Text(
+            label,
+            style: GoogleFonts.lato(fontSize: 12, color: Colors.grey[600]),
+          ),
+        ],
       ),
     );
   }

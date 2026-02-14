@@ -1,10 +1,12 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:wms/core/widgets/layout/supervisorBottonBar.dart';
 import 'package:wms/core/routes/app_router.dart';
 import 'package:wms/features/supervisor/presentation/cubits/dashboard_cubit.dart';
-import 'package:wms/features/logistics/data/repositories/task_repository.dart';
+import 'package:wms/features/supervisor/data/repositories/ai_review_repository.dart';
+import 'package:wms/features/supervisor/data/repositories/flag_repository.dart';
 import 'package:wms/core/theme/app_theme.dart';
 import 'package:wms/features/supervisor/presentation/pages/supervisor_notifications_screen.dart';
 import 'package:wms/features/supervisor/presentation/pages/supervisor_settings_screen.dart';
@@ -21,6 +23,23 @@ class SupervisorDashboardScreen extends StatefulWidget {
 
 class _SupervisorDashboardScreenState extends State<SupervisorDashboardScreen> {
   int _currentIndex = 0;
+  bool _isOnline = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkConnectivity();
+    Connectivity().onConnectivityChanged.listen((_) => _checkConnectivity());
+  }
+
+  Future<void> _checkConnectivity() async {
+    final results = await Connectivity().checkConnectivity();
+    final online = results.any((r) =>
+        r == ConnectivityResult.wifi ||
+        r == ConnectivityResult.mobile ||
+        r == ConnectivityResult.ethernet);
+    if (mounted && _isOnline != online) setState(() => _isOnline = online);
+  }
 
   void _onNavBarTap(int index) {
     if (index == _currentIndex)
@@ -53,7 +72,7 @@ class _SupervisorDashboardScreenState extends State<SupervisorDashboardScreen> {
 
     return BlocProvider(
       create: (context) =>
-          SupervisorDashboardCubit(sl<TaskRepository>())..loadDashboard(),
+          SupervisorDashboardCubit(sl<AiReviewRepository>(), sl<FlagRepository>())..loadDashboard(),
       child: Scaffold(
         backgroundColor: AppTheme.veryLightGrey,
         appBar: AppBar(
@@ -125,23 +144,43 @@ class _SupervisorDashboardScreenState extends State<SupervisorDashboardScreen> {
             ),
           ],
         ),
-        body: BlocBuilder<SupervisorDashboardCubit, SupervisorDashboardState>(
-          builder: (context, state) {
-            if (state is SupervisorDashboardLoading) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (state is SupervisorDashboardError) {
-              return Center(
-                child: Text(
-                  'Erreur: ${state.message}',
-                  style: GoogleFonts.lato(color: AppTheme.red),
-                ),
-              );
-            } else if (state is SupervisorDashboardLoaded) {
-              return SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+        body: Column(
+          children: [
+            if (!_isOnline)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                color: Colors.amber.shade100,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Welcome Card
+                    Icon(Icons.cloud_off, size: 18, color: Colors.amber.shade900),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Hors ligne — synchronisation au retour de la connexion',
+                      style: TextStyle(fontSize: 12, color: Colors.amber.shade900),
+                    ),
+                  ],
+                ),
+              ),
+            Expanded(
+              child: BlocBuilder<SupervisorDashboardCubit, SupervisorDashboardState>(
+                builder: (context, state) {
+                  if (state is SupervisorDashboardLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (state is SupervisorDashboardError) {
+                    return Center(
+                      child: Text(
+                        'Erreur: ${state.message}',
+                        style: GoogleFonts.lato(color: AppTheme.red),
+                      ),
+                    );
+                  } else if (state is SupervisorDashboardLoaded) {
+                    return SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Welcome Card
                     Container(
                       margin: const EdgeInsets.all(16),
                       padding: const EdgeInsets.all(20),
@@ -262,7 +301,7 @@ class _SupervisorDashboardScreenState extends State<SupervisorDashboardScreen> {
                           Expanded(
                             child: _buildAlertCard(
                               icon: Icons.flag_outlined,
-                              count: '5',
+                              count: '${state.flaggedCount}',
                               label: 'Tâches signalées',
                               color: AppTheme.yellow,
                             ),
@@ -271,7 +310,7 @@ class _SupervisorDashboardScreenState extends State<SupervisorDashboardScreen> {
                           Expanded(
                             child: _buildAlertCard(
                               icon: Icons.star_outline,
-                              count: '5',
+                              count: '${state.aiPendingCount}',
                               label: 'IA Nouveau',
                               color: AppTheme.yellow,
                             ),
@@ -444,9 +483,13 @@ class _SupervisorDashboardScreenState extends State<SupervisorDashboardScreen> {
                   ],
                 ),
               );
+              );
             }
             return const SizedBox.shrink();
           },
+        ),
+      ),
+          ],
         ),
         bottomNavigationBar: SupervisorBottomBar(
           currentIndex: _currentIndex,

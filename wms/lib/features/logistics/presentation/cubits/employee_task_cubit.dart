@@ -97,9 +97,12 @@ class EmployeeTaskCubit extends Cubit<EmployeeTaskState> {
       final success = await _taskRepository.completeTask(taskId);
       if (success) {
         await loadTasks(employeeId); // Refresh list to remove completed task
+      } else {
+        throw Exception("Server returned failure (check logs/network).");
       }
     } catch (e) {
       emit(EmployeeTaskError("Failed to complete task: $e"));
+      rethrow; // Allow UI to catch it
     }
   }
 }

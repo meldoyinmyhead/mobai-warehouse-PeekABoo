@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:wms/core/routes/app_router.dart';
 import 'package:wms/core/theme/app_theme.dart';
 import 'package:wms/features/auth/presentation/cubits/auth_cubit.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:wms/features/logistics/presentation/cubits/employee_task_cubit.dart';
 import 'package:wms/features/logistics/data/models/task_model.dart';
 import 'package:wms/core/widgets/layout/modern_floating_navbar.dart';
@@ -55,14 +56,28 @@ class _LogTaskScreenState extends State<LogTaskScreen> {
 
   void _submitLog() async {
     if (_selectedType == null || _selectedTask == null) {
-      SnackbarUtils.showError(context, 'Please select task type and specific task');
+      SnackbarUtils.showError(context, 'Veuillez sélectionner le type de tâche et la tâche.');
       return;
     }
 
-    final authCubit = context.read<AuthCubit>();
+    final results = await Connectivity().checkConnectivity();
+    final online = results.any((r) =>
+        r == ConnectivityResult.wifi ||
+        r == ConnectivityResult.mobile ||
+        r == ConnectivityResult.ethernet);
+    if (!online && mounted) {
+      SnackbarUtils.showError(context, 'Hors ligne. Connectez-vous pour enregistrer le journal.');
+      return;
+    }
 
-    // Log action to backend
-    await authCubit.logUserAction(
+    final authState = authCubit.state;
+    String userId = '';
+    if (authState is Authenticated) {
+      userId = authState.user.id;
+    }
+
+    // 1. Log the action (Audit)
+    final ok = await authCubit.logUserAction(
       action: 'SUBMIT_LOG',
       entityType: 'TASK',
       entityId: _selectedTask!.id,
@@ -74,9 +89,21 @@ class _LogTaskScreenState extends State<LogTaskScreen> {
       },
     );
 
-    if (mounted) {
-      SnackbarUtils.showSuccess(context, 'Task log submitted successfully!');
-      Navigator.pop(context);
+    if (!mounted) return;
+
+    // 2. Complete the Task
+    if (ok) {
+      try {
+        await context.read<EmployeeTaskCubit>().completeTask(_selectedTask!.id, userId);
+        if(!mounted) return;
+        SnackbarUtils.showSuccess(context, 'Tâche terminée et journal enregistré.');
+        Navigator.pop(context);
+      } catch (e) {
+        SnackbarUtils.showError(context, 'Journal enregistré mais erreur lors de la complétion: $e');
+      }
+      }
+    } else {
+      SnackbarUtils.showError(context, 'Impossible d\'enregistrer. Vérifiez la connexion.');
     }
   }
 

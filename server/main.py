@@ -463,6 +463,98 @@ def complete_employee_task(task_id: str, db: Session = Depends(get_db)):
     db.commit()
     return {"status": "success", "message": "Task completed"}
 
+# --- Supervisor: Pending AI Reviews (for offline cache & sync) ---
+@app.get("/supervisor/pending-reviews")
+def get_pending_reviews(db: Session = Depends(get_db)):
+    """
+    Returns preparation and picking orders with status PENDING_REVIEW for supervisor to approve/override.
+    Used by mobile to fetch when online and cache locally for offline review.
+    """
+    prep_orders = db.query(models.PreparationOrder).filter(
+        models.PreparationOrder.statut == models.OrderStatus.PENDING_REVIEW
+    ).all()
+    pick_orders = db.query(models.PickingOrder).filter(
+        models.PickingOrder.statut == models.OrderStatus.PENDING_REVIEW
+    ).all()
+
+    prep_list = []
+    for o in prep_orders:
+        lines = db.query(models.PreparationOrderLine).filter(
+            models.PreparationOrderLine.id_preparation_order == o.id
+        ).all()
+        line_data = []
+        for ln in lines:
+            prod = db.query(models.Produit).filter(models.Produit.id_produit == ln.id_produit).first()
+            line_data.append({
+                "id": str(ln.id),
+                "quantite_ai": ln.quantite_ai,
+                "quantite_finale": ln.quantite_finale,
+                "sku": prod.sku if prod else "",
+                "nom_produit": prod.nom_produit if prod else "",
+            })
+        prep_list.append({
+            "id": str(o.id),
+            "reference": o.reference,
+            "type": "preparation",
+            "statut": o.statut.value,
+            "date_prevue": o.date_prevue.isoformat() if o.date_prevue else None,
+            "created_at": o.created_at.isoformat() if o.created_at else None,
+            "lines": line_data,
+        })
+
+    pick_list = []
+    for o in pick_orders:
+        stops = db.query(models.PickingOrderStop).filter(
+            models.PickingOrderStop.id_picking_order == o.id
+        ).order_by(models.PickingOrderStop.stop_sequence).all()
+        stop_data = []
+        for st in stops:
+            prod = db.query(models.Produit).filter(models.Produit.id_produit == st.id_produit).first()
+            stop_data.append({
+                "stop_sequence": st.stop_sequence,
+                "quantite": st.quantite,
+                "sku": prod.sku if prod else "",
+                "nom_produit": prod.nom_produit if prod else "",
+            })
+        pick_list.append({
+            "id": str(o.id),
+            "reference": o.reference,
+            "type": "picking",
+            "statut": o.statut.value,
+            "route_distance_m": o.route_distance_m,
+            "created_at": o.created_at.isoformat() if o.created_at else None,
+            "stops": stop_data,
+        })
+
+    return {"preparation_orders": prep_list, "picking_orders": pick_list}
+
+
+@app.post("/supervisor/preparation-orders/{order_id}/approve")
+def approve_preparation_order(order_id: str, db: Session = Depends(get_db)):
+    import uuid
+    order = db.query(models.PreparationOrder).filter(
+        models.PreparationOrder.id == uuid.UUID(order_id)
+    ).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Preparation order not found")
+    order.statut = models.OrderStatus.APPROVED
+    db.commit()
+    return {"status": "success", "message": "Preparation order approved"}
+
+
+@app.post("/supervisor/picking-orders/{order_id}/approve")
+def approve_picking_order(order_id: str, db: Session = Depends(get_db)):
+    import uuid
+    order = db.query(models.PickingOrder).filter(
+        models.PickingOrder.id == uuid.UUID(order_id)
+    ).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Picking order not found")
+    order.statut = models.OrderStatus.APPROVED
+    db.commit()
+    return {"status": "success", "message": "Picking order approved"}
+
+
 # 4. Override Logging
 @app.post("/ai/log-override")
 def log_override(request: schemas.OverrideLogRequest, db: Session = Depends(get_db)):
@@ -483,5 +575,37 @@ def log_override(request: schemas.OverrideLogRequest, db: Session = Depends(get_
         created_at=datetime.utcnow()
     )
     db.add(override)
+    # Mark the original order as OVERRIDDEN so it no longer appears in pending reviews
+    if request.order_id and request.order_type:
+        try:
+            oid = uuid.UUID(request.order_id)
+            if request.order_type.upper() == "PREPARATION":
+                order = db.query(models.PreparationOrder).filter(models.PreparationOrder.id == oid).first()
+            else:
+                order = db.query(models.PickingOrder).filter(models.PickingOrder.id == oid).first()
+            if order:
+                order.statut = models.OrderStatus.OVERRIDDEN
+        except (ValueError, TypeError):
+            pass
     db.commit()
     return {"status": "logged", "id": str(override.id)}
+
+# 6. Scheduler Integration
+from scheduler import start_scheduler, daily_forecast_job
+
+@app.on_event("startup")
+def startup_event():
+    start_scheduler()
+
+@app.post("/scheduler/trigger-daily")
+def trigger_daily_job_manual(db: Session = Depends(get_db)):
+    """
+    Manually triggers the daily forecast job (for testing).
+    """
+    try:
+        # Run sync for now, or trigger the job via scheduler
+        daily_forecast_job()
+        return {"status": "triggered", "message": "Daily forecast job triggered successfully."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+

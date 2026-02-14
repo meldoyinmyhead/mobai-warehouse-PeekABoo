@@ -35,19 +35,56 @@ class LocalInventory extends Table {
 // 3. Sync Queue (Actions to push)
 class SyncQueue extends Table {
   IntColumn get id => integer().autoIncrement()();
-  TextColumn get actionType => text()(); // 'COMPLETE_STOP', 'CONFIRM_RECEIPT'
+  TextColumn get actionType => text()(); // 'COMPLETE_STOP', 'CONFIRM_RECEIPT', 'AI_OVERRIDE', 'AI_APPROVE'
   TextColumn get payload => text()(); // JSON
   DateTimeColumn get timestamp => dateTime()();
   TextColumn get status => text().withDefault(const Constant('pending'))();
   IntColumn get retryCount => integer().withDefault(const Constant(0))();
 }
 
-@DriftDatabase(tables: [LocalTasks, LocalInventory, SyncQueue])
+// 4. Local Pending AI Reviews (Supervisor offline: cache for review, store justification when overriding)
+class LocalPendingReviews extends Table {
+  TextColumn get id => text()(); // order UUID
+  TextColumn get orderType => text()(); // 'preparation' | 'picking'
+  TextColumn get reference => text()();
+  TextColumn get data => text()(); // JSON full payload from server
+  TextColumn get status => text()(); // 'pending' | 'approved' | 'overridden'
+  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get lastUpdated => dateTime()();
+  BoolColumn get synced => boolean().withDefault(const Constant(false))();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+// 5. Local Admin Cache (Admin offline: cache users + warehouses for read; mutations queued to SyncQueue)
+class LocalAdminCache extends Table {
+  TextColumn get key => text()(); // 'users' | 'warehouses'
+  TextColumn get data => text()(); // JSON array
+  DateTimeColumn get updatedAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {key};
+}
+
+@DriftDatabase(tables: [LocalTasks, LocalInventory, SyncQueue, LocalPendingReviews, LocalAdminCache])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 3;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onUpgrade: (migrator, from, to) async {
+          if (from < 2) {
+            await migrator.createTable(localPendingReviews);
+          }
+          if (from < 3) {
+            await migrator.createTable(localAdminCache);
+          }
+        },
+      );
 }
 
 LazyDatabase _openConnection() {

@@ -56,6 +56,18 @@ class AuthRepository {
     }
   }
 
+  /// Current user id from stored session (for sync / offline queue). Returns null if not logged in.
+  String? getCurrentUserId() {
+    final userStr = _prefs.getString('user_data');
+    if (userStr == null) return null;
+    try {
+      final m = jsonDecode(userStr) as Map<String, dynamic>;
+      return m['id_utilisateur']?.toString();
+    } catch (_) {
+      return null;
+    }
+  }
+
   Future<Map<String, dynamic>?> checkSession() async {
     final token = _prefs.getString('access_token');
     final userStr = _prefs.getString('user_data');
@@ -74,7 +86,8 @@ class AuthRepository {
     await _prefs.remove('user_data');
   }
 
-  Future<void> logAction({
+  /// Logs action to backend audit_log. Returns true if sent successfully (2xx). Used for tracking (e.g. location/task log).
+  Future<bool> logAction({
     required String userId,
     required String action,
     required String entityType,
@@ -82,7 +95,7 @@ class AuthRepository {
     Map<String, dynamic>? payload,
   }) async {
     try {
-      await http.post(
+      final r = await http.post(
         Uri.parse('$baseUrl/audit/log'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
@@ -92,9 +105,11 @@ class AuthRepository {
           'entity_id': entityId,
           'payload': payload,
         }),
-      );
+      ).timeout(const Duration(seconds: 10));
+      return r.statusCode >= 200 && r.statusCode < 300;
     } catch (e) {
       print('Audit logging failed: $e');
+      return false;
     }
   }
 }

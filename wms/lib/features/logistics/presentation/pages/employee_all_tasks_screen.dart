@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wms/core/theme/app_theme.dart';
+import 'package:wms/core/utils/snackbar_utils.dart';
 import 'package:wms/features/logistics/data/models/task_model.dart';
 import 'package:wms/features/logistics/presentation/cubits/employee_task_cubit.dart';
 import 'package:wms/features/auth/presentation/cubits/auth_cubit.dart';
@@ -23,6 +24,37 @@ class _EmployeeAllTasksScreenState extends State<EmployeeAllTasksScreen> {
     final authState = context.read<AuthCubit>().state;
     if (authState is Authenticated) {
       context.read<EmployeeTaskCubit>().loadTasks(authState.user.id);
+    }
+  }
+
+  /// Enregistrer: marks task completed (backend picking_orders + audit_log; locally LocalTasks + SyncQueue if offline).
+  Future<void> _onEnregistrer(BuildContext context, TaskModel task) async {
+    final authState = context.read<AuthCubit>().state;
+    if (authState is! Authenticated) {
+      SnackbarUtils.showError(context, 'Session expirée. Reconnectez-vous.');
+      return;
+    }
+    final userId = authState.user.id;
+    try {
+      await context.read<EmployeeTaskCubit>().completeTask(task.id, userId);
+      await context.read<AuthCubit>().logUserAction(
+            action: 'TASK_RECORDED',
+            entityType: 'PICKING_ORDER',
+            entityId: task.id,
+            payload: {
+              'task_type': task.type.name,
+              'task_title': task.title,
+              'timestamp': DateTime.now().toIso8601String(),
+            },
+          );
+      if (mounted) {
+        SnackbarUtils.showSuccess(context, 'Tâche enregistrée. Synchronisation en cours si hors ligne.');
+        _loadTasks();
+      }
+    } catch (e) {
+      if (mounted) {
+        SnackbarUtils.showError(context, 'Erreur: ${e.toString().replaceFirst(RegExp(r'^Exception:?\s*'), '')}');
+      }
     }
   }
 
@@ -70,10 +102,9 @@ class _EmployeeAllTasksScreenState extends State<EmployeeAllTasksScreen> {
             ),
           ),
         ),
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [Image.asset('assets/images/logo.png', height: 30)],
-        ),
+        centerTitle: true,
+        title: Image.asset('assets/images/logo.png', height: 30),
+        iconTheme: const IconThemeData(color: Color(0xFF5D6266)),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh, color: Color(0xFF5D6266)),
@@ -399,9 +430,7 @@ class _EmployeeAllTasksScreenState extends State<EmployeeAllTasksScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: () {
-                      // Log Directly
-                    },
+                    onPressed: () => _onEnregistrer(context, task),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: iconColor,
                       padding: const EdgeInsets.symmetric(vertical: 12),

@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:wms/features/auth/data/user_model.dart';
 import 'package:wms/features/auth/data/repositories/auth_repository.dart';
+import 'package:wms/core/services/sync_service.dart';
 
 // --- States ---
 abstract class AuthState extends Equatable {
@@ -34,8 +35,9 @@ class Unauthenticated extends AuthState {
 // --- Cubit ---
 class AuthCubit extends Cubit<AuthState> {
   final AuthRepository _authRepository;
+  final SyncService? _syncService;
 
-  AuthCubit(this._authRepository) : super(AuthInitial());
+  AuthCubit(this._authRepository, [this._syncService]) : super(AuthInitial());
 
   Future<void> login(String email, String password) async {
     emit(AuthLoading());
@@ -43,8 +45,9 @@ class AuthCubit extends Cubit<AuthState> {
       final response = await _authRepository.login(email, password);
       final user = UserModel.fromJson(response['user']);
       final token = response['access_token'];
-      
+
       emit(Authenticated(user: user, token: token));
+      _syncService?.runSync();
     } catch (e) {
       emit(Unauthenticated(message: e.toString()));
     }
@@ -57,6 +60,7 @@ class AuthCubit extends Cubit<AuthState> {
         final user = UserModel.fromJson(session['user']);
         final token = session['access_token'];
         emit(Authenticated(user: user, token: token));
+        _syncService?.runSync();
       } else {
         emit(const Unauthenticated());
       }
@@ -70,7 +74,7 @@ class AuthCubit extends Cubit<AuthState> {
     emit(const Unauthenticated());
   }
 
-  Future<void> logUserAction({
+  Future<bool> logUserAction({
     required String action,
     required String entityType,
     required String entityId,
@@ -78,7 +82,7 @@ class AuthCubit extends Cubit<AuthState> {
   }) async {
     if (state is Authenticated) {
       final user = (state as Authenticated).user;
-      await _authRepository.logAction(
+      return _authRepository.logAction(
         userId: user.id,
         action: action,
         entityType: entityType,
@@ -86,5 +90,6 @@ class AuthCubit extends Cubit<AuthState> {
         payload: payload,
       );
     }
+    return false;
   }
 }

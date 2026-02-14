@@ -52,6 +52,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
           return const SizedBox();
         },
       ),
+    ),
     );
   }
 
@@ -65,13 +66,16 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Équipe MobAI', style: GoogleFonts.lato(fontSize: 24, fontWeight: FontWeight.bold)),
-                  Text('$total membres au total', style: GoogleFonts.lato(fontSize: 14, color: Colors.grey[600])),
-                ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Équipe MobAI', style: GoogleFonts.lato(fontSize: 24, fontWeight: FontWeight.bold)),
+                    Text('$total membres au total', style: GoogleFonts.lato(fontSize: 14, color: Colors.grey[600])),
+                  ],
+                ),
               ),
+              const SizedBox(width: 12),
               ElevatedButton.icon(
                 onPressed: () => Navigator.pushNamed(context, '/admin/create_user'),
                 icon: const Icon(Icons.person_add_alt_1, size: 20, color: Colors.white),
