@@ -54,7 +54,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.darkBlue,
+      backgroundColor: AppTheme.lightGrey,
       body: SafeArea(
         child: Column(
           children: [
@@ -64,7 +64,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: () => Navigator.pushNamed(context, AppRouter.roleSelection),
-                  child: Text('Skip', style: GoogleFonts.lato(color: Colors.white, fontWeight: FontWeight.bold)),
+                  child: Text('Skip', style: GoogleFonts.lato(color: Colors.black, fontWeight: FontWeight.bold)),
                 ),
               ),
             ),
@@ -91,7 +91,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                          Navigator.pop(context);
                       }
                     },
-                    child: Text('Back', style: GoogleFonts.lato(color: Colors.grey[400])),
+                    child: Text('Back', style: GoogleFonts.lato(color: Colors.black)),
                   ),
                    Row(
                     children: List.generate(_pages.length, (index) => _buildDot(index)),
@@ -205,7 +205,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       height: 8,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: _currentPage == index ? AppTheme.yellow : Colors.grey[700],
+        color: _currentPage == index ? AppTheme.yellow : AppTheme.darkBlue,
       ),
     );
   }

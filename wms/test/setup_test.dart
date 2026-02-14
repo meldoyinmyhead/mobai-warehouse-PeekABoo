@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:wms/features/warehouse/data/models/task_model.dart';
-import 'package:wms/features/warehouse/data/models/location_point_model.dart';
+import 'package:wms/features/logistics/data/models/task_model.dart';
+import 'package:wms/features/supervisor/data/models/location_point_model.dart';
 
 void main() {
   test('TaskModel Serialization', () {

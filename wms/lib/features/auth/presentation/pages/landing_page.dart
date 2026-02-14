@@ -19,18 +19,12 @@ class LandingPage extends StatelessWidget {
               // Logo/Image placeholder - Using the existing asset but styling might need adjustment or new asset
               // If the design has a specific logo, we might need to swap it. 
               // For now, using the existing one but assuming it looks good on dark or using an Icon as placeholder if needed.
-               Image.asset('assets/images/logo_white.png', height: 80, errorBuilder: (c,e,s) => 
+               Image.asset('assets/images/logo.png', height: 80, errorBuilder: (c,e,s) => 
                 const Icon(Icons.warehouse, size: 80, color: Colors.white)
               ),
               const SizedBox(height: 24),
               
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                   Text('BBMS', style: GoogleFonts.lato(fontSize: 32, fontWeight: FontWeight.bold, color: AppTheme.yellow)),
-                   Text(' ELECTRIC', style: GoogleFonts.lato(fontSize: 32, fontWeight: FontWeight.w300, color: AppTheme.yellow, fontStyle: FontStyle.italic)),
-                ],
-              ),
+             Image.asset("assets/images/logo.png"),
               
               const SizedBox(height: 120),
 
