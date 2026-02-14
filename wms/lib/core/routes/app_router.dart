@@ -1,26 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:wms/features/warehouse/data/models/task_model.dart';
-import 'package:wms/features/warehouse/presentation/pages/supervisor/supervisor_dashboard_screen.dart';
-import 'package:wms/features/warehouse/presentation/pages/employee/employee_dashboard_screen.dart';
-import 'package:wms/features/warehouse/presentation/pages/employee_main_screen.dart';
-import 'package:wms/features/warehouse/presentation/pages/employee_profile_screen.dart';
-import 'package:wms/features/warehouse/presentation/pages/employee_settings_screen.dart';
-import 'package:wms/features/warehouse/presentation/pages/employee_notifications_screen.dart';
-import 'package:wms/features/warehouse/presentation/pages/employee/task_detail_screen.dart';
-import 'package:wms/features/warehouse/presentation/pages/supervisor/ai_review_screen.dart';
-import 'package:wms/features/warehouse/presentation/pages/employee/log_task_screen.dart';
-import 'package:wms/features/warehouse/presentation/pages/supervisor/supervisor_map_screen.dart';
-import 'package:wms/features/warehouse/presentation/pages/supervisor/supervisor_notifications_screen.dart';
-import 'package:wms/features/warehouse/presentation/pages/supervisor/supervisor_profile_screen.dart';
-
+import 'package:wms/features/logistics/data/models/task_model.dart';
+import 'package:wms/features/supervisor/presentation/pages/supervisor_dashboard_screen.dart';
+import 'package:wms/features/inventory/presentation/pages/employee_dashboard_screen.dart';
+import 'package:wms/features/inventory/presentation/pages/employee_main_screen.dart';
+import 'package:wms/features/auth/presentation/pages/employee_profile_screen.dart';
+import 'package:wms/features/auth/presentation/pages/employee_settings_screen.dart';
+import 'package:wms/features/auth/presentation/pages/employee_notifications_screen.dart';
+import 'package:wms/features/logistics/presentation/pages/task_detail_screen.dart';
+import 'package:wms/features/supervisor/presentation/pages/ai_review_screen.dart';
+import 'package:wms/features/logistics/presentation/pages/log_task_screen.dart';
+import 'package:wms/features/supervisor/presentation/pages/warehouse_map_screen.dart';
+import 'package:wms/features/supervisor/presentation/pages/supervisor_notifications_screen.dart';
+import 'package:wms/features/supervisor/presentation/pages/supervisor_profile_screen.dart';
 import 'package:wms/features/auth/presentation/pages/landing_page.dart';
 import 'package:wms/features/auth/presentation/pages/onboarding_screen.dart';
 import 'package:wms/features/auth/presentation/pages/role_selection_screen.dart';
 import 'package:wms/features/auth/presentation/pages/login_screen.dart';
-
-import 'package:wms/features/warehouse/presentation/pages/supervisor/flag_management_screen.dart';
-
-import 'package:wms/features/warehouse/presentation/pages/supervisor/supervisor_settings_screen.dart';
+import 'package:wms/features/supervisor/presentation/pages/flag_management_screen.dart';
+import 'package:wms/features/supervisor/presentation/pages/supervisor_settings_screen.dart';
 
 class AppRouter {
   static const String landing = '/';

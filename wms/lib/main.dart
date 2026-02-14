@@ -10,6 +10,10 @@ import 'package:wms/features/warehouse/presentation/cubits/employee/employee_not
 import 'package:wms/features/warehouse/presentation/cubits/supervisor/map_cubit.dart';
 import 'package:wms/features/warehouse/presentation/cubits/supervisor/ai_review_cubit.dart';
 import 'package:wms/features/auth/presentation/cubits/auth_cubit.dart';
+import 'package:wms/features/auth/data/repositories/auth_repository.dart';
+import 'package:wms/features/warehouse/presentation/pages/admin/admin_dashboard_screen.dart';
+import 'package:wms/features/warehouse/presentation/pages/employee_main_screen.dart';
+import 'package:wms/features/warehouse/presentation/pages/supervisor/supervisor_dashboard_screen.dart';
 
 
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -40,8 +44,7 @@ class MainApp extends StatelessWidget {
         BlocProvider(create: (_) => EmployeeProfileCubit()..loadProfile()),
         BlocProvider(create: (_) => EmployeeSettingsCubit()),
         BlocProvider(create: (_) => EmployeeNotificationCubit()),
-        BlocProvider(create: (_) => MapCubit()),
-        
+        BlocProvider(create: (_) => MapCubit()),        
         BlocProvider(create: (_) => AiReviewCubit()..loadPendingReviews()),
         BlocProvider(create: (_) => sl<AuthCubit>()),
       ],
@@ -50,6 +53,8 @@ class MainApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
         initialRoute: AppRouter.landing,
+        home: EmployeeMainScreen(), 
+        //home: AdminDashboardScreen(), 
         onGenerateRoute: AppRouter.generateRoute,
       ),
     );
