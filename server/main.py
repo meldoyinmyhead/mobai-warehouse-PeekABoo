@@ -92,10 +92,95 @@ def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     users = db.query(models.Utilisateur).offset(skip).limit(limit).all()
     return users
 
+@app.put("/users/{user_id}", response_model=schemas.Utilisateur)
+def update_user(user_id: str, user_update: schemas.UtilisateurBase, db: Session = Depends(get_db)):
+    import uuid
+    db_user = db.query(models.Utilisateur).filter(models.Utilisateur.id_utilisateur == uuid.UUID(user_id)).first()
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    for key, value in user_update.dict().items():
+        setattr(db_user, key, value)
+    
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+@app.delete("/users/{user_id}")
+def delete_user(user_id: str, db: Session = Depends(get_db)):
+    import uuid
+    db_user = db.query(models.Utilisateur).filter(models.Utilisateur.id_utilisateur == uuid.UUID(user_id)).first()
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    db.delete(db_user)
+    db.commit()
+    return {"status": "success", "message": "User deleted"}
+
 # 2. Warehouse Infrastructure
 @app.get("/entrepots/", response_model=List[schemas.Entrepot])
 def list_entrepots(db: Session = Depends(get_db)):
     return db.query(models.Entrepot).all()
+
+@app.post("/entrepots/", response_model=schemas.Entrepot, status_code=status.HTTP_201_CREATED)
+def create_entrepot(entrepot: schemas.EntrepotCreate, db: Session = Depends(get_db)):
+    db_entrepot = models.Entrepot(**entrepot.dict())
+    db.add(db_entrepot)
+    db.commit()
+    db.refresh(db_entrepot)
+    return db_entrepot
+
+@app.put("/entrepots/{entrepot_id}", response_model=schemas.Entrepot)
+def update_entrepot(entrepot_id: str, entrepot_update: schemas.EntrepotUpdate, db: Session = Depends(get_db)):
+    import uuid
+    db_entrepot = db.query(models.Entrepot).filter(models.Entrepot.id_entrepot == uuid.UUID(entrepot_id)).first()
+    if not db_entrepot:
+        raise HTTPException(status_code=404, detail="Warehouse not found")
+    
+    update_data = entrepot_update.dict(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(db_entrepot, key, value)
+    
+    db.commit()
+    db.refresh(db_entrepot)
+    return db_entrepot
+
+@app.delete("/entrepots/{entrepot_id}")
+def delete_entrepot(entrepot_id: str, db: Session = Depends(get_db)):
+    import uuid
+    db_entrepot = db.query(models.Entrepot).filter(models.Entrepot.id_entrepot == uuid.UUID(entrepot_id)).first()
+    if not db_entrepot:
+        raise HTTPException(status_code=404, detail="Warehouse not found")
+    
+    db.delete(db_entrepot)
+    db.commit()
+    return {"status": "success", "message": "Warehouse deleted"}
+
+# --- Etage (Floor) Management ---
+
+@app.post("/entrepots/{entrepot_id}/etages", response_model=schemas.Etage)
+def create_etage(entrepot_id: str, etage: schemas.EtageCreate, db: Session = Depends(get_db)):
+    import uuid
+    # Ensure entrepot matches
+    if str(etage.id_entrepot) != entrepot_id:
+         raise HTTPException(status_code=400, detail="Entrepot ID mismatch")
+    
+    db_etage = models.Etage(**etage.dict())
+    db.add(db_etage)
+    db.commit()
+    db.refresh(db_etage)
+    return db_etage
+
+@app.delete("/etages/{etage_id}")
+def delete_etage(etage_id: str, db: Session = Depends(get_db)):
+    import uuid
+    db_etage = db.query(models.Etage).filter(models.Etage.id == uuid.UUID(etage_id)).first()
+    if not db_etage:
+        raise HTTPException(status_code=404, detail="Floor not found")
+    
+    db.delete(db_etage)
+    db.commit()
+    return {"status": "success", "message": "Floor deleted"}
 
 @app.get("/emplacements/", response_model=List[schemas.Emplacement])
 def list_emplacements(zone: str = None, db: Session = Depends(get_db)):
@@ -345,6 +430,7 @@ def get_employee_tasks(user_id: str, db: Session = Depends(get_db)):
             id=order.id,
             reference=order.reference,
             assigned_to=order.assigned_to, 
+            order_type=order.order_type,
             total_distance_m=order.route_distance_m,
             stops=stops
         ))

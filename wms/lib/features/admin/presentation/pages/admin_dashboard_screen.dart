@@ -1,118 +1,40 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:wms/core/widgets/supervisorBottonBar.dart';
-import 'package:wms/features/warehouse/presentation/cubits/supervisor/dashboard_cubit.dart';
-import 'package:wms/features/warehouse/data/repositories/task_repository.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wms/core/theme/app_theme.dart';
-import 'package:wms/features/warehouse/presentation/pages/admin/ai_performance_screen.dart';
-import 'package:wms/features/warehouse/presentation/pages/admin/access_logs.dart';
-import 'package:wms/features/warehouse/presentation/pages/admin/export_reports_screen.dart';
+import 'package:wms/core/di/dependency_injection.dart';
+import 'package:wms/core/routes/app_router.dart';
+import 'package:wms/core/widgets/layout/admin_app_bar.dart';
+import 'package:wms/features/supervisor/presentation/cubits/dashboard_cubit.dart';
+import 'package:wms/features/admin/presentation/pages/admin_placeholders.dart';
+import 'package:wms/features/logistics/data/repositories/task_repository.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
-  const AdminDashboardScreen({super.key});
+  final bool isView;
+  const AdminDashboardScreen({super.key, this.isView = false});
 
   @override
   State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
 }
 
 class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
-  int _currentIndex = 0;
-
-  void _onNavBarTap(int index) {
-    if (index == _currentIndex) return;
-
-    setState(() {
-      _currentIndex = index;
-    });
-
-    switch (index) {
-      case 0:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => AdminDashboardScreen()),
-        );
-        break;
-
-      case 1:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => UserManagementScreen()),
-        );
-
-        break;
-
-      case 2:
-        Navigator.pushReplacementNamed(context, '/admin/reports');
-        break;
-      case 3:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => AnalyticsScreen()),
-        );
-        break;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) =>
-          SupervisorDashboardCubit(TaskRepository())..loadDashboard(),
-      child: Scaffold(
-        backgroundColor: AppTheme.veryLightGrey,
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 0,
-          leading: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: GestureDetector(
-              onTap: () {
-                // Naviguer vers le profil admin
-              },
-              child: const CircleAvatar(
-                backgroundColor: Color(0xFFF5F5F5),
-                child: Icon(Icons.person_outline, color: Color(0xFF5D6266)),
+          SupervisorDashboardCubit(sl<TaskRepository>())..loadDashboard(),
+      child: BlocBuilder<SupervisorDashboardCubit, SupervisorDashboardState>(
+        builder: (context, state) {
+          if (state is SupervisorDashboardLoading) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (state is SupervisorDashboardError) {
+            return Center(
+              child: Text(
+                'Erreur: ${state.message}',
+                style: GoogleFonts.lato(color: AppTheme.red),
               ),
-            ),
-          ),
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [Image.asset('assets/images/logo.png', height: 30)],
-          ),
-          actions: [
-            IconButton(
-              icon: const Icon(
-                Icons.settings_outlined,
-                color: Color(0xFF5D6266),
-              ),
-              onPressed: () {
-                // Naviguer vers les paramètres
-              },
-            ),
-            IconButton(
-              icon: const Icon(
-                Icons.notifications_outlined,
-                color: Color(0xFF5D6266),
-              ),
-              onPressed: () {
-                // Naviguer vers les notifications
-              },
-            ),
-          ],
-        ),
-        body: BlocBuilder<SupervisorDashboardCubit, SupervisorDashboardState>(
-          builder: (context, state) {
-            if (state is SupervisorDashboardLoading) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (state is SupervisorDashboardError) {
-              return Center(
-                child: Text(
-                  'Erreur: ${state.message}',
-                  style: GoogleFonts.lato(color: AppTheme.red),
-                ),
-              );
-            } else if (state is SupervisorDashboardLoaded) {
+            );
+          } else if (state is SupervisorDashboardLoaded) {
               return SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -151,13 +73,19 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         children: [
                           GestureDetector(
                             onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const CreateNewUserScreen(),
-                                ),
-                              );
+                              Navigator.pushNamed(context, AppRouter.adminWarehouseConfig);
+                            },
+                            child: _buildQuickActionButton(
+                              icon: Icons.warehouse_outlined,
+                              label: 'Configuration de l\'entrepôt',
+                              color: AppTheme.lightBlue,
+                              width: MediaQuery.of(context).size.width * 0.9,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.pushNamed(context, AppRouter.adminCreateUser);
                             },
                             child: Container(
                               child: _buildQuickActionButton(
@@ -179,7 +107,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) =>
-                                            const AccessLogsScreen(),
+                                            AccessLogsScreen(),
                                       ),
                                     );
                                   },
@@ -200,7 +128,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) =>
-                                            const ExportReportsScreen(),
+                                            ExportReportsScreen(),
                                       ),
                                     );
                                   },
@@ -393,7 +321,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const AIPerformanceScreen(),
+                              builder: (context) => AIPerformanceScreen(),
                             ),
                           );
                         },
@@ -831,10 +759,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             return const SizedBox.shrink();
           },
         ),
-        bottomNavigationBar: AdminBottomBar(
-          currentIndex: _currentIndex,
-          onTap: _onNavBarTap,
-        ),
+        bottomNavigationBar: widget.isView ? null : const AdminAppBar(title: 'Tableau de Bord'),
       ),
     );
   }

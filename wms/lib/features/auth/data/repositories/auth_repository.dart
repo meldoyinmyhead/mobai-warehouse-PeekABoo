@@ -5,9 +5,14 @@ import 'package:wms/features/auth/data/user_model.dart';
 
 import 'package:wms/core/app_config.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 class AuthRepository {
+  final SharedPreferences _prefs;
   final String baseUrl = AppConfig.backendUrl;
   
+  AuthRepository(this._prefs);
+
   Future<Map<String, dynamic>> login(String email, String password) async {
     try {
       final response = await http.post(
@@ -21,6 +26,11 @@ class AuthRepository {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
+        
+        // Persist Session
+        await _prefs.setString('access_token', data['access_token']);
+        await _prefs.setString('user_data', jsonEncode(data['user']));
+        
         return {
           'user': data['user'],
           'access_token': data['access_token'],
@@ -33,9 +43,27 @@ class AuthRepository {
         throw Exception('Erreur de connexion: ${response.statusCode}');
       }
     } catch (e) {
-      if (e is Exception) rethrow; // Rethrow friendly exceptions
+      if (e is Exception) rethrow; 
       throw Exception('Erreur technique: ${e.toString()}');
     }
+  }
+
+  Future<Map<String, dynamic>?> checkSession() async {
+    final token = _prefs.getString('access_token');
+    final userStr = _prefs.getString('user_data');
+    
+    if (token != null && userStr != null) {
+      return {
+        'access_token': token,
+        'user': jsonDecode(userStr)
+      };
+    }
+    return null;
+  }
+  
+  Future<void> logout() async {
+    await _prefs.remove('access_token');
+    await _prefs.remove('user_data');
   }
 
   Future<void> logAction({
@@ -59,7 +87,6 @@ class AuthRepository {
       );
     } catch (e) {
       print('Audit logging failed: $e');
-      // In a production app, queue for retry
     }
   }
 }

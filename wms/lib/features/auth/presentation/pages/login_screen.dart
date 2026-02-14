@@ -44,18 +44,22 @@ class _LoginScreenState extends State<LoginScreen> {
     return BlocListener<AuthCubit, AuthState>(
       listener: (context, state) {
         if (state is Authenticated) {
-          // Role-based routing
+          // Role-based routing - Clear stack so back button doesn't go to login
+          String targetRoute;
           switch (state.user.role) {
             case UserRole.ADMIN:
-              Navigator.pushReplacementNamed(context, AppRouter.adminDashboard);
+              targetRoute = AppRouter.adminDashboard;
               break;
             case UserRole.SUPERVISOR:
-              Navigator.pushReplacementNamed(context, AppRouter.supervisorDashboard);
+              targetRoute = AppRouter.supervisorDashboard;
               break;
             case UserRole.EMPLOYEE:
-              Navigator.pushReplacementNamed(context, AppRouter.employeeMain);
+              targetRoute = AppRouter.employeeMain;
               break;
+            default:
+              targetRoute = AppRouter.landing;
           }
+          Navigator.pushNamedAndRemoveUntil(context, targetRoute, (route) => false);
         } else if (state is Unauthenticated && state.message != null) {
           SnackbarUtils.showError(context, state.message!);
         }

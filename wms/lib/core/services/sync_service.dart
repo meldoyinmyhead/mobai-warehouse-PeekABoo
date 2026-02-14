@@ -62,6 +62,13 @@ class SyncService {
         Map<String, dynamic>? response;
 
         switch (action.actionType) {
+          case 'COMPLETE_TASK':
+            response = await _supabase.rpc('process_task_completion', params: {
+              'p_task_id': payload['task_id'],
+              'p_user_id': _supabase.auth.currentUser!.id,
+            });
+            break;
+            
           case 'COMPLETE_STOP':
             response = await _supabase.rpc('process_picking_stop', params: {
               'p_stop_id': payload['stop_id'],
@@ -129,7 +136,7 @@ class SyncService {
     for (final t in tasks) {
       await _db.into(_db.localTasks).insertOnConflictUpdate(
         LocalTasksCompanion(
-          id: drift.Value(t['id']),
+          id: drift.Value(t['id'].toString()),
           type: drift.Value(t['type'] ?? 'general'),
           status: drift.Value(t['statut']),
           data: drift.Value(jsonEncode(t)),

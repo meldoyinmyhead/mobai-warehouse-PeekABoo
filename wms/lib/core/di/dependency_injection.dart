@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:wms/core/database/app_database.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wms/core/repositories/offline_repository.dart';
 import 'package:wms/core/services/sync_service.dart';
 import 'package:wms/features/auth/data/repositories/auth_repository.dart';
@@ -17,6 +18,10 @@ import 'package:wms/features/supervisor/data/repositories/ai_review_repository.d
 import 'package:wms/features/supervisor/data/repositories/flag_repository.dart';
 import 'package:wms/features/inventory/data/repositories/receipt_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:wms/features/admin/data/repositories/admin_repository.dart';
+import 'package:wms/features/admin/presentation/cubits/warehouse_cubit.dart';
+import 'package:wms/features/admin/presentation/cubits/admin_user_cubit.dart';
+import 'package:wms/core/app_config.dart';
 
 final sl = GetIt.instance;
 
@@ -33,14 +38,19 @@ Future<void> setupDependencyInjection() async {
   final syncService = await SyncService.init(sl());
   sl.registerSingleton<SyncService>(syncService);
 
+  // External
+  final sharedPreferences = await SharedPreferences.getInstance();
+  sl.registerSingleton<SharedPreferences>(sharedPreferences);
+
   // Repositories
   sl.registerLazySingleton<EntrepotRepository>(() => EntrepotRepository());
   sl.registerLazySingleton<EmplacementRepository>(() => EmplacementRepository());
-  sl.registerLazySingleton<TaskRepository>(() => TaskRepository());
-  sl.registerLazySingleton<AuthRepository>(() => AuthRepository());
+  sl.registerLazySingleton<TaskRepository>(() => TaskRepository(sl<AppDatabase>()));
+  sl.registerLazySingleton<AuthRepository>(() => AuthRepository(sl<SharedPreferences>()));
   sl.registerLazySingleton<AiReviewRepository>(() => AiReviewRepository());
   sl.registerLazySingleton<FlagRepository>(() => FlagRepository());
   sl.registerLazySingleton<ReceiptRepository>(() => ReceiptRepository(Supabase.instance.client, sl()));
+  sl.registerLazySingleton<AdminRepository>(() => AdminRepository(AppConfig.backendUrl));
 
   // Cubits
   sl.registerFactory<SupervisorDashboardCubit>(
@@ -53,4 +63,6 @@ Future<void> setupDependencyInjection() async {
   sl.registerFactory<AiReviewCubit>(() => AiReviewCubit(sl<AiReviewRepository>()));
   sl.registerFactory<FlagCubit>(() => FlagCubit(sl<FlagRepository>()));
   sl.registerFactory<ReceiptCubit>(() => ReceiptCubit(sl<ReceiptRepository>()));
+  sl.registerFactory<WarehouseCubit>(() => WarehouseCubit(sl<AdminRepository>()));
+  sl.registerFactory<AdminUserCubit>(() => AdminUserCubit(sl<AdminRepository>()));
 }

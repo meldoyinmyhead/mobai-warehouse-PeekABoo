@@ -50,7 +50,23 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
+  Future<void> checkSession() async {
+    try {
+      final session = await _authRepository.checkSession();
+      if (session != null) {
+        final user = UserModel.fromJson(session['user']);
+        final token = session['access_token'];
+        emit(Authenticated(user: user, token: token));
+      } else {
+        emit(const Unauthenticated());
+      }
+    } catch (e) {
+      emit(const Unauthenticated());
+    }
+  }
+
   void logout() {
+    _authRepository.logout();
     emit(const Unauthenticated());
   }
 

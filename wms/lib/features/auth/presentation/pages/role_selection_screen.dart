@@ -61,6 +61,16 @@ class RoleSelectionScreen extends StatelessWidget {
                  Navigator.pushNamed(context, AppRouter.login, arguments: {'role': 'supervisor'});
               },
             ),
+            const SizedBox(height: 24),
+             _buildRoleCard(
+              context,
+              title: 'Administrateur',
+              subtitle: 'Gestion des utilisateurs et du système',
+              icon: Icons.settings_applications_outlined,
+              onTap: () {
+                 Navigator.pushNamed(context, AppRouter.login, arguments: {'role': 'admin'});
+              },
+            ),
 
             const Spacer(),
             Text(

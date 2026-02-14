@@ -6,6 +6,7 @@ import 'package:wms/features/supervisor/presentation/widgets/isometric_warehouse
 import 'package:wms/core/data/warehouse_layout_data.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wms/features/logistics/presentation/cubits/employee_task_cubit.dart';
+import 'package:wms/features/auth/presentation/cubits/auth_cubit.dart';
 
 class EmployeeMapTaskScreen extends StatefulWidget {
   final TaskModel task;
@@ -94,10 +95,11 @@ class _EmployeeMapTaskScreenState extends State<EmployeeMapTaskScreen> {
                       width: 2000,
                       height: 2000,
                       child: CustomPaint(
-                        painter: IsometricWarehousePainter(
-                          layout: _floorLayouts[_currentFloor] ?? [],
-                          aiPath: pathOffsets,
-                          entities: [
+                          painter: IsometricWarehousePainter(
+                            layout: _floorLayouts[_currentFloor] ?? [],
+                            aiPath: pathOffsets,
+                            floor: _currentFloor,
+                            entities: [
                             // Show current user position (start of path)
                             if (pathOffsets.isNotEmpty)
                               {'x': pathOffsets.first.dx, 'y': pathOffsets.first.dy, 'color': AppTheme.lightBlue, 'label': 'Moi', 'type': 'employee'}
@@ -173,7 +175,12 @@ class _EmployeeMapTaskScreenState extends State<EmployeeMapTaskScreen> {
                             // Check if Cubit is available, otherwise use Repository directly?
                             // Assuming Cubit is available for now. 
                             // If fail, we might need to fix Router or Provider.
-                            await context.read<EmployeeTaskCubit>().completeTask(widget.task.id);
+                            final authState = context.read<AuthCubit>().state;
+                            String employeeId = '';
+                            if (authState is Authenticated) {
+                              employeeId = authState.user.id;
+                            }
+                            await context.read<EmployeeTaskCubit>().completeTask(widget.task.id, employeeId);
                             
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(

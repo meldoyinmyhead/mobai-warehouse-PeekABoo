@@ -35,18 +35,54 @@ class EmployeeTaskCubit extends Cubit<EmployeeTaskState> {
 
   EmployeeTaskCubit(this._taskRepository) : super(EmployeeTaskLoading());
 
-  Future<void> loadTasks() async {
+  // Helper to get filtered tasks for the UI
+  List<TaskModel> get filteredTasks {
+    if (state is EmployeeTaskLoaded) {
+      final loadedState = state as EmployeeTaskLoaded;
+      if (loadedState.filter == 'All') {
+        return loadedState.tasks;
+      }
+      
+      // Map filter string to TaskType
+      TaskType? targetType;
+      switch (loadedState.filter.toLowerCase()) {
+        case 'reception':
+        case 'receipt':
+          targetType = TaskType.receipt;
+          break;
+        case 'stockage':
+        case 'storage':
+          targetType = TaskType.storage;
+          break;
+        case 'preparation':
+        case 'picking':
+          targetType = TaskType.picking;
+          break;
+        case 'delivery':
+        case 'livraison':
+          targetType = TaskType.delivery;
+          break;
+      }
+      
+      if (targetType != null) {
+        return loadedState.tasks.where((t) => t.type == targetType).toList();
+      }
+      return loadedState.tasks;
+    }
+    return [];
+  }
+
+  Future<void> loadTasks(String employeeId) async {
     try {
       emit(EmployeeTaskLoading());
-      // Fetching tasks for the specific employee
-      // In production, get this ID from AuthCubit
-      const String employeeId = 'bd1252b5-15d2-4051-9290-d70ecad8ee72'; 
       final tasks = await _taskRepository.getEmployeeTasks(employeeId);
       emit(EmployeeTaskLoaded(tasks: tasks));
     } catch (e) {
       emit(EmployeeTaskError("Failed to load tasks: $e"));
     }
   }
+
+  void refreshTasks(String employeeId) => loadTasks(employeeId);
 
   void filterTasks(String filter) {
     if (state is EmployeeTaskLoaded) {
@@ -55,11 +91,12 @@ class EmployeeTaskCubit extends Cubit<EmployeeTaskState> {
     }
   }
 
-  Future<void> completeTask(String taskId) async {
+
+  Future<void> completeTask(String taskId, String employeeId) async {
     try {
       final success = await _taskRepository.completeTask(taskId);
       if (success) {
-        await loadTasks(); // Refresh list to remove completed task
+        await loadTasks(employeeId); // Refresh list to remove completed task
       }
     } catch (e) {
       emit(EmployeeTaskError("Failed to complete task: $e"));

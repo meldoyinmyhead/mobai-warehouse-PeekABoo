@@ -9,6 +9,7 @@ import 'package:wms/core/theme/app_theme.dart';
 import 'package:wms/features/supervisor/presentation/pages/supervisor_notifications_screen.dart';
 import 'package:wms/features/supervisor/presentation/pages/supervisor_settings_screen.dart';
 import 'package:wms/features/supervisor/presentation/pages/supervisor_profile_screen.dart';
+import 'package:wms/core/di/dependency_injection.dart';
 
 class SupervisorDashboardScreen extends StatefulWidget {
   const SupervisorDashboardScreen({super.key});
@@ -52,7 +53,7 @@ class _SupervisorDashboardScreenState extends State<SupervisorDashboardScreen> {
 
     return BlocProvider(
       create: (context) =>
-          SupervisorDashboardCubit(TaskRepository())..loadDashboard(),
+          SupervisorDashboardCubit(sl<TaskRepository>())..loadDashboard(),
       child: Scaffold(
         backgroundColor: AppTheme.veryLightGrey,
         appBar: AppBar(

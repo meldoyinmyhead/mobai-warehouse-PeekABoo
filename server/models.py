@@ -56,15 +56,40 @@ class Entrepot(Base):
     id_entrepot = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     code_entrepot = Column(String, unique=True, index=True)
     nom_entrepot = Column(String)
+    adresse = Column(String, nullable=True)
     ville = Column(String)
+    heures_ouverture = Column(String, nullable=True)
+    manager_id = Column(UUID(as_uuid=True), ForeignKey("utilisateurs.id_utilisateur"), nullable=True)
+    largeur = Column(Float, default=0.0) # Meters
+    longueur = Column(Float, default=0.0) # Meters
+    hauteur = Column(Float, default=0.0) # Meters
+    type_climat = Column(String, nullable=True)
+    layout_map = Column(JSON, default={}) # Visual layout grid
     actif = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    manager = relationship("Utilisateur", foreign_keys=[manager_id])
+    etages = relationship("Etage", back_populates="entrepot")
+    emplacements = relationship("Emplacement", back_populates="entrepot")
+
+class Etage(Base):
+    __tablename__ = "etages"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id_entrepot = Column(UUID(as_uuid=True), ForeignKey("entrepots.id_entrepot"))
+    nom_etage = Column(String)
+    code_etage = Column(String)
+    nombre_emplacements = Column(Integer, default=0)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    entrepot = relationship("Entrepot", back_populates="etages")
+    emplacements = relationship("Emplacement", back_populates="etage")
 
 class Emplacement(Base):
     __tablename__ = "emplacements"
     id_emplacement = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     code_emplacement = Column(String, unique=True, index=True)
     id_entrepot = Column(UUID(as_uuid=True), ForeignKey("entrepots.id_entrepot"))
+    id_etage = Column(UUID(as_uuid=True), ForeignKey("etages.id"), nullable=True)
     zone = Column(Enum(Zone, name="zone_type", create_type=False))
     type_emplacement = Column(Enum(EmplacementType, name="location_type", create_type=False))
     niveau = Column(Integer, default=0)
@@ -73,6 +98,10 @@ class Emplacement(Base):
     distance_to_expedition = Column(Float, default=0.0)
     capacite_palettes = Column(Integer, default=1)
     actif = Column(Boolean, default=True)
+
+    entrepot = relationship("Entrepot", back_populates="emplacements")
+    etage = relationship("Etage", back_populates="emplacements")
+    stock = relationship("StockParEmplacement", back_populates="emplacement")
 
 class Utilisateur(Base):
     __tablename__ = "utilisateurs"
@@ -114,6 +143,9 @@ class StockParEmplacement(Base):
     quantite = Column(Integer, default=0)
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     version = Column(Integer, default=1) # Optimistic locking
+
+    produit = relationship("Produit")
+    emplacement = relationship("Emplacement", back_populates="stock")
 
 class Transaction(Base):
     __tablename__ = "transactions"
@@ -181,6 +213,7 @@ class PickingOrder(Base):
     id_preparation_order = Column(UUID(as_uuid=True), ForeignKey("preparation_orders.id"), nullable=True)
     assigned_to = Column(UUID(as_uuid=True), ForeignKey("utilisateurs.id_utilisateur"))
     id_chariot = Column(UUID(as_uuid=True), ForeignKey("chariots.id"), nullable=True)
+    order_type = Column(Enum(TransactionType, name="transaction_type", create_type=False), default=TransactionType.PICKING)
     generated_by_ai = Column(Boolean, default=True)
     statut = Column(Enum(OrderStatus, name="order_status", create_type=False))
     approved_by = Column(UUID(as_uuid=True), ForeignKey("utilisateurs.id_utilisateur"), nullable=True)
