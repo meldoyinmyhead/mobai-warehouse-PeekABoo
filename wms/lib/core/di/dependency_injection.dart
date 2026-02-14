@@ -5,12 +5,18 @@ import 'package:wms/core/repositories/offline_repository.dart';
 import 'package:wms/core/services/sync_service.dart';
 import 'package:wms/features/auth/data/repositories/auth_repository.dart';
 import 'package:wms/features/auth/presentation/cubits/auth_cubit.dart';
-import 'package:wms/features/warehouse/data/repositories/entrepot_repository.dart';
-import 'package:wms/features/warehouse/data/repositories/emplacement_repository.dart';
-import 'package:wms/features/warehouse/data/repositories/task_repository.dart';
-import 'package:wms/features/warehouse/presentation/cubits/supervisor/dashboard_cubit.dart';
-import 'package:wms/features/warehouse/presentation/cubits/employee/employee_task_cubit.dart';
-import 'package:wms/features/warehouse/presentation/cubits/supervisor/ai_review_cubit.dart'; // Added missing import
+import 'package:wms/features/inventory/data/repositories/entrepot_repository.dart';
+import 'package:wms/features/inventory/data/repositories/emplacement_repository.dart';
+import 'package:wms/features/logistics/data/repositories/task_repository.dart';
+import 'package:wms/features/supervisor/presentation/cubits/dashboard_cubit.dart';
+import 'package:wms/features/logistics/presentation/cubits/employee_task_cubit.dart';
+import 'package:wms/features/supervisor/presentation/cubits/ai_review_cubit.dart';
+import 'package:wms/features/supervisor/presentation/cubits/flag_cubit.dart';
+import 'package:wms/features/inventory/presentation/cubits/receipt_cubit.dart';
+import 'package:wms/features/supervisor/data/repositories/ai_review_repository.dart';
+import 'package:wms/features/supervisor/data/repositories/flag_repository.dart';
+import 'package:wms/features/inventory/data/repositories/receipt_repository.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 final sl = GetIt.instance;
 
@@ -32,6 +38,9 @@ Future<void> setupDependencyInjection() async {
   sl.registerLazySingleton<EmplacementRepository>(() => EmplacementRepository());
   sl.registerLazySingleton<TaskRepository>(() => TaskRepository());
   sl.registerLazySingleton<AuthRepository>(() => AuthRepository());
+  sl.registerLazySingleton<AiReviewRepository>(() => AiReviewRepository());
+  sl.registerLazySingleton<FlagRepository>(() => FlagRepository());
+  sl.registerLazySingleton<ReceiptRepository>(() => ReceiptRepository(Supabase.instance.client, sl()));
 
   // Cubits
   sl.registerFactory<SupervisorDashboardCubit>(
@@ -41,4 +50,7 @@ Future<void> setupDependencyInjection() async {
     () => EmployeeTaskCubit(sl<TaskRepository>()), // Eventually switch to OfflineRepository
   );
   sl.registerLazySingleton<AuthCubit>(() => AuthCubit(sl<AuthRepository>()));
+  sl.registerFactory<AiReviewCubit>(() => AiReviewCubit(sl<AiReviewRepository>()));
+  sl.registerFactory<FlagCubit>(() => FlagCubit(sl<FlagRepository>()));
+  sl.registerFactory<ReceiptCubit>(() => ReceiptCubit(sl<ReceiptRepository>()));
 }

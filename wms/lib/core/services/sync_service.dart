@@ -10,7 +10,6 @@ class SyncService {
   final AppDatabase _db;
   final Connectivity _connectivity;
   
-  // Singleton pattern
   static SyncService? _instance;
   
   SyncService._(this._supabase, this._db, this._connectivity);
@@ -23,7 +22,6 @@ class SyncService {
     
     _instance = SyncService._(supabase, db, connectivity);
     
-    // Listen to Auth Changes
     supabase.auth.onAuthStateChange.listen((data) {
       final event = data.event;
       if (event == AuthChangeEvent.signedIn) {
@@ -36,10 +34,7 @@ class SyncService {
     return _instance!;
   }
 
-  /// 1. Main Sync Loop
-  /// Should be called periodically or when connection is restored.
   Future<void> runSync() async {
-    // Check connection
     final connectivityResult = await _connectivity.checkConnectivity();
     if (connectivityResult == ConnectivityResult.none) {
       print('[Sync] Offline. Skipping sync.');
@@ -48,22 +43,15 @@ class SyncService {
 
     try {
       print('[Sync] Starting Sync...');
-      
-      // A. Push Pending Actions
       await _pushPendingActions();
-      
-      // B. Pull New Data
       await _pullLatestData();
-      
       print('[Sync] Sync Completed Successfully.');
     } catch (e) {
       print('[Sync] Error: $e');
     }
   }
 
-  /// 2. PUSH: Send local actions to server
   Future<void> _pushPendingActions() async {
-    // Get all pending actions from SyncQueue
     final pendingActions = await (_db.select(_db.syncQueue)
       ..where((tbl) => tbl.status.equals('pending')))
       .get();
@@ -71,27 +59,51 @@ class SyncService {
     for (final action in pendingActions) {
       try {
         final payload = jsonDecode(action.payload);
-        
-        if (action.actionType == 'COMPLETE_STOP') {
-             // Call Supabase RPC
-             final response = await _supabase.rpc('process_picking_stop', params: {
-               'p_stop_id': payload['stop_id'],
-               'p_qty_picked': payload['qty_picked'],
+        Map<String, dynamic>? response;
+
+        switch (action.actionType) {
+          case 'COMPLETE_STOP':
+            response = await _supabase.rpc('process_picking_stop', params: {
+              'p_stop_id': payload['stop_id'],
+              'p_qty_picked': payload['qty_picked'],
+              'p_user_id': _supabase.auth.currentUser!.id,
+            });
+            break;
+            
+          case 'CONFIRM_RECEIPT':
+            response = await _supabase.rpc('process_receipt', params: {
+              'p_order_id': payload['order_id'],
+              'p_items': payload['received_items'],
+              'p_user_id': _supabase.auth.currentUser!.id,
+            });
+            break;
+
+          case 'TRANSFER_STOCK':
+            response = await _supabase.rpc('process_transfer', params: {
+               'p_prod_id': payload['product_id'],
+               'p_from_loc': payload['from_location_id'],
+               'p_to_loc': payload['to_location_id'],
+               'p_qty': payload['quantity'],
                'p_user_id': _supabase.auth.currentUser!.id,
-             });
-             
-             if (response['status'] == 'SUCCESS' || response['status'] == 'CONFLICT') {
-                // If conflict, we mark as synced but maybe log error.
-                // For now, treat conflict as "Handled by Server".
-                await _markActionSynced(action.id);
-             } else {
-               // Retry logic?
-             }
+            });
+            break;
+
+           case 'DELIVERY_VALIDATION':
+            response = await _supabase.rpc('process_delivery', params: {
+               'p_order_id': payload['order_id'],
+               'p_result': payload['result'],
+               'p_notes': payload['notes'],
+               'p_user_id': _supabase.auth.currentUser!.id,
+            });
+            break;
+        }
+
+        if (response != null && (response['status'] == 'SUCCESS' || response['status'] == 'CONFLICT')) {
+          await _markActionSynced(action.id);
         }
         
       } catch (e) {
         print('[Sync] Error pushing action ${action.id}: $e');
-        // Increment retry count?
       }
     }
   }
@@ -104,9 +116,7 @@ class SyncService {
       ));
   }
 
-  /// 3. PULL: Get updates from server
   Future<void> _pullLatestData() async {
-    // Get last sync timestamp (mocked for now)
     final lastSync = DateTime.now().subtract(const Duration(days: 1)).toIso8601String();
     
     final response = await _supabase.rpc('sync_pull', params: {
@@ -114,17 +124,13 @@ class SyncService {
       'p_last_sync': lastSync,
     });
     
-    // Parse response
     final tasks = response['tasks'] as List;
-    // Update local DB...
-    print('[Sync] Pulled ${tasks.length} tasks updates.');
     
-    // Example: Insert tasks into LocalTasks
     for (final t in tasks) {
       await _db.into(_db.localTasks).insertOnConflictUpdate(
         LocalTasksCompanion(
           id: drift.Value(t['id']),
-          type: drift.Value('picking'), // Infer from table
+          type: drift.Value(t['type'] ?? 'general'),
           status: drift.Value(t['statut']),
           data: drift.Value(jsonEncode(t)),
           createdAt: drift.Value(DateTime.parse(t['created_at'])),
@@ -134,17 +140,13 @@ class SyncService {
       );
     }
   }
-  /// 4. REALTIME: Listen for changes
+
   void subscribeToTasks() {
-    print('[Realtime] Subscribing to tasks...');
     _supabase
         .from('tasks')
         .stream(primaryKey: ['id'])
         .listen((List<Map<String, dynamic>> data) {
-          print('[Realtime] Received ${data.length} tasks update');
           _handleRealtimeUpdate(data);
-        }, onError: (e) {
-          print('[Realtime] Error: $e');
         });
   }
 
@@ -152,8 +154,8 @@ class SyncService {
     for (final t in tasks) {
       await _db.into(_db.localTasks).insertOnConflictUpdate(
         LocalTasksCompanion(
-          id: drift.Value(t['id'].toString()), // Ensure string ID
-          type: drift.Value('picking'),
+          id: drift.Value(t['id'].toString()),
+          type: drift.Value(t['type'] ?? 'general'),
           status: drift.Value(t['statut']),
           data: drift.Value(jsonEncode(t)),
           createdAt: drift.Value(DateTime.parse(t['created_at'])),
@@ -162,6 +164,5 @@ class SyncService {
         )
       );
     }
-    // Optionally notify UI via a StreamController or Cubit
   }
 }
