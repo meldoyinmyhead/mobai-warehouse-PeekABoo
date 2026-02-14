@@ -8,7 +8,18 @@ from database import engine, SessionLocal, Base
 # Create tables
 models.Base.metadata.create_all(bind=engine)
 
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI(title="MobAI WMS Backend", version="1.0.0")
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Security Scheme
 security = HTTPBearer()
@@ -51,23 +62,38 @@ def require_role(allowed_roles: List[str]):
 # 0. Authentication
 @app.post("/auth/login", response_model=schemas.TokenResponse)
 def login(request: schemas.LoginRequest, db: Session = Depends(get_db)):
-    user = db.query(models.Utilisateur).filter(models.Utilisateur.email == request.email).first()
-    import hashlib
+    import logging
+    logger = logging.getLogger("uvicorn.error")
     
+    logger.info(f"Login attempt for email: {request.email}")
+    user = db.query(models.Utilisateur).filter(models.Utilisateur.email == request.email).first()
+    
+    if not user:
+        logger.warning(f"Login failed: User {request.email} not found")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+        )
+        
+    import hashlib
     # Hash the incoming password to compare with stored hash
     hashed_input = hashlib.sha256(request.password.encode()).hexdigest()
     
-    if not user or user.password_hash != hashed_input:
+    if user.password_hash != hashed_input:
+        logger.warning(f"Login failed: Password mismatch for {request.email}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
         )
     
     if not user.actif:
+        logger.warning(f"Login failed: Account inactive for {request.email}")
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="User account is deactivated",
         )
+
+    logger.info(f"Login successful for: {request.email}")
 
     return {
         "access_token": f"mock_token_{str(user.id_utilisateur)}",
