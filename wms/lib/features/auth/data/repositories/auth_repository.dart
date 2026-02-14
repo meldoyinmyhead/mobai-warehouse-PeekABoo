@@ -25,16 +25,24 @@ class AuthRepository {
           'user': data['user'],
           'access_token': data['access_token'],
         };
-      } else if (response.statusCode == 401) {
-        throw Exception('Email ou mot de passe incorrect.');
-      } else if (response.statusCode == 403) {
-        throw Exception('Compte désactivé contactez l\'administrateur.');
-      } else {
-        throw Exception('Erreur de connexion: ${response.statusCode}');
       }
+      String? detail;
+      try {
+        final body = jsonDecode(response.body);
+        if (body is Map && body['detail'] != null) {
+          detail = body['detail'] is String ? body['detail'] as String : body['detail'].toString();
+        }
+      } catch (_) {}
+      if (response.statusCode == 401) {
+        throw Exception(detail ?? 'Incorrect email or password.');
+      }
+      if (response.statusCode == 403) {
+        throw Exception(detail ?? 'Your account has been disabled. Please contact your administrator.');
+      }
+      throw Exception(detail ?? 'Connection error. Please try again later.');
     } catch (e) {
-      if (e is Exception) rethrow; // Rethrow friendly exceptions
-      throw Exception('Erreur technique: ${e.toString()}');
+      if (e is Exception) rethrow;
+      throw Exception('Connection error. Please check your internet and try again.');
     }
   }
 
