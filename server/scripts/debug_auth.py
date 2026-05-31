@@ -1,31 +1,36 @@
 import os
-from supabase import create_client, Client
+import hashlib
+import psycopg2
 from dotenv import load_dotenv
 
 load_dotenv()
 
-url = os.getenv("SUPABASE_URL")
-key = os.getenv("SUPABASE_KEY") # service_role key
+db_url = os.environ.get("DATABASE_URL")
 
-def debug_auth():
-    if not url or not key:
-        print("Missing credentials in .env")
+def verify_users():
+    if not db_url:
+        print("DATABASE_URL not found")
         return
 
-    supabase: Client = create_client(url, key)
-    
-    print("\n--- Listing ALL Users in Supabase Auth ---")
     try:
-        # Use admin.list_users() which requires service_role key
-        response = supabase.auth.admin.list_users()
-        users = response
-        if not users:
-            print("No users found in Auth.")
-        else:
-            for user in users:
-                print(f"Email: {user.email} | ID: {user.id} | Last Login: {user.last_sign_in_at}")
+        conn = psycopg2.connect(db_url)
+        cur = conn.cursor()
+        
+        cur.execute("SELECT email, role, password_hash, actif FROM utilisateurs")
+        rows = cur.fetchall()
+        
+        print(f"\n--- Current Users in DB ({len(rows)}) ---")
+        for row in rows:
+            print(f"Email: {row[0]} | Role: {row[1]} | Hash Start: {row[2][:8]}... | Active: {row[3]}")
+        
+        input_pass = "password123"
+        expected_hash = hashlib.sha256(input_pass.encode()).hexdigest()
+        print(f"\nExpected Hash (SHA256): {expected_hash[:8]}...")
+        
+        cur.close()
+        conn.close()
     except Exception as e:
-        print(f"Error fetching auth users: {e}")
+        print(f"Error: {e}")
 
 if __name__ == "__main__":
-    debug_auth()
+    verify_users()
